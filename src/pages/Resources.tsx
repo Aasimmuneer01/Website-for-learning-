@@ -86,14 +86,25 @@ export default function Resources() {
                     <span className="flex items-center gap-1"><Eye className="w-4 h-4" /> {resource.viewCount || 0}</span>
                     <span className="flex items-center gap-1"><Download className="w-4 h-4" /> {resource.downloadCount || 0}</span>
                   </div>
-                  <a 
-                    href={resource.pdfUrl} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="px-4 py-2 bg-primary text-secondary rounded-lg font-bold text-sm shadow-[0_2px_0_0_#0ea5e9] hover:shadow-none hover:translate-y-[2px] transition-all uppercase"
-                  >
-                    View
-                  </a>
+                  <div className="flex gap-2">
+                    <a 
+                      href={resource.pdfUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="px-4 py-2 bg-secondary text-primary rounded-lg font-bold text-sm shadow-[0_2px_0_0_theme(colors.surface)] hover:shadow-none hover:translate-y-[2px] transition-all uppercase"
+                    >
+                      View
+                    </a>
+                    <a 
+                      href={resource.pdfUrl} 
+                      download={`${resource.slug || 'download'}.pdf`}
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="px-4 py-2 bg-primary text-secondary rounded-lg font-bold text-sm shadow-[0_2px_0_0_#0ea5e9] hover:shadow-none hover:translate-y-[2px] transition-all uppercase"
+                    >
+                      Download
+                    </a>
+                  </div>
                 </div>
               </div>
             </motion.div>

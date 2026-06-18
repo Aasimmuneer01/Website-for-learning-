@@ -64,10 +64,6 @@ export default function Home() {
               className="absolute right-0 bottom-0 w-64 h-64 rounded-2xl overflow-hidden border-4 border-surface shadow-2xl z-30 flex items-center justify-center bg-surface group"
             >
               <img src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?q=80&w=800&auto=format&fit=crop" alt="Study materials" className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity absolute inset-0 mix-blend-overlay" />
-              <div className="relative z-10 text-center p-4">
-                <p className="text-primary font-bold text-2xl font-mono">10K+</p>
-                <p className="text-white font-bold uppercase text-sm tracking-wider">Resources</p>
-              </div>
             </motion.div>
           </div>
         </div>
