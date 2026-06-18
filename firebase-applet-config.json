@@ -1,8 +1,10 @@
 {
-  apiKey: "AIzaSyAjpGS1Oj6yhHv3wv4F2tET69N_Qe9DMh0",
-  authDomain: "resourceswebsite-4871a.firebaseapp.com",
-  projectId: "resourceswebsite-4871a",
-  storageBucket: "resourceswebsite-4871a.firebasestorage.app",
-  messagingSenderId: "499105267177",
-  appId: "1:499105267177:web:d88137205e617e294c1f78"
+  "projectId": "rock-pursuit-98kj5",
+  "appId": "1:791104982851:web:c5e9f626228740ea85a9f6",
+  "apiKey": "AIzaSyD2DgRqZ6i1YyGeZVfmX9UQDWJ-gGV9Pfs",
+  "authDomain": "rock-pursuit-98kj5.firebaseapp.com",
+  "firestoreDatabaseId": "ai-studio-e622a72c-26f7-4f20-9cbf-56c7d5961e47",
+  "storageBucket": "rock-pursuit-98kj5.firebasestorage.app",
+  "messagingSenderId": "791104982851",
+  "measurementId": ""
 }
