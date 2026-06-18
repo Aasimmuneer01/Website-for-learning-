@@ -2,6 +2,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { Navigate } from 'react-router-dom';
 import { auth } from '../../firebase/config';
 import { signOut } from 'firebase/auth';
+import ResourceUpload from '../../components/ResourceUpload';
 
 export default function AdminDashboard() {
   const { user, loading } = useAuth();
@@ -23,8 +24,8 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="p-8 max-w-7xl mx-auto">
-      <div className="flex justify-between items-center mb-6">
+    <div className="p-8 max-w-7xl mx-auto space-y-8">
+      <div className="flex justify-between items-center mb-2">
         <h1 className="text-3xl font-bold font-sans tracking-tight text-white">Admin Dashboard</h1>
         <button 
           onClick={handleSignOut}
@@ -33,7 +34,8 @@ export default function AdminDashboard() {
           Sign Out
         </button>
       </div>
-      <p className="text-gray-400 mb-8">Welcome back, {user.displayName || user.email}</p>
+      <p className="text-gray-400">Welcome back, {user.displayName || user.email}</p>
+      
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <div className="bg-surface p-6 rounded-xl shadow-sm border border-secondary shadow-[0_4px_0_0_theme(colors.secondary)]">
           <h3 className="text-lg font-bold text-gray-400">Total Users</h3>
@@ -52,6 +54,10 @@ export default function AdminDashboard() {
           <p className="text-3xl font-bold text-primary mt-2">0</p>
         </div>
       </div>
+
+      {/* Upload Section */}
+      <ResourceUpload />
+      
     </div>
   );
 }
