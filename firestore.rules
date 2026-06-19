@@ -32,6 +32,11 @@ service cloud.firestore {
       allow write: if isAuthenticated();
     }
 
+    match /creatorInfo/{docId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
     // User profile management
     match /users/{userId} {
       allow read: if request.auth != null && (request.auth.uid == userId || isAuthenticated());

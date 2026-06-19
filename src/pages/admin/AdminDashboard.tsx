@@ -3,6 +3,8 @@ import { Navigate } from 'react-router-dom';
 import { auth } from '../../firebase/config';
 import { signOut } from 'firebase/auth';
 import ResourceUpload from '../../components/ResourceUpload';
+import AdminResourceList from '../../components/AdminResourceList';
+import AdminCreatorSettings from '../../components/AdminCreatorSettings';
 
 export default function AdminDashboard() {
   const { user, loading } = useAuth();
@@ -57,6 +59,12 @@ export default function AdminDashboard() {
 
       {/* Upload Section */}
       <ResourceUpload />
+
+      {/* Manage Resources Section */}
+      <AdminResourceList />
+
+      {/* Creator Settings Section */}
+      <AdminCreatorSettings />
       
     </div>
   );

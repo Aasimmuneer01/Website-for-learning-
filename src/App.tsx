@@ -19,7 +19,7 @@ export default function App() {
         <Router>
           <div className="min-h-screen bg-background-main text-text-main flex flex-col">
             <Navbar />
-            <main className="flex-1 overflow-hidden">
+            <main className="flex-1 overflow-auto">
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/resources" element={<Resources />} />
@@ -27,6 +27,11 @@ export default function App() {
                 <Route path="/admin/login" element={<AdminLogin />} />
               </Routes>
             </main>
+            <footer className="w-full py-6 mt-auto border-t border-secondary bg-surface text-center">
+              <p className="text-gray-400 font-medium">
+                Created with <span className="text-red-500">❤️</span> by Aasim Muneer &copy; {new Date().getFullYear()}
+              </p>
+            </footer>
           </div>
         </Router>
       </AuthProvider>

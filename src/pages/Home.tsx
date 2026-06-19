@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { BookOpen, Download, User, MonitorPlay } from 'lucide-react';
+import CreatorSection from '../components/CreatorSection';
 
 export default function Home() {
   return (
@@ -40,30 +41,14 @@ export default function Home() {
           </div>
           
           <div className="flex-1 relative flex justify-center items-center h-[500px] w-full mt-10 lg:mt-0">
-            {/* Image Composition simulating the reference image */}
+            {/* New single hero image */}
             <motion.div 
               initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.7 }}
-              className="absolute right-10 top-0 w-64 h-80 rounded-2xl overflow-hidden border-4 border-surface shadow-2xl z-10"
+              className="relative w-full max-w-md h-full max-h-[400px] rounded-2xl overflow-hidden border-4 border-surface shadow-2xl z-10"
             >
-              <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=800&auto=format&fit=crop" alt="Students collaborating" className="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity" />
-            </motion.div>
-            <motion.div 
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.7, delay: 0.2 }}
-              className="absolute right-40 top-32 w-64 h-80 rounded-2xl overflow-hidden border-4 border-surface shadow-2xl z-20"
-            >
-              <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=800&auto=format&fit=crop" alt="Student smiling" className="w-full h-full object-cover opacity-90 hover:opacity-100 transition-opacity" />
-            </motion.div>
-            <motion.div 
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.7, delay: 0.4 }}
-              className="absolute right-0 bottom-0 w-64 h-64 rounded-2xl overflow-hidden border-4 border-surface shadow-2xl z-30 flex items-center justify-center bg-surface group"
-            >
-              <img src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?q=80&w=800&auto=format&fit=crop" alt="Study materials" className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity absolute inset-0 mix-blend-overlay" />
+              <img src="https://images.unsplash.com/photo-1513258496099-48168024aec0?q=80&w=800&auto=format&fit=crop" alt="Study desk" className="w-full h-full object-cover opacity-90 hover:opacity-100 transition-opacity" />
             </motion.div>
           </div>
         </div>
@@ -141,6 +126,9 @@ export default function Home() {
            </div>
         </div>
       </section>
+
+      {/* Creator Section */}
+      <CreatorSection />
     </div>
   );
 }
