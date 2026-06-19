@@ -103,13 +103,13 @@ export default function ResourceUpload() {
             </div>
             
             <div>
-              <label className="block text-white mb-2 text-sm font-bold">Category</label>
+              <label className="block text-white mb-2 text-sm font-bold">Subject / Category</label>
               <input 
                 type="text" 
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
                 className="w-full bg-background-main border border-secondary p-3 rounded-lg text-white focus:outline-none focus:border-primary transition-colors"
-                placeholder="E.g., Mathematics"
+                placeholder="E.g., Mathematics, English, Biology"
               />
             </div>
             

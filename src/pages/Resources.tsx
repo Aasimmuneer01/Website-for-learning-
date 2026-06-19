@@ -38,7 +38,12 @@ export default function Resources() {
 
   const filteredResources = useMemo(() => {
     return resources.filter(resource => {
-      const matchesSubject = currentSubject === 'All' || (resource.category && resource.category.toLowerCase() === currentSubject.toLowerCase());
+      const subj = currentSubject.toLowerCase();
+      const matchesSubject = currentSubject === 'All' || 
+        (resource.category && resource.category.toLowerCase().includes(subj)) ||
+        (resource.subject && resource.subject.toLowerCase().includes(subj)) ||
+        (resource.title && resource.title.toLowerCase().includes(subj));
+        
       const matchesSearch = resource.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
                             (resource.description && resource.description.toLowerCase().includes(searchQuery.toLowerCase()));
       return matchesSubject && matchesSearch;
