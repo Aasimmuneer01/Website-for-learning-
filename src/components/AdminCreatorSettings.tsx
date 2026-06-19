@@ -12,7 +12,7 @@ export default function AdminCreatorSettings() {
   const [form, setForm] = useState({
     name: 'Aasim Muneer',
     bio: "Hi, I'm Aasim Muneer, a student and aspiring developer. I created this platform to help students easily access study materials, notes, PDFs, assignments, and educational resources in one place. My goal is to make learning simpler, faster, and accessible for everyone.",
-    imageUrl: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?q=80&w=800&auto=format&fit=crop',
+    imageUrl: 'https://placehold.co/400x400/1e293b/0ea5e9?text=Developer',
     email: 'aasimmuneer349@gmail.com',
     github: '',
     linkedin: '',
@@ -100,6 +100,7 @@ export default function AdminCreatorSettings() {
             onChange={e => setForm({ ...form, imageUrl: e.target.value })}
             className="w-full bg-background-main border border-secondary p-3 rounded-lg text-white"
           />
+          <p className="text-xs text-gray-500 mt-1">If using ImgBB, make sure to copy the <strong>"Direct link"</strong> (ends with .jpg/.png).</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

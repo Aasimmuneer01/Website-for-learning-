@@ -20,7 +20,7 @@ export default function CreatorSection() {
           setCreator({
             name: 'Aasim Muneer',
             bio: "Hi, I'm Aasim Muneer, a student and aspiring developer. I created this platform to help students easily access study materials, notes, PDFs, assignments, and educational resources in one place. My goal is to make learning simpler, faster, and accessible for everyone.",
-            imageUrl: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?q=80&w=800&auto=format&fit=crop',
+            imageUrl: 'https://placehold.co/400x400/1e293b/0ea5e9?text=Developer',
             email: 'aasimmuneer349@gmail.com'
           });
         }
@@ -29,7 +29,7 @@ export default function CreatorSection() {
         setCreator({
           name: 'Aasim Muneer',
           bio: "Hi, I'm Aasim Muneer, a student and aspiring developer. I created this platform to help students easily access study materials, notes, PDFs, assignments, and educational resources in one place. My goal is to make learning simpler, faster, and accessible for everyone.",
-          imageUrl: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?q=80&w=800&auto=format&fit=crop',
+          imageUrl: 'https://placehold.co/400x400/1e293b/0ea5e9?text=Developer',
           email: 'aasimmuneer349@gmail.com'
         });
       } finally {
@@ -67,8 +67,9 @@ export default function CreatorSection() {
             <div className="shrink-0">
               <div className="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-4 border-surface shadow-xl relative inline-block">
                 <img 
-                  src={creator.imageUrl || 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?q=80&w=800&auto=format&fit=crop'} 
+                  src={creator.imageUrl === 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?q=80&w=800&auto=format&fit=crop' ? 'https://placehold.co/400x400/1e293b/0ea5e9?text=Developer' : creator.imageUrl || 'https://placehold.co/400x400/1e293b/0ea5e9?text=Developer'} 
                   alt={creator.name} 
+                  referrerPolicy="no-referrer"
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                 />
               </div>

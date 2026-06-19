@@ -1,9 +1,12 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { BookOpen, Download, User, MonitorPlay } from 'lucide-react';
 import CreatorSection from '../components/CreatorSection';
 
 export default function Home() {
+  const [showSubjects, setShowSubjects] = useState(false);
+
   return (
     <div className="flex flex-col gap-16 pb-20">
       {/* Hero Section */}
@@ -28,16 +31,45 @@ export default function Home() {
             >
               Discover and share premium study materials, notes, previous year papers, and assignments designed to help you excel.
             </motion.p>
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="flex gap-4 justify-center lg:justify-start"
-            >
-              <Link to="/resources" className="px-8 py-4 bg-primary text-secondary rounded-lg font-bold shadow-[0_4px_0_0_#0ea5e9] hover:shadow-none hover:translate-y-[4px] transition-all uppercase tracking-wide">
-                Browse Materials
-              </Link>
-            </motion.div>
+            <div className="flex flex-col items-center lg:items-start">
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="flex flex-col gap-4 w-full"
+              >
+                {!showSubjects ? (
+                  <button 
+                    onClick={() => setShowSubjects(true)}
+                    className="self-center lg:self-start px-8 py-4 bg-primary text-secondary rounded-lg font-bold shadow-[0_4px_0_0_#0ea5e9] hover:shadow-none hover:translate-y-[4px] transition-all uppercase tracking-wide"
+                  >
+                    Browse Materials
+                  </button>
+                ) : (
+                  <motion.div 
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    className="flex flex-wrap gap-3 justify-center lg:justify-start"
+                  >
+                    {['Maths', 'English', 'Biology', 'Chemistry', 'Physics', 'Geography', 'History', 'Civics', 'Computer', 'Islamic Studies', 'Urdu'].map(subject => (
+                      <Link 
+                        key={subject}
+                        to={`/resources?subject=${encodeURIComponent(subject)}`} 
+                        className="px-4 py-2 bg-surface border border-secondary text-white rounded-full text-sm font-medium hover:bg-secondary hover:text-primary transition-colors"
+                      >
+                        {subject}
+                      </Link>
+                    ))}
+                    <Link 
+                      to="/resources" 
+                      className="px-4 py-2 bg-primary/20 text-primary border border-primary/50 rounded-full text-sm font-bold hover:bg-primary hover:text-secondary transition-colors"
+                    >
+                      View All
+                    </Link>
+                  </motion.div>
+                )}
+              </motion.div>
+            </div>
           </div>
           
           <div className="flex-1 relative flex justify-center items-center h-[500px] w-full mt-10 lg:mt-0">

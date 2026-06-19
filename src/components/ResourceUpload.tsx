@@ -159,6 +159,7 @@ export default function ResourceUpload() {
                   className="w-full bg-background-main border border-secondary p-3 rounded-lg text-white focus:outline-none focus:border-primary transition-colors"
                   placeholder="https://example.com/image.jpg"
                 />
+                <p className="text-xs text-gray-500 mt-1">For ImgBB, ensure you copy the <strong>"Direct link"</strong> (ends with .jpg/.png).</p>
               </div>
             </div>
           </div>
