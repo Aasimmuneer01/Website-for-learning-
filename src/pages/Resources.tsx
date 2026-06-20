@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
-import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+import { collection, getDocs, query, orderBy, doc, updateDoc, increment } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { Resource } from '../types';
 import { FileText, Download, Eye, Search, Filter } from 'lucide-react';
@@ -35,6 +35,44 @@ export default function Resources() {
 
     fetchResources();
   }, []);
+
+  const handleView = async (e: React.MouseEvent, resource: Resource) => {
+    e.preventDefault();
+    const viewedKey = `viewed_${resource.id}`;
+    const lastViewed = localStorage.getItem(viewedKey);
+    const now = Date.now();
+    if (!lastViewed || now - parseInt(lastViewed) > 24 * 60 * 60 * 1000) {
+      try {
+        await updateDoc(doc(db, 'resources', resource.id), {
+          viewCount: increment(1)
+        });
+        localStorage.setItem(viewedKey, now.toString());
+      } catch (err) {
+        console.error("Failed to increment view", err);
+      }
+    }
+    window.open(resource.pdfUrl, '_blank');
+  };
+
+  const handleDownload = async (e: React.MouseEvent, resource: Resource) => {
+    e.preventDefault();
+    try {
+      await updateDoc(doc(db, 'resources', resource.id), {
+        downloadCount: increment(1)
+      });
+    } catch (err) {
+      console.error("Failed to increment download", err);
+    }
+    
+    // Create a temporary link to trigger download safely without being blocked by popups
+    const link = document.createElement('a');
+    link.href = resource.pdfUrl;
+    link.download = `${resource.slug || 'download'}.pdf`;
+    link.target = '_blank';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const filteredResources = useMemo(() => {
     return resources.filter(resource => {
@@ -161,6 +199,7 @@ export default function Resources() {
                           href={resource.pdfUrl} 
                           target="_blank" 
                           rel="noopener noreferrer"
+                          onClick={(e) => handleView(e, resource)}
                           className="px-4 py-2 bg-secondary text-primary rounded-lg font-bold text-sm shadow-[0_2px_0_0_theme(colors.surface)] hover:shadow-none hover:translate-y-[2px] transition-all uppercase"
                         >
                           View
@@ -170,6 +209,7 @@ export default function Resources() {
                           download={`${resource.slug || 'download'}.pdf`}
                           target="_blank" 
                           rel="noopener noreferrer"
+                          onClick={(e) => handleDownload(e, resource)}
                           className="px-4 py-2 bg-primary text-secondary rounded-lg font-bold text-sm shadow-[0_2px_0_0_#0ea5e9] hover:shadow-none hover:translate-y-[2px] transition-all uppercase"
                         >
                           Download

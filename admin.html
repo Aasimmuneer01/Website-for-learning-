@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <!-- Inter Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .view-section { display: none; }
+        .view-section.active { display: block; }
+        .toast { padding: 1rem; border-radius: 6px; margin-top: 0.5rem; color: white; background: #333; animation: fadein 0.3s; border: 1px solid #444; font-size: 0.875rem; }
+        .toast.success { background-color: #000; border-color: #333; color: #ededed; }
+        .toast.error { background-color: #5c0000; border-color: #e5484d; color: #fff; }
+        @keyframes fadein { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        #app-layout { height: 100vh; height: 100dvh; }
+
+        /* Vercel-like form controls */
+        .v-input {
+            width: 100%;
+            background-color: transparent;
+            border: 1px solid #333;
+            color: #ededed;
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            outline: none;
+            transition: border-color 0.15s ease;
+        }
+        .v-input:focus {
+            border-color: #888;
+        }
+        
+        .v-btn-primary {
+            background-color: #ededed;
+            color: #000;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            transition: background-color 0.15s ease;
+            border: 1px solid transparent;
+        }
+        .v-btn-primary:hover {
+            background-color: #fff;
+        }
+        
+        .v-btn-secondary {
+            background-color: transparent;
+            color: #ededed;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            transition: background-color 0.15s ease, border-color 0.15s ease;
+            border: 1px solid #333;
+        }
+        .v-btn-secondary:hover {
+            background-color: #111;
+            border-color: #444;
+        }
+
+        .v-btn-danger {
+            background-color: #e5484d;
+            color: #fff;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            transition: background-color 0.15s ease;
+            border: 1px solid transparent;
+        }
+        .v-btn-danger:hover {
+            background-color: #ff4d4f;
+        }
+
+        .v-label {
+            display: block;
+            font-size: 0.875rem;
+            color: #a1a1aa;
+            margin-bottom: 0.375rem;
+            font-weight: 500;
+        }
+
+        .v-card {
+            background-color: #000;
+            border: 1px solid #333;
+            border-radius: 8px;
+        }
+
+        .v-card-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid #333;
+        }
+        .v-card-body {
+            padding: 1.5rem;
+        }
+    </style>
+</head>
+<body class="bg-black text-[#ededed] font-sans antialiased">
+  <div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2"></div>
+  
+  <div id="login-view" class="active flex items-center justify-center min-h-screen bg-black p-4">
+      <form id="login-form" class="v-card w-full max-w-sm">
+          <div class="v-card-header text-center border-b-0 pb-0">
+              <h2 class="text-xl font-semibold text-white">Admin Login</h2>
+              <p class="text-sm text-gray-400 mt-2">Enter your credentials to continue</p>
+          </div>
+          <div class="v-card-body space-y-4">
+              <div>
+                  <label class="v-label">Email</label>
+                  <input type="email" id="login-user" class="v-input" placeholder="admin@example.com" required>
+              </div>
+              <div>
+                  <label class="v-label">Password</label>
+                  <input type="password" id="login-pass" class="v-input" required>
+              </div>
+              <button type="submit" class="v-btn-primary w-full mt-4">Log in</button>
+          </div>
+      </form>
+  </div>
+
+  <div id="app-layout" class="hidden flex h-screen overflow-hidden">
+      <!-- Sidebar -->
+      <aside id="sidebar" class="fixed inset-y-0 left-0 bg-black w-64 transform -translate-x-full md:translate-x-0 transition-transform duration-200 z-30 flex flex-col border-r border-[#333]">
+          <div class="flex items-center justify-between px-6 py-4 shrink-0 border-b border-[#333]">
+              <div class="flex items-center gap-2">
+                 <div class="w-6 h-6 bg-white rounded-full flex items-center justify-center"><i class="fas fa-play text-black text-[10px] ml-0.5"></i></div>
+                 <h1 id="sidebar-site-name" class="font-semibold text-sm tracking-tight text-white mb-0 pb-0 mt-0 pt-0">Admin</h1>
+              </div>
+              <button id="close-sidebar" class="md:hidden text-gray-500 hover:text-white"><i class="fas fa-times text-lg"></i></button>
+          </div>
+          <nav class="px-3 py-4 space-y-1 overflow-y-auto flex-1">
+              <a href="#" data-target="dashboard" class="nav-link active-nav flex items-center px-3 py-2 text-sm rounded-md hover:bg-[#111] text-gray-400 hover:text-white transition-colors"><i class="fas fa-layer-group w-5 text-center mr-2"></i> Overview</a>
+              <a href="#" data-target="resources" class="nav-link flex items-center px-3 py-2 text-sm rounded-md hover:bg-[#111] text-gray-400 hover:text-white transition-colors"><i class="fas fa-file-alt w-5 text-center mr-2"></i> Resources</a>
+              <a href="#" data-target="categories" class="nav-link flex items-center px-3 py-2 text-sm rounded-md hover:bg-[#111] text-gray-400 hover:text-white transition-colors"><i class="fas fa-folder w-5 text-center mr-2"></i> Categories</a>
+              <a href="#" data-target="settings" class="nav-link flex items-center px-3 py-2 text-sm rounded-md hover:bg-[#111] text-gray-400 hover:text-white transition-colors"><i class="fas fa-cog w-5 text-center mr-2"></i> Settings</a>
+          </nav>
+          <div class="p-4 shrink-0 border-t border-[#333]">
+               <button id="logout-btn" class="w-full flex items-center px-3 py-2 text-sm rounded-md text-red-500 hover:bg-[#111] transition-colors"><i class="fas fa-sign-out-alt w-5 text-center mr-2"></i> Log Out</button>
+          </div>
+      </aside>
+      
+      <div id="sidebar-overlay" class="fixed inset-0 bg-black/60 hidden z-20"></div>
+
+      <!-- Main Content -->
+      <main class="flex-1 flex flex-col h-screen md:ml-64 relative min-w-0 bg-[#000]">
+          <header class="bg-black border-b border-[#333] px-6 py-4 flex justify-between items-center z-10 shrink-0">
+             <div class="flex items-center gap-4">
+                 <button id="toggle-sidebar" class="md:hidden text-gray-400 hover:text-white transition-colors"><i class="fas fa-bars"></i></button>
+                 <h2 id="topbar-title" class="text-sm font-medium text-gray-200">Overview</h2>
+             </div>
+             <div class="flex items-center gap-4">
+                 <!-- Theme toggle is obsolete since we are forcing dark per instructions, but kept functionally alive if needed, simply disguised or we just hide the icon as we default to dark and no neon colors. -->
+                 <button id="theme-toggle" class="text-gray-400 hover:text-white transition-colors hidden"><i class="fas fa-moon text-sm"></i></button>
+                 <img id="topbar-avatar" src="https://placehold.co/100" class="w-8 h-8 rounded-full border border-[#333] object-cover">
+             </div>
+          </header>
+
+          <div class="flex-1 overflow-x-hidden overflow-y-auto w-full">
+              <div class="max-w-6xl mx-auto pb-12 p-6 md:p-8">
+                  <!-- DASHBOARD -->
+                  <section id="view-dashboard" class="view-section active space-y-8">
+                      <div>
+                          <h1 class="text-2xl font-semibold tracking-tight text-white mb-6">Dashboard</h1>
+                          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                              <div class="v-card p-5">
+                                  <h3 class="text-xs text-gray-400 font-medium uppercase tracking-wider mb-2">Total Resources</h3>
+                                  <p id="stat-resources" class="text-3xl font-semibold text-white">0</p>
+                              </div>
+                              <div class="v-card p-5">
+                                  <h3 class="text-xs text-gray-400 font-medium uppercase tracking-wider mb-2">Downloads</h3>
+                                  <p id="stat-downloads" class="text-3xl font-semibold text-white">0</p>
+                              </div>
+                              <div class="v-card p-5">
+                                  <h3 class="text-xs text-gray-400 font-medium uppercase tracking-wider mb-2">Total Views</h3>
+                                  <p id="stat-views" class="text-3xl font-semibold text-white">0</p>
+                              </div>
+                              <div class="v-card p-5">
+                                  <h3 class="text-xs text-gray-400 font-medium uppercase tracking-wider mb-2">Total Users</h3>
+                                  <p id="stat-users" class="text-3xl font-semibold text-white">0</p>
+                              </div>
+                          </div>
+                      </div>
+
+                      <div>
+                          <h2 class="text-lg font-semibold text-white mb-4">Recent Uploads</h2>
+                          <div class="v-card overflow-hidden">
+                              <div class="overflow-x-auto">
+                                  <table class="w-full text-left text-sm whitespace-nowrap">
+                                      <thead class="bg-[#0a0a0a] text-gray-400 border-b border-[#333]">
+                                          <tr>
+                                              <th class="px-5 py-3 font-medium">Resource</th>
+                                              <th class="px-5 py-3 font-medium">Category</th>
+                                              <th class="px-5 py-3 font-medium text-right">Actions</th>
+                                          </tr>
+                                      </thead>
+                                      <tbody id="recent-resources-tbody" class="divide-y divide-[#333]"></tbody>
+                                  </table>
+                              </div>
+                              <div id="recent-empty" class="hidden text-center py-10 text-gray-500 text-sm">No resources found</div>
+                          </div>
+                      </div>
+                  
+                      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
+                          <div>
+                              <h2 class="text-lg font-semibold text-white mb-4">Most Viewed Resources</h2>
+                              <div class="v-card overflow-hidden">
+                                  <div class="overflow-x-auto">
+                                      <table class="w-full text-left text-sm whitespace-nowrap">
+                                          <thead class="bg-[#0a0a0a] text-gray-400 border-b border-[#333]">
+                                              <tr>
+                                                  <th class="px-5 py-3 font-medium">Resource</th>
+                                                  <th class="px-5 py-3 font-medium text-right">Views</th>
+                                              </tr>
+                                          </thead>
+                                          <tbody id="most-viewed-tbody" class="divide-y divide-[#333]"></tbody>
+                                      </table>
+                                  </div>
+                              </div>
+                          </div>
+                          <div>
+                              <h2 class="text-lg font-semibold text-white mb-4">Most Downloaded Resources</h2>
+                              <div class="v-card overflow-hidden">
+                                  <div class="overflow-x-auto">
+                                      <table class="w-full text-left text-sm whitespace-nowrap">
+                                          <thead class="bg-[#0a0a0a] text-gray-400 border-b border-[#333]">
+                                              <tr>
+                                                  <th class="px-5 py-3 font-medium">Resource</th>
+                                                  <th class="px-5 py-3 font-medium text-right">Downloads</th>
+                                              </tr>
+                                          </thead>
+                                          <tbody id="most-downloaded-tbody" class="divide-y divide-[#333]"></tbody>
+                                      </table>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+</section>
+
+                  <!-- RESOURCES -->
+                  <section id="view-resources" class="view-section hidden space-y-6">
+                      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                          <h1 class="text-2xl font-semibold tracking-tight text-white">Resources</h1>
+                          <div class="flex items-center gap-3 w-full sm:w-auto">
+                              <div class="relative w-full sm:w-64">
+                                  <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm"></i>
+                                  <input type="text" id="search-resource" placeholder="Search..." class="v-input pl-9">
+                              </div>
+                              <button id="btn-add-resource" class="v-btn-primary whitespace-nowrap"><i class="fas fa-plus mr-1"></i> Add Resource</button>
+                          </div>
+                      </div>
+
+                      <div class="v-card overflow-hidden">
+                          <div class="overflow-x-auto">
+                              <table class="w-full text-left text-sm whitespace-nowrap lg:whitespace-normal">
+                                  <thead class="bg-[#0a0a0a] text-gray-400 border-b border-[#333]">
+                                      <tr>
+                                          <th class="px-5 py-3 font-medium w-full">Resource</th>
+                                          <th class="px-5 py-3 font-medium min-w-[120px]">Category</th>
+                                          <th class="px-5 py-3 font-medium text-right min-w-[100px]">Actions</th>
+                                      </tr>
+                                  </thead>
+                                  <tbody id="resources-tbody" class="divide-y divide-[#333] align-middle"></tbody>
+                              </table>
+                          </div>
+                          <div id="resources-empty" class="hidden py-12 text-center text-gray-500 text-sm">No matching resources</div>
+                      </div>
+                  </section>
+
+                  <!-- CATEGORIES -->
+                  <section id="view-categories" class="view-section hidden space-y-6">
+                       <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                           <h1 class="text-2xl font-semibold tracking-tight text-white">Categories</h1>
+                           <button id="btn-add-category" class="v-btn-primary"><i class="fas fa-plus mr-1"></i> Add Category</button>
+                       </div>
+                       
+                       <div id="categories-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"></div>
+                       <div id="categories-empty" class="hidden p-12 text-center text-gray-500 v-card text-sm">No categories defined</div>
+                  </section>
+
+                  <!-- SETTINGS -->
+                  <section id="view-settings" class="view-section hidden space-y-8">
+                       <div>
+                           <h1 class="text-2xl font-semibold tracking-tight text-white mb-6">Settings</h1>
+                       </div>
+                       <div class="max-w-3xl space-y-8">
+                           <!-- Homepage Config -->
+                           <form id="form-homepage" class="v-card">
+                               <div class="v-card-header">
+                                   <h3 class="text-lg font-medium text-white">Homepage Configuration</h3>
+                                   <p class="text-sm text-gray-400 mt-1">Update the main landing page details.</p>
+                               </div>
+                               <div class="v-card-body space-y-5">
+                                   <div><label class="v-label">Hero Title</label><input type="text" id="hp-title" class="v-input"></div>
+                                   <div><label class="v-label">Subtitle Description</label><textarea id="hp-subtitle" rows="3" class="v-input"></textarea></div>
+                                   <div><label class="v-label">Hero Background Image</label><input type="url" id="hp-bg" class="v-input"></div>
+                               </div>
+                               <div class="p-4 border-t border-[#333] flex justify-end bg-[#0a0a0a] rounded-b-lg">
+                                   <button type="submit" class="v-btn-primary">Save Changes</button>
+                               </div>
+                           </form>
+                           
+                           <!-- Creator Profile -->
+                           <form id="form-creator" class="v-card">
+                               <div class="v-card-header">
+                                   <h3 class="text-lg font-medium text-white">Creator Profile</h3>
+                                   <p class="text-sm text-gray-400 mt-1">Information displayed on the about section.</p>
+                               </div>
+                               <div class="v-card-body space-y-5">
+                                   <div class="flex items-center gap-5">
+                                       <img id="creator-img-preview" src="https://placehold.co/150" class="w-16 h-16 rounded-full object-cover border border-[#333]">
+                                       <div class="flex-1"><label class="v-label">Avatar Image URL</label><input type="url" id="cr-image" class="v-input" placeholder="https://..."></div>
+                                   </div>
+                                   <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                       <div><label class="v-label">Display Name</label><input type="text" id="cr-name" class="v-input"></div>
+                                       <div><label class="v-label">Public Email</label><input type="email" id="cr-email" class="v-input"></div>
+                                   </div>
+                                   <div><label class="v-label">Short Bio</label><textarea id="cr-bio" class="v-input" rows="3"></textarea></div>
+                               </div>
+                               <div class="p-4 border-t border-[#333] flex justify-end bg-[#0a0a0a] rounded-b-lg">
+                                   <button type="submit" class="v-btn-primary">Update Profile</button>
+                               </div>
+                           </form>
+                           
+                           <form id="form-socials" class="hidden"></form>
+                           <form id="form-ads" class="hidden"></form>
+                           <form id="form-settings" class="hidden"></form>
+                           
+                           <div class="v-card border-red-900/50 bg-[#1a0505]">
+                               <div class="p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                   <div>
+                                        <h3 class="text-lg font-medium text-red-500">Danger Zone</h3>
+                                        <p class="text-sm text-gray-400 mt-1">Clear all database records. This is for demo purposes.</p>
+                                   </div>
+                                   <button type="button" id="btn-clear-data" class="v-btn-danger whitespace-nowrap">Clear Database</button>
+                               </div>
+                           </div>
+                       </div>
+                  </section>
+              </div>
+          </div>
+      </main>
+  </div>
+
+  <!-- Resource Modal -->
+  <div id="modal-resource" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+      <div class="v-card w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
+          <div class="v-card-header flex justify-between items-center shrink-0">
+              <h3 id="modal-resource-title" class="font-medium text-lg text-white">Add Resource</h3>
+              <button class="btn-cancel-modal text-gray-400 hover:text-white transition-colors"><i class="fas fa-times pointer-events-none"></i></button>
+          </div>
+          <div class="v-card-body overflow-y-auto flex-1">
+              <form id="form-resource" class="space-y-4">
+                  <input type="hidden" id="res-id">
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div class="md:col-span-2"><label class="v-label">Title *</label><input type="text" id="res-title" class="v-input" required></div>
+                      <div><label class="v-label">Subject</label><input type="text" id="res-subject" class="v-input"></div>
+                      <div><label class="v-label">Class Level</label><input type="text" id="res-class" class="v-input"></div>
+                      <div><label class="v-label">Category</label><select id="res-category" class="v-input text-gray-300 bg-black"><option value="">Select Category</option></select></div>
+                      <div><label class="v-label">PDF URL *</label><input type="url" id="res-pdf" class="v-input" required></div>
+                      <div class="md:col-span-2"><label class="v-label">Thumbnail URL</label><input type="url" id="res-thumb" class="v-input"></div>
+                  </div>
+                  <div><label class="v-label">Short Description</label><textarea id="res-desc" class="v-input" rows="3"></textarea></div>
+                  <div class="flex items-center gap-2 mt-2">
+                      <input type="checkbox" id="res-featured" class="w-4 h-4 rounded border-[#333] bg-black accent-white cursor-pointer"><label for="res-featured" class="text-sm font-medium text-gray-300 cursor-pointer select-none">Mark as Featured</label>
+                  </div>
+              </form>
+          </div>
+          <div class="p-4 border-t border-[#333] bg-[#0a0a0a] flex justify-end gap-3 shrink-0">
+              <button class="btn-cancel-modal v-btn-secondary">Cancel</button>
+              <button id="btn-save-resource" type="submit" form="form-resource" class="v-btn-primary">Save Changes</button>
+          </div>
+      </div>
+  </div>
+
+  <!-- Category Modal -->
+  <div id="modal-category" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+      <div class="v-card w-full max-w-sm overflow-hidden">
+          <div class="v-card-header"><h3 id="modal-category-title" class="font-medium text-lg text-white">Add Category</h3></div>
+          <div class="v-card-body">
+              <form id="form-category">
+                  <input type="hidden" id="cat-id">
+                  <label class="v-label">Category Name *</label>
+                  <input type="text" id="cat-name" class="v-input" required>
+              </form>
+          </div>
+          <div class="p-4 border-t border-[#333] bg-[#0a0a0a] flex justify-end gap-3">
+              <button class="btn-cancel-modal v-btn-secondary">Cancel</button>
+              <button id="btn-save-category" type="submit" form="form-category" class="v-btn-primary">Save</button>
+          </div>
+      </div>
+  </div>
+
+  <!-- Delete Modal -->
+  <div id="modal-delete" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+      <div class="v-card w-full max-w-sm text-center p-6">
+          <div class="w-12 h-12 rounded-full bg-red-950 text-red-500 flex items-center justify-center mx-auto mb-4 border border-red-900">
+              <i class="fas fa-exclamation-triangle text-xl"></i>
+          </div>
+          <h3 class="font-medium text-lg text-white mb-2">Delete Item</h3>
+          <p class="text-gray-400 text-sm mb-6">Are you sure you want to delete this item? This action cannot be undone.</p>
+          <div class="flex justify-center gap-3">
+              <button class="btn-cancel-modal v-btn-secondary flex-1">Cancel</button>
+              <button id="btn-confirm-delete" type="button" class="v-btn-danger flex-1">Delete</button>
+          </div>
+      </div>
+  </div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc, updateDoc, onSnapshot, serverTimestamp, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+    const firebaseConfig = {
+        projectId: "resourceswebsite-4871a",
+        appId: "1:499105267177:web:d88137205e617e294c1f78",
+        apiKey: "AIzaSyAjpGS1Oj6yhHv3wv4F2tET69N_Qe9DMh0",
+        authDomain: "resourceswebsite-4871a.firebaseapp.com",
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    const defaultState = {
+        isLoggedIn: false,
+        theme: 'dark',
+        global: { siteName: 'Study Materials Pro', logoUrl: '' },
+        resources: [],
+        categories: [],
+        homepage: { title: 'Educational Resources', subtitle: 'Discover and share premium study materials, notes, previous year papers, and assignments designed to help you excel.', bgImage: 'https://images.unsplash.com/photo-1513258496099-48168024aec0?q=80&w=800&auto=format&fit=crop' },
+        creator: { name: 'Aasim Muneer', email: 'aasimmuneer349@gmail.com', bio: 'Student and developer creating free resources.', image: 'https://placehold.co/400x400/1e293b/0ea5e9?text=Creator' },
+        socials: { enabled: true, youtube: '', instagram: '', telegram: '', facebook: '' },
+        ads: { header: '', sidebar: '', footer: '' }
+    };
+
+    let state = { ...defaultState };
+
+    const toastContainer = document.getElementById('toast-container');
+    function showToast(message, type = 'success') {
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.textContent = message;
+        toastContainer.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+    
+    function applyTheme() {
+        if (state.theme === 'dark') {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    }
+    applyTheme();
+
+    document.getElementById('theme-toggle').addEventListener('click', () => {
+        state.theme = state.theme === 'dark' ? 'light' : 'dark';
+        applyTheme();
+    });
+
+    const loginView = document.getElementById('login-view');
+    const appLayout = document.getElementById('app-layout');
+    const loginForm = document.getElementById('login-form');
+
+    function checkAuth() {
+        if (state.isLoggedIn) {
+            loginView.classList.remove('active');
+            appLayout.classList.remove('hidden');
+            updateUI();
+        } else {
+            loginView.classList.add('active');
+            appLayout.classList.add('hidden');
+        }
+    }
+
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            state.isLoggedIn = true;
+            checkAuth();
+            initListeners();
+        } else {
+            state.isLoggedIn = false;
+            checkAuth();
+        }
+    });
+
+    loginForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const u = document.getElementById('login-user').value;
+        const p = document.getElementById('login-pass').value;
+        signInWithEmailAndPassword(auth, u, p).then(() => {
+            showToast('Logged in successfully');
+        }).catch(err => {
+            showToast(err.message, 'error');
+        });
+    });
+
+    document.getElementById('logout-btn').addEventListener('click', () => {
+        signOut(auth).then(()=>showToast('Logged out'));
+    });
+
+    // Navigation logic
+    let currentView = 'dashboard';
+    const navLinks = document.querySelectorAll('.nav-link');
+    const viewSections = document.querySelectorAll('#app-layout .view-section');
+    const topbarTitle = document.getElementById('topbar-title');
+
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const target = link.getAttribute('data-target');
+            switchView(target);
+            document.getElementById('sidebar').classList.remove('translate-x-0');
+            document.getElementById('sidebar').classList.add('-translate-x-full');
+            document.getElementById('sidebar-overlay').classList.add('hidden');
+        });
+    });
+
+    function switchView(target) {
+        currentView = target;
+        navLinks.forEach(l => {
+            l.classList.remove('active-nav', 'bg-[#111]', 'text-white'); l.classList.add('text-gray-400');
+            if(l.getAttribute('data-target') === target) {
+                l.classList.add('active-nav', 'bg-[#111]', 'text-white'); l.classList.remove('text-gray-400');
+                topbarTitle.textContent = l.textContent.trim();
+            }
+        });
+        viewSections.forEach(v => {
+            v.classList.remove('active');
+            v.classList.add('hidden');
+            if(v.id === `view-${target}`) {
+                v.classList.add('active');
+                v.classList.remove('hidden');
+            }
+        });
+    }
+
+    document.getElementById('toggle-sidebar').addEventListener('click', () => {
+        document.getElementById('sidebar').classList.remove('-translate-x-full');
+        document.getElementById('sidebar').classList.add('translate-x-0');
+        document.getElementById('sidebar-overlay').classList.remove('hidden');
+    });
+    
+    document.getElementById('close-sidebar').addEventListener('click', () => {
+        document.getElementById('sidebar').classList.remove('translate-x-0');
+        document.getElementById('sidebar').classList.add('-translate-x-full');
+        document.getElementById('sidebar-overlay').classList.add('hidden');
+    });
+    document.getElementById('sidebar-overlay').addEventListener('click', () => {
+        document.getElementById('sidebar').classList.remove('translate-x-0');
+        document.getElementById('sidebar').classList.add('-translate-x-full');
+        document.getElementById('sidebar-overlay').classList.add('hidden');
+    });
+
+    // Firetore Listeners
+    let unsubscribes = [];
+    function initListeners() {
+        unsubscribes.forEach(u => u());
+        unsubscribes = [];
+        
+        unsubscribes.push(onSnapshot(collection(db, 'resources'), (snap) => {
+            state.resources = snap.docs.map(d => ({id: d.id, ...d.data()}));
+            updateUI();
+        }));
+        
+        unsubscribes.push(onSnapshot(collection(db, 'categories'), (snap) => {
+            state.categories = snap.docs.map(d => ({id: d.id, ...d.data()}));
+            updateUI();
+        }));
+        
+        try {
+            unsubscribes.push(onSnapshot(collection(db, 'users'), (snap) => {
+                state.usersCount = snap.size;
+                updateUI();
+            }, (error) => {
+                console.warn("Could not fetch users (might be permission issue):", error);
+            }));
+        } catch(e) {}
+        
+        unsubscribes.push(onSnapshot(doc(db, 'creatorInfo', 'profile'), (snap) => {
+            if(snap.exists()) {
+                state.creator = { ...state.creator, ...snap.data() };
+                updateUI();
+                populateCreatorForm();
+            }
+        }));
+
+        unsubscribes.push(onSnapshot(doc(db, 'settings', 'homepage'), (snap) => {
+            if(snap.exists()) {
+                state.homepage = { ...state.homepage, ...snap.data() };
+                updateUI();
+                populateHomepageForm();
+            }
+        }));
+    }
+
+    function updateUI() {
+        if (!state.isLoggedIn) return;
+        document.getElementById('sidebar-site-name').textContent = state.global.siteName || 'AdminPanel';
+        document.getElementById('topbar-avatar').src = state.creator.image || state.creator.imageUrl || 'https://placehold.co/100x100/0ea5e9/ffffff?text=A';
+
+        document.getElementById('stat-resources').textContent = state.resources.length;
+        document.getElementById('stat-downloads').textContent = state.resources.reduce((acc, r) => acc + (r.downloadCount || 0), 0);
+        if(document.getElementById('stat-views')) document.getElementById('stat-views').textContent = state.resources.reduce((acc, r) => acc + (r.viewCount || 0), 0); 
+        if(document.getElementById('stat-categories')) document.getElementById('stat-categories').textContent = state.categories.length;
+        if (document.getElementById('stat-users')) document.getElementById('stat-users').textContent = state.usersCount || 0;
+
+        renderRecentResources();
+        renderAnalyticsTables();
+        renderResourcesTable();
+        renderCategoriesList();
+        // We don't indiscriminately populate forms every update UI anymore
+        populateCategorySelects();
+    }
+
+    function populateHomepageForm() {
+        if(document.activeElement && (document.activeElement.id.startsWith('hp-'))) return;
+        document.getElementById('hp-title').value = state.homepage.title || '';
+        document.getElementById('hp-subtitle').value = state.homepage.subtitle || '';
+        document.getElementById('hp-bg').value = state.homepage.bgImage || state.homepage.heroImage || '';
+    }
+
+    function populateCreatorForm() {
+        if(document.activeElement && (document.activeElement.id.startsWith('cr-'))) return;
+        document.getElementById('cr-name').value = state.creator.name || '';
+        document.getElementById('cr-email').value = state.creator.email || '';
+        document.getElementById('cr-bio').value = state.creator.bio || '';
+        document.getElementById('cr-image').value = state.creator.image || state.creator.imageUrl || '';
+        document.getElementById('creator-img-preview').src = state.creator.image || state.creator.imageUrl || 'https://placehold.co/400/1e293b/ccc';
+    }
+
+    function populateForms() {
+        document.getElementById('hp-title').value = state.homepage.title || '';
+        document.getElementById('hp-subtitle').value = state.homepage.subtitle || '';
+        document.getElementById('hp-bg').value = state.homepage.bgImage || state.homepage.heroImage || '';
+
+        document.getElementById('cr-name').value = state.creator.name || '';
+        document.getElementById('cr-email').value = state.creator.email || '';
+        document.getElementById('cr-bio').value = state.creator.bio || '';
+        document.getElementById('cr-image').value = state.creator.image || state.creator.imageUrl || '';
+        document.getElementById('creator-img-preview').src = state.creator.image || state.creator.imageUrl || 'https://placehold.co/400/1e293b/ccc';
+    }
+
+    function populateCategorySelects() {
+        const select = document.getElementById('res-category');
+        select.innerHTML = '<option value="">Select Category</option>';
+        state.categories.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c.name;
+            opt.textContent = c.name;
+            select.appendChild(opt);
+        });
+    }
+
+    // Forms Submission
+    if(document.getElementById('form-homepage')) document.getElementById('form-homepage').addEventListener('submit', async e => {
+        e.preventDefault();
+        try {
+            await setDoc(doc(db, 'settings', 'homepage'), {
+                title: document.getElementById('hp-title').value,
+                subtitle: document.getElementById('hp-subtitle').value,
+                bgImage: document.getElementById('hp-bg').value,
+                heroImage: document.getElementById('hp-bg').value
+            }, { merge: true });
+            showToast('Homepage settings saved');
+        } catch(err) {
+            showToast('Error saving: '+err.message, 'error');
+        }
+    });
+
+    if(document.getElementById('form-creator')) document.getElementById('form-creator').addEventListener('submit', async e => {
+        e.preventDefault();
+        try {
+            await setDoc(doc(db, 'creatorInfo', 'profile'), {
+                name: document.getElementById('cr-name').value,
+                email: document.getElementById('cr-email').value,
+                bio: document.getElementById('cr-bio').value,
+                imageUrl: document.getElementById('cr-image').value
+            }, { merge: true });
+            showToast('Creator profile saved');
+        } catch(err) {
+            showToast('Error saving: '+err.message, 'error');
+        }
+    });
+
+    if (document.getElementById('form-socials')) document.getElementById('form-socials').addEventListener('submit', e => { e.preventDefault(); showToast('Not Implemented', 'error'); });
+    if (document.getElementById('form-ads')) document.getElementById('form-ads').addEventListener('submit', e => { e.preventDefault(); showToast('Not Implemented', 'error'); });
+    if (document.getElementById('form-settings')) document.getElementById('form-settings').addEventListener('submit', e => { e.preventDefault(); showToast('Not Implemented', 'error'); });
+    if (document.getElementById('btn-clear-data')) document.getElementById('btn-clear-data').addEventListener('click', () => { showToast('Not Implemented in Firebase Demo', 'error'); });
+
+    // Modals
+    const modalResource = document.getElementById('modal-resource');
+    const modalCategory = document.getElementById('modal-category');
+    const modalDelete = document.getElementById('modal-delete');
+    let itemToDelete = null;
+
+    document.querySelectorAll('.btn-cancel-modal').forEach(btn => {
+        btn.addEventListener('click', () => {
+            modalResource.classList.add('hidden');
+            modalCategory.classList.add('hidden');
+            modalDelete.classList.add('hidden');
+            itemToDelete = null;
+        });
+    });
+
+    document.getElementById('btn-add-resource').addEventListener('click', () => {
+        document.getElementById('form-resource').reset();
+        document.getElementById('res-id').value = '';
+        document.getElementById('modal-resource-title').textContent = 'Add Resource';
+        modalResource.classList.remove('hidden');
+    });
+
+    document.getElementById('btn-add-category').addEventListener('click', () => {
+        document.getElementById('cat-id').value = '';
+        document.getElementById('cat-name').value = '';
+        document.getElementById('modal-category-title').textContent = 'Add Category';
+        modalCategory.classList.remove('hidden');
+    });
+
+    document.getElementById('form-resource').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const id = document.getElementById('res-id').value;
+        const data = {
+            title: document.getElementById('res-title').value,
+            subject: document.getElementById('res-subject').value,
+            classLvl: document.getElementById('res-class').value,
+            category: document.getElementById('res-category').value,
+            featured: document.getElementById('res-featured').checked,
+            description: document.getElementById('res-desc').value,
+            thumbnailUrl: document.getElementById('res-thumb').value,
+            pdfUrl: document.getElementById('res-pdf').value,
+            updatedAt: serverTimestamp()
+        };
+        
+        try {
+            if(id) {
+                await updateDoc(doc(db, 'resources', id), data);
+                showToast('Resource updated');
+            } else {
+                data.createdAt = serverTimestamp();
+                await addDoc(collection(db, 'resources'), data);
+                showToast('Resource added');
+            }
+            modalResource.classList.add('hidden');
+        } catch(err) {
+            showToast('Error: ' + err.message, 'error');
+        }
+    });
+
+    document.getElementById('form-category').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const id = document.getElementById('cat-id').value;
+        try {
+            if(id) {
+                await updateDoc(doc(db, 'categories', id), { name: document.getElementById('cat-name').value });
+                showToast('Category updated');
+            } else {
+                await addDoc(collection(db, 'categories'), { name: document.getElementById('cat-name').value });
+                showToast('Category added');
+            }
+            modalCategory.classList.add('hidden');
+        } catch(err) {
+            showToast('Error: ' + err.message, 'error');
+        }
+    });
+
+    document.getElementById('btn-confirm-delete').addEventListener('click', async () => {
+        if(!itemToDelete) return;
+        try {
+            await deleteDoc(doc(db, itemToDelete.collection, itemToDelete.id));
+            showToast('Deleted successfully');
+            modalDelete.classList.add('hidden');
+            itemToDelete = null;
+        } catch(err) {
+            showToast('Error: ' + err.message, 'error');
+        }
+    });
+
+    function editResource(id) {
+        const item = state.resources.find(r => r.id === id);
+        if(!item) return;
+        document.getElementById('res-id').value = item.id;
+        document.getElementById('res-title').value = item.title;
+        document.getElementById('res-subject').value = item.subject || '';
+        document.getElementById('res-class').value = item.classLvl || '';
+        document.getElementById('res-category').value = item.category || '';
+        document.getElementById('res-featured').checked = !!item.featured;
+        document.getElementById('res-desc').value = item.description || item.desc || '';
+        document.getElementById('res-thumb').value = item.thumbnailUrl || item.thumbUrl || '';
+        document.getElementById('res-pdf').value = item.pdfUrl || '';
+        document.getElementById('modal-resource-title').textContent = 'Edit Resource';
+        modalResource.classList.remove('hidden');
+    }
+
+    function deleteResource(id) {
+        itemToDelete = { collection: 'resources', id };
+        modalDelete.classList.remove('hidden');
+    }
+
+    function editCategory(id) {
+        const item = state.categories.find(c => c.id === id);
+        if(!item) return;
+        document.getElementById('cat-id').value = item.id;
+        document.getElementById('cat-name').value = item.name;
+        document.getElementById('modal-category-title').textContent = 'Edit Category';
+        modalCategory.classList.remove('hidden');
+    }
+
+    function deleteCategory(id) {
+        itemToDelete = { collection: 'categories', id };
+        modalDelete.classList.remove('hidden');
+    }
+
+    async function toggleFeatured(id, isFeatured) {
+        try {
+            await updateDoc(doc(db, 'resources', id), { featured: !isFeatured });
+            showToast('Featured status updated');
+        } catch(err) {
+            showToast('Error: ' + err.message, 'error');
+        }
+    }
+
+    document.addEventListener('click', (e) => {
+        const editResBtn = e.target.closest('.action-edit-res');
+        if(editResBtn) { e.preventDefault(); editResource(editResBtn.getAttribute('data-id')); }
+        
+        const delResBtn = e.target.closest('.action-del-res');
+        if(delResBtn) { e.preventDefault(); deleteResource(delResBtn.getAttribute('data-id')); }
+
+        const featResBtn = e.target.closest('.action-feat-res');
+        if(featResBtn) { e.preventDefault(); toggleFeatured(featResBtn.getAttribute('data-id'), featResBtn.getAttribute('data-featured') === 'true'); }
+
+        const editCatBtn = e.target.closest('.action-edit-cat');
+        if(editCatBtn) { e.preventDefault(); editCategory(editCatBtn.getAttribute('data-id')); }
+
+        const delCatBtn = e.target.closest('.action-del-cat');
+        if(delCatBtn) { e.preventDefault(); deleteCategory(delCatBtn.getAttribute('data-id')); }
+    });
+
+    function renderRecentResources() {
+        const tbody = document.getElementById('recent-resources-tbody');
+        const empty = document.getElementById('recent-empty');
+        if(!tbody) return;
+        const sorted = [...state.resources].reverse().slice(0, 5);
+        if(sorted.length === 0) {
+            tbody.innerHTML = '';
+            empty.classList.remove('hidden'); return;
+        }
+        empty.classList.add('hidden');
+        tbody.innerHTML = sorted.map(r => `
+            <tr class="border-b border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
+                <td class="py-3 font-medium dark:text-gray-200">${r.title}</td>
+                <td class="py-3 text-gray-500">${r.subject || '-'}</td>
+                <td class="py-3"><span class="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 px-2 py-1 rounded text-xs">${r.category||'-'}</span></td>
+                <td class="py-3 text-gray-400 text-xs text-right">Just now</td>
+            </tr>
+        `).join('');
+    }
+
+    
+    function renderAnalyticsTables() {
+        const viewsTbody = document.getElementById('most-viewed-tbody');
+        const dlsTbody = document.getElementById('most-downloaded-tbody');
+        if(!viewsTbody || !dlsTbody) return;
+
+        const sortedByViews = [...state.resources].sort((a,b) => (b.viewCount||0) - (a.viewCount||0)).slice(0, 5);
+        viewsTbody.innerHTML = sortedByViews.map(r => `
+            <tr class="hover:bg-[#111] transition-colors">
+                <td class="px-5 py-3 font-medium text-[#ededed]">${r.title}</td>
+                <td class="px-5 py-3 text-right text-gray-400">${r.viewCount||0}</td>
+            </tr>
+        `).join('');
+
+        const sortedByDls = [...state.resources].sort((a,b) => (b.downloadCount||0) - (a.downloadCount||0)).slice(0, 5);
+        dlsTbody.innerHTML = sortedByDls.map(r => `
+            <tr class="hover:bg-[#111] transition-colors">
+                <td class="px-5 py-3 font-medium text-[#ededed]">${r.title}</td>
+                <td class="px-5 py-3 text-right text-gray-400">${r.downloadCount||0}</td>
+            </tr>
+        `).join('');
+    }
+
+    function renderResourcesTable(searchTerm = '') {
+        const tbody = document.getElementById('resources-tbody');
+        const empty = document.getElementById('resources-empty');
+        if(!tbody) return;
+        let filtered = state.resources;
+        if(searchTerm) {
+            const s = searchTerm.toLowerCase();
+            filtered = filtered.filter(r => r.title.toLowerCase().includes(s) || (r.subject||'').toLowerCase().includes(s));
+        }
+        if(filtered.length === 0) {
+            tbody.innerHTML = '';
+            empty.classList.remove('hidden'); return;
+        }
+        empty.classList.add('hidden');
+        
+        tbody.innerHTML = filtered.map(r => `
+            <tr class="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group">
+                <td class="p-3 border-b border-gray-200 dark:border-gray-700/50">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded bg-gray-200 dark:bg-gray-800 shrink-0 overflow-hidden text-blue-500 flex items-center justify-center">
+                            ${r.thumbnailUrl || r.thumbUrl ? `<img src="${r.thumbnailUrl || r.thumbUrl}" class="w-full h-full object-cover" referrerPolicy="no-referrer">` : '<i class="fa-solid fa-file-pdf"></i>'}
+                        </div>
+                        <div>
+                            <p class="font-bold text-gray-900 dark:text-white">${r.title} <a href="${r.pdfUrl}" target="_blank" class="text-blue-500 hover:text-blue-600 hover:underline text-xs ml-1"><i class="fa-solid fa-external-link"></i></a></p>
+                            <p class="text-xs text-gray-500">${r.subject || ''} ${r.classLvl ? '· '+r.classLvl : ''}</p>
+                        </div>
+                    </div>
+                </td>
+                <td class="p-3 border-b border-gray-200 dark:border-gray-700/50">
+                    <span class="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 px-2 py-1 rounded text-xs inline-block">${r.category || 'Uncategorized'}</span>
+                </td>
+                <td class="p-3 border-b border-gray-200 dark:border-gray-700/50">
+                    <button class="action-feat-res pointer-events-auto text-lg transition-colors ${r.featured ? 'text-orange-500 hover:text-orange-600' : 'text-gray-300 dark:text-gray-600 hover:text-gray-400 dark:hover:text-gray-500'}" data-id="${r.id}" data-featured="${r.featured}">
+                        <i class="fa-solid fa-star pointer-events-none"></i>
+                    </button>
+                </td>
+                <td class="p-3 border-b border-gray-200 dark:border-gray-700/50 text-right space-x-2 w-[110px]">
+                    <button class="action-edit-res pointer-events-auto w-8 h-8 rounded bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-blue-500 hover:text-white transition-colors inline-flex items-center justify-center m-0" data-id="${r.id}"><i class="fa-solid fa-pen pointer-events-none"></i></button>
+                    <button class="action-del-res pointer-events-auto w-8 h-8 rounded bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-red-500 hover:text-white transition-colors inline-flex items-center justify-center m-0" data-id="${r.id}"><i class="fa-solid fa-trash pointer-events-none"></i></button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    if(document.getElementById('search-resource')) document.getElementById('search-resource').addEventListener('input', e => renderResourcesTable(e.target.value));
+
+    function renderCategoriesList() {
+        const list = document.getElementById('categories-list');
+        const empty = document.getElementById('categories-empty');
+        if(!list) return;
+        if(state.categories.length === 0) {
+            list.innerHTML = '';
+            empty.classList.remove('hidden'); return;
+        }
+        empty.classList.add('hidden');
+        list.innerHTML = state.categories.map(c => `
+            <div class="flex justify-between items-center bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-3 rounded-lg hover:border-blue-500/50 transition-colors">
+                <span class="font-medium dark:text-white"><i class="fa-solid fa-tag text-blue-500 mr-2 opacity-50"></i>${c.name}</span>
+                <div class="flex items-center gap-2">
+                    <button class="action-edit-cat pointer-events-auto w-8 h-8 rounded bg-gray-200 dark:bg-gray-800 text-gray-500 hover:text-blue-500 transition-colors flex items-center justify-center" data-id="${c.id}"><i class="fa-solid fa-pen pointer-events-none"></i></button>
+                    <button class="action-del-cat pointer-events-auto w-8 h-8 rounded bg-gray-200 dark:bg-gray-800 text-gray-500 hover:text-red-500 transition-colors flex items-center justify-center" data-id="${c.id}"><i class="fa-solid fa-trash pointer-events-none"></i></button>
+                </div>
+            </div>
+        `).join('');
+    }
+</script>
+
+</body>
+</html>

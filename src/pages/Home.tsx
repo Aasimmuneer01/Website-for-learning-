@@ -1,11 +1,38 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { BookOpen, Download, User, MonitorPlay } from 'lucide-react';
+import { db } from '../firebase/config';
+import { doc, getDoc } from 'firebase/firestore';
 import CreatorSection from '../components/CreatorSection';
 
 export default function Home() {
   const [showSubjects, setShowSubjects] = useState(false);
+  const [homepageSettings, setHomepageSettings] = useState({
+    title: 'Educational\nResources',
+    subtitle: 'Discover and share premium study materials, notes, previous year papers, and assignments designed to help you excel.',
+    bgImage: 'https://images.unsplash.com/photo-1513258496099-48168024aec0?q=80&w=800&auto=format&fit=crop'
+  });
+
+  useEffect(() => {
+    const fetchHomepageSettings = async () => {
+      try {
+        const docRef = doc(db, 'settings', 'homepage');
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          setHomepageSettings({
+            title: data.title || 'Educational\nResources',
+            subtitle: data.subtitle || 'Discover and share premium study materials, notes, previous year papers, and assignments designed to help you excel.',
+            bgImage: data.bgImage || data.heroImage || 'https://images.unsplash.com/photo-1513258496099-48168024aec0?q=80&w=800&auto=format&fit=crop'
+          });
+        }
+      } catch (err) {
+        console.warn("Could not fetch homepage settings:", err);
+      }
+    };
+    fetchHomepageSettings();
+  }, []);
 
   return (
     <div className="flex flex-col gap-16 pb-20">
@@ -16,12 +43,9 @@ export default function Home() {
             <motion.h1 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-5xl lg:text-7xl font-bold tracking-tighter mb-6 text-white uppercase"
+              className="text-5xl lg:text-7xl font-bold tracking-tighter mb-6 text-white uppercase whitespace-pre-wrap leading-tight"
             >
-              Educational <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-600">
-                Resources
-              </span>
+              {homepageSettings.title}
             </motion.h1>
             <motion.p 
               initial={{ opacity: 0, y: 20 }}
@@ -29,7 +53,7 @@ export default function Home() {
               transition={{ delay: 0.1 }}
               className="text-lg text-gray-400 mb-8 max-w-xl mx-auto lg:mx-0 font-medium"
             >
-              Discover and share premium study materials, notes, previous year papers, and assignments designed to help you excel.
+              {homepageSettings.subtitle}
             </motion.p>
             <div className="flex flex-col items-center lg:items-start">
               <motion.div 
@@ -80,7 +104,7 @@ export default function Home() {
               transition={{ duration: 0.7 }}
               className="relative w-full max-w-md h-full max-h-[400px] rounded-2xl overflow-hidden border-4 border-surface shadow-2xl z-10"
             >
-              <img src="https://images.unsplash.com/photo-1513258496099-48168024aec0?q=80&w=800&auto=format&fit=crop" alt="Study desk" className="w-full h-full object-cover opacity-90 hover:opacity-100 transition-opacity" />
+              <img src={homepageSettings.bgImage} referrerPolicy="no-referrer" alt="Study desk" className="w-full h-full object-cover opacity-90 hover:opacity-100 transition-opacity" />
             </motion.div>
           </div>
         </div>
