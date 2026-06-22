@@ -12,6 +12,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body { font-family: 'Inter', sans-serif; }
+        .hidden { display: none !important; }
+        .flex { display: flex !important; }
         .view-section { display: none; }
         .view-section.active { display: block; }
         .toast { padding: 1rem; border-radius: 6px; margin-top: 0.5rem; color: white; background: #333; animation: fadein 0.3s; border: 1px solid #444; font-size: 0.875rem; }
@@ -471,12 +473,16 @@
 
     function checkAuth() {
         if (state.isLoggedIn) {
-            loginView.classList.remove('active');
+            loginView.classList.add('hidden');
+            loginView.classList.remove('flex');
             appLayout.classList.remove('hidden');
+            appLayout.classList.add('flex');
             updateUI();
         } else {
-            loginView.classList.add('active');
+            loginView.classList.remove('hidden');
+            loginView.classList.add('flex');
             appLayout.classList.add('hidden');
+            appLayout.classList.remove('flex');
         }
     }
 
