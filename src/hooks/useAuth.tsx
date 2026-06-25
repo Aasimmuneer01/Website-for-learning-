@@ -9,7 +9,7 @@ import {
   sendEmailVerification,
   updateProfile
 } from 'firebase/auth';
-import { doc, getDoc, setDoc, updateDoc, serverTimestamp, onSnapshot } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, serverTimestamp, onSnapshot, deleteDoc } from 'firebase/firestore';
 import { auth, db } from '../firebase/config';
 import { User as UserType } from '../types';
 
@@ -42,6 +42,7 @@ interface AuthContextType {
   logout: () => Promise<void>;
   forgotPassword: (email: string) => Promise<void>;
   resendVerification: () => Promise<void>;
+  verifyOTP: (code: string) => Promise<boolean>;
   clearBannedMessage: () => void;
 }
 
@@ -56,6 +57,7 @@ const AuthContext = createContext<AuthContextType>({
   logout: async () => {},
   forgotPassword: async () => {},
   resendVerification: async () => {},
+  verifyOTP: async () => false,
   clearBannedMessage: () => {},
 });
 
@@ -139,8 +141,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             return;
           }
 
-          // Verification check
-          if (data.verificationRequired && !authUser.emailVerified && !data.emailVerified) {
+          // Verification check (Support both Firebase and Custom OTP)
+          if (data.verificationRequired && !authUser.emailVerified && !data.emailVerified && !data.isEmailVerified) {
             setVerificationBlocked(true);
           } else {
             setVerificationBlocked(false);
@@ -167,6 +169,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const cred = await createUserWithEmailAndPassword(auth, email, pass);
     if (cred.user) {
       await updateProfile(cred.user, { displayName: name });
+      // Trigger initial OTP send
+      await resendVerification();
     }
   };
 
@@ -180,9 +184,52 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const resendVerification = async () => {
-    if (auth.currentUser) {
-      await sendEmailVerification(auth.currentUser);
+    if (!auth.currentUser) return;
+    
+    // Generate 6-digit OTP
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    
+    // Store in Firestore
+    await setDoc(doc(db, 'otps', auth.currentUser.uid), {
+      code,
+      email: auth.currentUser.email,
+      expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes
+    });
+
+    // Call server API to "send" email (Simulated)
+    try {
+      await fetch('/api/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: auth.currentUser.email, code })
+      });
+    } catch (err) {
+      console.error("Failed to call send-otp API:", err);
     }
+  };
+
+  const verifyOTP = async (code: string): Promise<boolean> => {
+    if (!auth.currentUser) return false;
+
+    const otpDoc = await getDoc(doc(db, 'otps', auth.currentUser.uid));
+    if (!otpDoc.exists()) return false;
+
+    const data = otpDoc.data();
+    const now = new Date();
+    
+    if (data.code === code && data.expiresAt.toDate() > now) {
+      // Success! Update user doc
+      await updateDoc(doc(db, 'users', auth.currentUser.uid), {
+        isEmailVerified: true,
+        emailVerified: true // Also update our custom field
+      });
+
+      // Cleanup
+      await deleteDoc(doc(db, 'otps', auth.currentUser.uid));
+      return true;
+    }
+
+    return false;
   };
 
   const clearBannedMessage = () => setBannedMessage(null);
@@ -199,6 +246,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       logout,
       forgotPassword,
       resendVerification,
+      verifyOTP,
       clearBannedMessage,
     }}>
       {children}
