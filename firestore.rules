@@ -16,7 +16,7 @@ service cloud.firestore {
     match /users/{userId} {
       allow read: if (request.auth != null && request.auth.uid == userId) || isAdmin();
       allow create: if (request.auth != null && request.auth.uid == userId && (request.resource.data.role in ['user', 'student'] || request.auth.token.email in ['admin@example.com', 'aasimmuneer349@gmail.com', 'admin@eduplatform.com'])) || isAdmin();
-      allow update: if isAdmin() || (request.auth != null && request.auth.uid == userId && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'isBanned', 'banReason', 'accountStatus']));
+      allow update: if isAdmin() || (request.auth != null && request.auth.uid == userId && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'isBanned', 'banReason', 'accountStatus', 'isPremium']));
       allow delete: if isAdmin();
     }
 

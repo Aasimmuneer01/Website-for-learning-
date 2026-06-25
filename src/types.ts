@@ -11,6 +11,7 @@ export interface User {
   verificationRequired?: boolean;
   deviceFingerprint?: string;
   accountStatus?: 'active' | 'banned' | 'suspicious' | string;
+  isPremium?: boolean;
 }
 
 export interface Resource {

@@ -2,9 +2,10 @@ import { useEffect, useState, useMemo, MouseEvent } from 'react';
 import { collection, getDocs, query, orderBy, doc, updateDoc, increment } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { Resource } from '../types';
-import { FileText, Download, Eye, Search, Filter } from 'lucide-react';
+import { FileText, Download, Eye, Search, Filter, Lock, Crown } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
 
 const SUBJECTS = ['All', 'Maths', 'English', 'Biology', 'Chemistry', 'Physics', 'Geography', 'History', 'Civics', 'Computer', 'Islamic Studies', 'Urdu'];
 
@@ -13,6 +14,10 @@ export default function Resources() {
   const [loading, setLoading] = useState(true);
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState('');
+  const navigate = useNavigate();
+  const { userData } = useAuth();
+
+  const isPremium = userData?.isPremium || ['admin', 'superadmin', 'moderator'].includes(userData?.role || '');
 
   const currentSubject = searchParams.get('subject') || 'All';
 
@@ -51,19 +56,25 @@ export default function Resources() {
         console.error("Failed to increment view", err);
       }
     }
-    window.open(resource.pdfUrl, '_blank');
+    navigate(`/viewer/${resource.id}`);
   };
 
   const handleDownload = async (e: MouseEvent, resource: Resource) => {
     e.preventDefault();
+    if (!isPremium) return;
+    
     try {
       await updateDoc(doc(db, 'resources', resource.id), {
         downloadCount: increment(1)
       });
+      const link = document.createElement('a');
+      link.href = resource.pdfUrl;
+      link.download = `${resource.title}.pdf`;
+      link.target = '_blank';
+      link.click();
     } catch (err) {
       console.error("Failed to increment download", err);
     }
-    window.open(resource.pdfUrl, '_blank');
   };
 
   const filteredResources = useMemo(() => {
@@ -187,25 +198,30 @@ export default function Resources() {
                         <span className="flex items-center gap-1"><Download className="w-4 h-4" /> {resource.downloadCount || 0}</span>
                       </div>
                       <div className="flex gap-2">
-                        <a 
-                          href={resource.pdfUrl} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
+                        <button 
                           onClick={(e) => handleView(e, resource)}
-                          className="px-4 py-2 bg-secondary text-primary rounded-lg font-bold text-sm shadow-[0_2px_0_0_theme(colors.surface)] hover:shadow-none hover:translate-y-[2px] transition-all uppercase"
+                          className="px-4 py-2 bg-secondary text-primary rounded-lg font-bold text-sm shadow-[0_2px_0_0_theme(colors.surface)] hover:shadow-none hover:translate-y-[2px] transition-all uppercase flex items-center gap-2"
                         >
+                          <Eye size={16} />
                           View
-                        </a>
-                        <a 
-                          href={resource.pdfUrl} 
-                          download={`${resource.slug || 'download'}.pdf`}
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          onClick={(e) => handleDownload(e, resource)}
-                          className="px-4 py-2 bg-primary text-secondary rounded-lg font-bold text-sm shadow-[0_2px_0_0_#0ea5e9] hover:shadow-none hover:translate-y-[2px] transition-all uppercase"
-                        >
-                          Download
-                        </a>
+                        </button>
+                        {isPremium ? (
+                          <button 
+                            onClick={(e) => handleDownload(e, resource)}
+                            className="px-4 py-2 bg-primary text-secondary rounded-lg font-bold text-sm shadow-[0_2px_0_0_#0ea5e9] hover:shadow-none hover:translate-y-[2px] transition-all uppercase flex items-center gap-2"
+                          >
+                            <Download size={16} />
+                            Download
+                          </button>
+                        ) : (
+                          <button 
+                            disabled
+                            className="px-4 py-2 bg-secondary text-gray-600 rounded-lg font-bold text-sm border border-surface cursor-not-allowed uppercase flex items-center gap-2"
+                          >
+                            <Lock size={16} />
+                            Download
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>

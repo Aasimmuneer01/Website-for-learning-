@@ -103,6 +103,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             role: authUser.email === 'admin@example.com' || authUser.email === 'aasimmuneer349@gmail.com' || authUser.email === 'admin@eduplatform.com' ? 'admin' : 'user',
             isBanned: false,
             banReason: '',
+            isPremium: false,
             emailVerified: authUser.emailVerified,
             verificationRequired: false,
             deviceFingerprint: fp,

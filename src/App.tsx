@@ -10,6 +10,7 @@ import Home from './pages/Home';
 import Resources from './pages/Resources';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminLogin from './pages/admin/AdminLogin';
+import PDFViewer from './components/PDFViewer';
 import { AuthProvider, useAuth } from './hooks/useAuth';
 import AuthScreen from './components/AuthScreen';
 import VerificationScreen from './components/VerificationScreen';
@@ -35,20 +36,27 @@ function MainLayout() {
 
   return (
     <div className="min-h-screen bg-background-main text-text-main flex flex-col">
-      <Navbar />
-      <main className="flex-1 overflow-auto">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/resources" element={<Resources />} />
-          <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/admin/login" element={<AdminLogin />} />
-        </Routes>
-      </main>
-      <footer className="w-full py-6 mt-auto border-t border-secondary bg-surface text-center">
-        <p className="text-gray-400 font-medium">
-          Created with <span className="text-red-500">❤️</span> by Aasim Muneer &copy; {new Date().getFullYear()}
-        </p>
-      </footer>
+      <Routes>
+        <Route path="/viewer/:resourceId" element={<PDFViewer />} />
+        <Route path="*" element={
+          <>
+            <Navbar />
+            <main className="flex-1 overflow-auto">
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/resources" element={<Resources />} />
+                <Route path="/admin" element={<AdminDashboard />} />
+                <Route path="/admin/login" element={<AdminLogin />} />
+              </Routes>
+            </main>
+            <footer className="w-full py-6 mt-auto border-t border-secondary bg-surface text-center">
+              <p className="text-gray-400 font-medium">
+                Created with <span className="text-red-500">❤️</span> by Aasim Muneer &copy; {new Date().getFullYear()}
+              </p>
+            </footer>
+          </>
+        } />
+      </Routes>
     </div>
   );
 }
