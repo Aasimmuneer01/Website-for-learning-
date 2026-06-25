@@ -4,7 +4,7 @@ import { db } from '../firebase/config';
 import { User as UserType, Resource } from '../types';
 import { 
   Users, Eye, Download, FileText, ShieldAlert, CheckCircle2, XCircle, 
-  Search, Filter, Ban, CheckCircle, Mail, Trash2, Info, AlertTriangle, UserCheck, Shield
+  Search, Filter, Ban, CheckCircle, Mail, Trash2, Info, AlertTriangle, UserCheck, Shield, Crown
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -447,6 +447,23 @@ export default function AdminUsersManager() {
                           className="p-1.5 bg-background-main hover:bg-secondary text-primary rounded-lg transition-colors border border-secondary inline-block"
                         >
                           <Mail className="w-4 h-4" />
+                        </button>
+
+                        <button
+                          onClick={async () => {
+                            if (!confirm(`Toggle premium status for ${u.email}?`)) return;
+                            try {
+                              await updateDoc(doc(db, 'users', u.uid), {
+                                isPremium: !u.isPremium
+                              });
+                            } catch (err) {
+                              alert("Failed to toggle premium: " + err);
+                            }
+                          }}
+                          title="Toggle Premium Status"
+                          className={`p-1.5 ${u.isPremium ? 'bg-yellow-500/20 text-yellow-500 border-yellow-500/40' : 'bg-gray-500/10 text-gray-500 border-gray-500/20'} hover:opacity-80 rounded-lg transition-colors border inline-block`}
+                        >
+                          <Crown className="w-4 h-4" />
                         </button>
 
                         <button

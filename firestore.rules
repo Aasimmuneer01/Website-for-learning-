@@ -27,7 +27,12 @@ service cloud.firestore {
 
     match /resources/{resource} {
       allow read: if true;
-      allow update: if isAdmin() || (request.auth != null && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewCount', 'downloadCount']));
+      allow update: if isAdmin() || (
+        request.auth != null && 
+        request.resource.data.diff(resource.data).affectedKeys().hasAny(['viewCount', 'downloadCount']) &&
+        request.resource.data.title == resource.data.title &&
+        request.resource.data.pdfUrl == resource.data.pdfUrl
+      );
       allow create, delete: if isAdmin();
     }
 

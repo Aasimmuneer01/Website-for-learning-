@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo, MouseEvent } from 'react';
 import { collection, getDocs, query, orderBy, doc, updateDoc, increment } from 'firebase/firestore';
-import { db } from '../firebase/config';
+import { db, auth } from '../firebase/config';
 import { Resource } from '../types';
 import { FileText, Download, Eye, Search, Filter, Lock, Crown } from 'lucide-react';
 import { motion } from 'motion/react';
@@ -41,39 +41,47 @@ export default function Resources() {
     fetchResources();
   }, []);
 
-  const handleView = async (e: MouseEvent, resource: Resource) => {
+  const handleView = (e: MouseEvent, resource: Resource) => {
     e.preventDefault();
     const viewedKey = `viewed_${resource.id}`;
     const lastViewed = localStorage.getItem(viewedKey);
     const now = Date.now();
-    if (!lastViewed || now - parseInt(lastViewed) > 24 * 60 * 60 * 1000) {
-      try {
-        await updateDoc(doc(db, 'resources', resource.id), {
-          viewCount: increment(1)
-        });
-        localStorage.setItem(viewedKey, now.toString());
-      } catch (err) {
-        console.error("Failed to increment view", err);
-      }
-    }
+    
+    // Navigate immediately for better UX
     navigate(`/viewer/${resource.id}`);
+
+    if (auth.currentUser && (!lastViewed || now - parseInt(lastViewed) > 24 * 60 * 60 * 1000)) {
+      updateDoc(doc(db, 'resources', resource.id), {
+        viewCount: increment(1)
+      }).then(() => {
+        localStorage.setItem(viewedKey, now.toString());
+      }).catch(err => {
+        console.error("Failed to increment view", err);
+      });
+    }
   };
 
-  const handleDownload = async (e: MouseEvent, resource: Resource) => {
+  const handleDownload = (e: MouseEvent, resource: Resource) => {
     e.preventDefault();
     if (!isPremium) return;
     
-    try {
-      await updateDoc(doc(db, 'resources', resource.id), {
+    // Increment count in background if authenticated
+    if (auth.currentUser) {
+      updateDoc(doc(db, 'resources', resource.id), {
         downloadCount: increment(1)
-      });
-      const link = document.createElement('a');
-      link.href = resource.pdfUrl;
-      link.download = `${resource.title}.pdf`;
-      link.target = '_blank';
-      link.click();
+      }).catch(err => console.error("Count increment error:", err));
+    }
+
+    // Open in new tab immediately to avoid popup blocker
+    try {
+      const win = window.open(resource.pdfUrl, '_blank');
+      if (!win) {
+        // Fallback if blocked
+        window.location.href = resource.pdfUrl;
+      }
     } catch (err) {
-      console.error("Failed to increment download", err);
+      console.error("Download redirection failed:", err);
+      window.location.href = resource.pdfUrl;
     }
   };
 
@@ -205,23 +213,24 @@ export default function Resources() {
                           <Eye size={16} />
                           View
                         </button>
-                        {isPremium ? (
-                          <button 
-                            onClick={(e) => handleDownload(e, resource)}
-                            className="px-4 py-2 bg-primary text-secondary rounded-lg font-bold text-sm shadow-[0_2px_0_0_#0ea5e9] hover:shadow-none hover:translate-y-[2px] transition-all uppercase flex items-center gap-2"
-                          >
-                            <Download size={16} />
-                            Download
-                          </button>
-                        ) : (
-                          <button 
-                            disabled
-                            className="px-4 py-2 bg-secondary text-gray-600 rounded-lg font-bold text-sm border border-surface cursor-not-allowed uppercase flex items-center gap-2"
-                          >
-                            <Lock size={16} />
-                            Download
-                          </button>
-                        )}
+                        <button 
+                          onClick={(e) => {
+                            if (isPremium) {
+                              handleDownload(e, resource);
+                            } else {
+                              e.preventDefault();
+                              alert("Ask the admin to give you the premium access to download any resources");
+                            }
+                          }}
+                          className={`px-4 py-2 rounded-lg font-bold text-sm transition-all uppercase flex items-center gap-2 ${
+                            isPremium 
+                              ? 'bg-primary text-secondary shadow-[0_2px_0_0_#0ea5e9] hover:shadow-none hover:translate-y-[2px]' 
+                              : 'bg-secondary text-gray-500 border border-surface hover:text-gray-300'
+                          }`}
+                        >
+                          {isPremium ? <Download size={16} /> : <Lock size={16} />}
+                          Download
+                        </button>
                       </div>
                     </div>
                   </div>
