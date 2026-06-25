@@ -128,7 +128,7 @@ export default function PDFViewer() {
         <div className="flex items-center gap-2 sm:gap-4">
           {isPremium && (
             <>
-              <button onClick={() => window.print()} className="p-2 text-gray-400 hover:text-white transition-colors">
+              <button onClick={() => window.print()} className="p-2 text-gray-400 hover:text-text-main transition-colors">
                 <Printer size={20} />
               </button>
               <button onClick={handleDownload} className="flex items-center gap-2 px-4 py-2 bg-primary text-secondary rounded-lg font-bold text-sm">
@@ -174,26 +174,26 @@ export default function PDFViewer() {
           <button 
             disabled={currentPage <= 1}
             onClick={() => setCurrentPage(prev => prev - 1)}
-            className="p-2 text-white disabled:text-gray-600 hover:bg-surface rounded-lg"
+            className="p-2 text-text-main disabled:text-gray-600 hover:bg-surface rounded-lg"
           >
             <ChevronLeft size={24} />
           </button>
-          <span className="text-white font-bold">
+          <span className="text-text-main font-bold">
             Page {currentPage} of {numPages}
           </span>
           <button 
             disabled={currentPage >= numPages}
             onClick={() => setCurrentPage(prev => prev + 1)}
-            className="p-2 text-white disabled:text-gray-600 hover:bg-surface rounded-lg"
+            className="p-2 text-text-main disabled:text-gray-600 hover:bg-surface rounded-lg"
           >
             <ChevronRight size={24} />
           </button>
         </div>
         
         <div className="hidden sm:flex items-center gap-2">
-          <button onClick={() => setScale(prev => Math.max(0.5, prev - 0.2))} className="px-2 text-white hover:bg-surface rounded">-</button>
-          <span className="text-white text-sm">{(scale * 100).toFixed(0)}%</span>
-          <button onClick={() => setScale(prev => Math.min(3, prev + 0.2))} className="px-2 text-white hover:bg-surface rounded">+</button>
+          <button onClick={() => setScale(prev => Math.max(0.5, prev - 0.2))} className="px-2 text-text-main hover:bg-surface rounded">-</button>
+          <span className="text-text-main text-sm">{(scale * 100).toFixed(0)}%</span>
+          <button onClick={() => setScale(prev => Math.min(3, prev + 0.2))} className="px-2 text-text-main hover:bg-surface rounded">+</button>
         </div>
       </div>
     </div>

@@ -107,7 +107,7 @@ export default function Resources() {
         animate={{ opacity: 1, y: 0 }}
         className="mb-8"
       >
-        <h1 className="text-4xl font-bold mb-4 font-sans tracking-tight text-white uppercase">Study Resources</h1>
+        <h1 className="text-4xl font-bold mb-4 font-sans tracking-tight text-text-main uppercase">Study Resources</h1>
         <p className="text-gray-400">Browse and download educational materials.</p>
       </motion.div>
 
@@ -122,12 +122,12 @@ export default function Resources() {
                 placeholder="Search..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-background-main border border-secondary p-2 pl-9 rounded-lg text-white text-sm focus:outline-none focus:border-primary"
+                className="w-full bg-background-main border border-secondary p-2 pl-9 rounded-lg text-text-main text-sm focus:outline-none focus:border-primary"
               />
             </div>
 
             <div>
-              <h3 className="text-white font-bold mb-3 uppercase tracking-wide text-sm flex items-center gap-2">
+              <h3 className="text-text-main font-bold mb-3 uppercase tracking-wide text-sm flex items-center gap-2">
                 <Filter className="w-4 h-4" /> Subjects
               </h3>
               <div className="flex flex-wrap lg:flex-col gap-2">
@@ -189,7 +189,7 @@ export default function Resources() {
                         {resource.classLevel}
                       </span>
                     </div>
-                    <h3 className="text-xl font-bold text-white mb-2 line-clamp-2 leading-tight">{resource.title}</h3>
+                    <h3 className="text-xl font-bold text-text-main mb-2 line-clamp-2 leading-tight">{resource.title}</h3>
                     <p className="text-gray-400 text-sm mb-4 line-clamp-3 flex-1">{resource.description}</p>
                     
                     <div className="flex items-center justify-between mt-auto pt-4 border-t border-secondary">

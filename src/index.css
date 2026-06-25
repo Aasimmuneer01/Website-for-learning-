@@ -4,7 +4,21 @@
   --color-primary: #38bdf8;
   --color-secondary: #091818;
   --color-accent: #38bdf8;
-  --color-background-main: #091818;
-  --color-surface: #122424;
-  --color-text-main: #e2e8f0;
+  --color-background-main: var(--bg-main);
+  --color-surface: var(--bg-surface);
+  --color-text-main: var(--text-main);
+}
+
+@layer base {
+  :root {
+    --bg-main: #ffffff;
+    --bg-surface: #f8fafc;
+    --text-main: #0f172a;
+  }
+
+  .dark {
+    --bg-main: #020617;
+    --bg-surface: #0f172a;
+    --text-main: #f8fafc;
+  }
 }

@@ -34,8 +34,8 @@ export default function AdminLogin() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background-main p-4">
-      <div className="w-full max-w-md bg-secondary rounded-xl p-8 shadow-xl border border-surface">
-        <h1 className="text-3xl font-bold text-white mb-6 text-center font-sans tracking-tight">Admin Login</h1>
+      <div className="w-full max-w-md bg-surface rounded-xl p-8 shadow-xl border border-secondary">
+        <h1 className="text-3xl font-bold text-text-main mb-6 text-center font-sans tracking-tight">Admin Login</h1>
         <p className="text-gray-400 text-center mb-8">
           Please sign in to access the admin panel.
         </p>
@@ -51,25 +51,25 @@ export default function AdminLogin() {
         
         <form onSubmit={handleAuth} className="space-y-4">
           <div>
-            <label className="block text-white mb-2 text-sm font-bold">Email Address</label>
+            <label className="block text-text-main mb-2 text-sm font-bold">Email Address</label>
             <input 
               type="email" 
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full bg-surface border border-secondary p-3 rounded-lg text-white focus:outline-none focus:border-primary transition-colors"
+              className="w-full bg-background-main border border-secondary p-3 rounded-lg text-text-main focus:outline-none focus:border-primary transition-colors"
               placeholder="admin@example.com"
             />
           </div>
           <div className="mb-6">
-            <label className="block text-white mb-2 text-sm font-bold">Password</label>
+            <label className="block text-text-main mb-2 text-sm font-bold">Password</label>
             <input 
               type="password" 
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
               minLength={6}
-              className="w-full bg-surface border border-secondary p-3 rounded-lg text-white focus:outline-none focus:border-primary transition-colors"
+              className="w-full bg-background-main border border-secondary p-3 rounded-lg text-text-main focus:outline-none focus:border-primary transition-colors"
               placeholder="••••••••"
             />
           </div>

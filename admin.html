@@ -12,8 +12,47 @@
     <style>
         :root {
             --sidebar-width: 260px;
+            --bg-body: #f8fafc;
+            --text-body: #0f172a;
+            --bg-card: #ffffff;
+            --border-color: #e2e8f0;
+            --bg-input: #ffffff;
+            --text-input: #0f172a;
+            --bg-primary: #0f172a;
+            --text-primary: #ffffff;
+            --bg-secondary: #f1f5f9;
+            --text-secondary: #0f172a;
+            --sidebar-bg: #ffffff;
+            --header-bg: rgba(255, 255, 255, 0.8);
+            --nav-active: #f1f5f9;
+            --nav-text: #64748b;
+            --nav-text-active: #0f172a;
         }
-        body { font-family: 'Inter', sans-serif; background-color: #000; color: #fff; }
+
+        .dark {
+            --bg-body: #020617;
+            --text-body: #f8fafc;
+            --bg-card: #0f172a;
+            --border-color: #1e293b;
+            --bg-input: #020617;
+            --text-input: #f8fafc;
+            --bg-primary: #38bdf8;
+            --text-primary: #020617;
+            --bg-secondary: #1e293b;
+            --text-secondary: #f8fafc;
+            --sidebar-bg: #020617;
+            --header-bg: rgba(2, 6, 23, 0.8);
+            --nav-active: #1e293b;
+            --nav-text: #94a3b8;
+            --nav-text-active: #f8fafc;
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--bg-body); 
+            color: var(--text-body); 
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
         .font-mono { font-family: 'JetBrains Mono', monospace; }
         
         /* Custom scrollbar */
@@ -23,16 +62,17 @@
         ::-webkit-scrollbar-thumb:hover { background: #444; }
 
         .v-card {
-            background-color: #0a0a0a;
-            border: 1px solid #222;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
             border-radius: 12px;
             overflow: hidden;
+            transition: all 0.3s ease;
         }
         .v-input {
-            background-color: #000;
-            border: 1px solid #333;
+            background-color: var(--bg-input);
+            border: 1px solid var(--border-color);
             border-radius: 8px;
-            color: #fff;
+            color: var(--text-input);
             padding: 0.625rem 0.875rem;
             font-size: 0.875rem;
             width: 100%;
@@ -44,26 +84,26 @@
             box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
         }
         .v-btn-primary {
-            background-color: #fff;
-            color: #000;
-            font-weight: 500;
-            padding: 0.625rem 1.25rem;
-            border-radius: 8px;
-            font-size: 0.875rem;
-            transition: opacity 0.2s ease;
-        }
-        .v-btn-primary:hover { opacity: 0.9; }
-        .v-btn-secondary {
-            background-color: #111;
-            color: #fff;
-            border: 1px solid #333;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
             font-weight: 500;
             padding: 0.625rem 1.25rem;
             border-radius: 8px;
             font-size: 0.875rem;
             transition: all 0.2s ease;
         }
-        .v-btn-secondary:hover { background-color: #1a1a1a; border-color: #444; }
+        .v-btn-primary:hover { opacity: 0.9; }
+        .v-btn-secondary {
+            background-color: var(--bg-secondary);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+            font-weight: 500;
+            padding: 0.625rem 1.25rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+        .v-btn-secondary:hover { background-color: var(--nav-active); border-color: #444; }
         .v-btn-danger {
             background-color: #ff4d4d;
             color: #fff;
@@ -72,9 +112,17 @@
             border-radius: 8px;
             font-size: 0.875rem;
         }
+        .nav-link {
+            color: var(--nav-text);
+            transition: all 0.2s ease;
+        }
+        .nav-link:hover {
+            background-color: var(--nav-active);
+            color: var(--nav-text-active);
+        }
         .nav-link.active {
-            background-color: #1a1a1a;
-            color: #fff;
+            background-color: var(--nav-active);
+            color: var(--nav-text-active);
         }
         .view-section { display: none; }
         .view-section.active { display: block; }
@@ -92,6 +140,18 @@
         .modal-overlay {
             background-color: rgba(0,0,0,0.8);
             backdrop-filter: blur(4px);
+        }
+
+        #sidebar {
+            background-color: var(--sidebar-bg);
+            border-color: var(--border-color);
+        }
+        header {
+            background-color: var(--header-bg);
+            border-color: var(--border-color);
+        }
+        #login-view {
+            background-color: var(--bg-body);
         }
     </style>
 </head>
@@ -184,6 +244,10 @@
                     <h2 id="topbar-title" class="text-sm font-semibold tracking-tight">Dashboard</h2>
                 </div>
                 <div class="flex items-center gap-3">
+                    <button id="admin-theme-toggle" class="w-10 h-10 rounded-lg flex items-center justify-center text-gray-400 hover:text-white hover:bg-secondary transition-all" title="Toggle Theme">
+                        <i class="fas fa-sun block dark:hidden"></i>
+                        <i class="fas fa-moon hidden dark:block"></i>
+                    </button>
                     <div class="flex flex-col items-end mr-2 hidden sm:flex">
                         <span id="admin-display-name" class="text-xs font-medium text-white">Admin User</span>
                         <span id="admin-email" class="text-[10px] text-gray-500">admin@example.com</span>
@@ -733,6 +797,28 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
+
+        // THEME MANAGEMENT
+        function initTheme() {
+            const savedTheme = localStorage.getItem('admin_theme') || 'dark';
+            if (savedTheme === 'light') {
+                document.documentElement.classList.remove('dark');
+            } else {
+                document.documentElement.classList.add('dark');
+            }
+        }
+        initTheme();
+
+        document.getElementById('admin-theme-toggle').addEventListener('click', () => {
+            const isDark = document.documentElement.classList.contains('dark');
+            if (isDark) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('admin_theme', 'light');
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('admin_theme', 'dark');
+            }
+        });
 
         // GLOBAL STATE
         const state = {

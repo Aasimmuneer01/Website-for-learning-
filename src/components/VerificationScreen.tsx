@@ -40,8 +40,8 @@ export default function VerificationScreen() {
         </div>
 
         <div className="space-y-2">
-          <h2 className="text-2xl font-bold font-sans text-white">Verification Required</h2>
-          <p className="text-gray-300 text-sm leading-relaxed">
+          <h2 className="text-2xl font-bold font-sans text-text-main">Verification Required</h2>
+          <p className="text-gray-400 text-sm leading-relaxed">
             Your account requires email verification before you can continue using this website.
           </p>
           <p className="text-xs text-gray-400 pt-1">
@@ -69,7 +69,7 @@ export default function VerificationScreen() {
           <button 
             onClick={handleReload}
             disabled={loading}
-            className="w-full py-3 bg-surface border border-secondary text-white font-semibold rounded-xl hover:bg-secondary/50 transition-all text-sm flex items-center justify-center gap-2"
+            className="w-full py-3 bg-surface border border-secondary text-text-main font-semibold rounded-xl hover:bg-secondary/50 transition-all text-sm flex items-center justify-center gap-2"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
             <span>I have verified my email (Check Status)</span>

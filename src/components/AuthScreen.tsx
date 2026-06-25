@@ -54,7 +54,11 @@ export default function AuthScreen() {
         setSuccessMsg("Password reset link sent to your email!");
       }
     } catch (err: any) {
-      setError(err.message || "Authentication failed. Please check your credentials.");
+      if (err.code === 'auth/user-not-found') {
+        setError("You are not registered on this website sign-up before sign in");
+      } else {
+        setError(err.message || "Authentication failed. Please check your credentials.");
+      }
     } finally {
       setLoading(false);
     }
@@ -75,7 +79,7 @@ export default function AuthScreen() {
           <div className="w-12 h-12 bg-primary/10 text-primary rounded-xl flex items-center justify-center mx-auto border border-primary/20 mb-3">
             <Lock className="w-6 h-6" />
           </div>
-          <h1 className="text-2xl font-bold font-sans tracking-tight text-white">
+          <h1 className="text-2xl font-bold font-sans tracking-tight text-text-main">
             {mode === 'login' ? 'Sign In to EduPlatform' : mode === 'signup' ? 'Create Your Account' : 'Reset Password'}
           </h1>
           <p className="text-gray-400 text-sm">
@@ -109,7 +113,7 @@ export default function AuthScreen() {
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
                   placeholder="Student Name"
-                  className="w-full bg-background-main border border-secondary rounded-xl pl-11 pr-4 py-2.5 text-white placeholder-gray-600 focus:outline-none focus:border-primary text-sm transition-colors"
+                  className="w-full bg-background-main border border-secondary rounded-xl pl-11 pr-4 py-2.5 text-text-main placeholder-gray-600 focus:outline-none focus:border-primary text-sm transition-colors"
                 />
               </div>
             </div>
@@ -125,7 +129,7 @@ export default function AuthScreen() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="student@example.com"
-                className="w-full bg-background-main border border-secondary rounded-xl pl-11 pr-4 py-2.5 text-white placeholder-gray-600 focus:outline-none focus:border-primary text-sm transition-colors"
+                className="w-full bg-background-main border border-secondary rounded-xl pl-11 pr-4 py-2.5 text-text-main placeholder-gray-600 focus:outline-none focus:border-primary text-sm transition-colors"
               />
             </div>
           </div>
@@ -152,7 +156,7 @@ export default function AuthScreen() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full bg-background-main border border-secondary rounded-xl pl-11 pr-4 py-2.5 text-white placeholder-gray-600 focus:outline-none focus:border-primary text-sm transition-colors"
+                  className="w-full bg-background-main border border-secondary rounded-xl pl-11 pr-4 py-2.5 text-text-main placeholder-gray-600 focus:outline-none focus:border-primary text-sm transition-colors"
                 />
               </div>
             </div>
