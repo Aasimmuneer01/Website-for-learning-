@@ -2,7 +2,15 @@ export interface User {
   uid: string;
   email: string;
   displayName: string;
-  role: 'user' | 'moderator' | 'admin' | 'superadmin';
+  createdAt?: any;
+  lastLogin?: any;
+  role: 'user' | 'moderator' | 'admin' | 'superadmin' | string;
+  isBanned?: boolean;
+  banReason?: string;
+  emailVerified?: boolean;
+  verificationRequired?: boolean;
+  deviceFingerprint?: string;
+  accountStatus?: 'active' | 'banned' | 'suspicious' | string;
 }
 
 export interface Resource {

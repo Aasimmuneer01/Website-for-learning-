@@ -1,51 +1,64 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Helper function to check if user is authenticated
     function isAuthenticated() {
       return request.auth != null;
     }
 
-    // Publicly readable content, authenticated users can write for now
+    function isAdmin() {
+      return request.auth != null && (
+        request.auth.token.email in ['admin@example.com', 'aasimmuneer349@gmail.com', 'admin@eduplatform.com'] ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'superadmin', 'moderator'])
+      );
+    }
+
+    match /users/{userId} {
+      allow read: if (request.auth != null && request.auth.uid == userId) || isAdmin();
+      allow create: if (request.auth != null && request.auth.uid == userId && (request.resource.data.role in ['user', 'student'] || request.auth.token.email in ['admin@example.com', 'aasimmuneer349@gmail.com', 'admin@eduplatform.com'])) || isAdmin();
+      allow update: if isAdmin() || (request.auth != null && request.auth.uid == userId && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'isBanned', 'banReason', 'accountStatus']));
+      allow delete: if isAdmin();
+    }
+
+    match /bannedFingerprints/{fp} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
     match /resources/{resource} {
       allow read: if true;
-      allow write: if isAuthenticated();
+      allow update: if isAdmin() || (request.auth != null && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewCount', 'downloadCount']));
+      allow create, delete: if isAdmin();
     }
 
     match /categories/{category} {
       allow read: if true;
-      allow write: if isAuthenticated();
+      allow write: if isAdmin();
     }
 
     match /classes/{classLevel} {
       allow read: if true;
-      allow write: if isAuthenticated();
+      allow write: if isAdmin();
     }
 
     match /boards/{board} {
       allow read: if true;
-      allow write: if isAuthenticated();
+      allow write: if isAdmin();
     }
 
     match /announcements/{announcement} {
       allow read: if true;
-      allow write: if isAuthenticated();
+      allow write: if isAdmin();
     }
 
     match /creatorInfo/{docId} {
       allow read: if true;
-      allow write: if isAuthenticated();
+      allow write: if isAdmin();
     }
 
     match /settings/{docId} {
       allow read: if true;
-      allow write: if isAuthenticated();
-    }
-
-    // User profile management
-    match /users/{userId} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null && request.auth.uid == userId;
+      allow write: if isAdmin();
     }
   }
 }

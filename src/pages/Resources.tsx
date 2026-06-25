@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, MouseEvent } from 'react';
 import { collection, getDocs, query, orderBy, doc, updateDoc, increment } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { Resource } from '../types';
@@ -36,7 +36,7 @@ export default function Resources() {
     fetchResources();
   }, []);
 
-  const handleView = async (e: React.MouseEvent, resource: Resource) => {
+  const handleView = async (e: MouseEvent, resource: Resource) => {
     e.preventDefault();
     const viewedKey = `viewed_${resource.id}`;
     const lastViewed = localStorage.getItem(viewedKey);
@@ -54,7 +54,7 @@ export default function Resources() {
     window.open(resource.pdfUrl, '_blank');
   };
 
-  const handleDownload = async (e: React.MouseEvent, resource: Resource) => {
+  const handleDownload = async (e: MouseEvent, resource: Resource) => {
     e.preventDefault();
     try {
       await updateDoc(doc(db, 'resources', resource.id), {
@@ -63,15 +63,7 @@ export default function Resources() {
     } catch (err) {
       console.error("Failed to increment download", err);
     }
-    
-    // Create a temporary link to trigger download safely without being blocked by popups
-    const link = document.createElement('a');
-    link.href = resource.pdfUrl;
-    link.download = `${resource.slug || 'download'}.pdf`;
-    link.target = '_blank';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    window.open(resource.pdfUrl, '_blank');
   };
 
   const filteredResources = useMemo(() => {

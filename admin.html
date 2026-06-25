@@ -141,6 +141,7 @@
               <a href="#" data-target="dashboard" class="nav-link active-nav flex items-center px-3 py-2 text-sm rounded-md hover:bg-[#111] text-gray-400 hover:text-white transition-colors"><i class="fas fa-layer-group w-5 text-center mr-2"></i> Overview</a>
               <a href="#" data-target="resources" class="nav-link flex items-center px-3 py-2 text-sm rounded-md hover:bg-[#111] text-gray-400 hover:text-white transition-colors"><i class="fas fa-file-alt w-5 text-center mr-2"></i> Resources</a>
               <a href="#" data-target="categories" class="nav-link flex items-center px-3 py-2 text-sm rounded-md hover:bg-[#111] text-gray-400 hover:text-white transition-colors"><i class="fas fa-folder w-5 text-center mr-2"></i> Categories</a>
+              <a href="#" data-target="users" class="nav-link flex items-center px-3 py-2 text-sm rounded-md hover:bg-[#111] text-gray-400 hover:text-white transition-colors"><i class="fas fa-users w-5 text-center mr-2"></i> Users</a>
               <a href="#" data-target="settings" class="nav-link flex items-center px-3 py-2 text-sm rounded-md hover:bg-[#111] text-gray-400 hover:text-white transition-colors"><i class="fas fa-cog w-5 text-center mr-2"></i> Settings</a>
           </nav>
           <div class="p-4 shrink-0 border-t border-[#333]">
@@ -186,6 +187,25 @@
                               <div class="v-card p-5">
                                   <h3 class="text-xs text-gray-400 font-medium uppercase tracking-wider mb-2">Total Users</h3>
                                   <p id="stat-users" class="text-3xl font-semibold text-white">0</p>
+                              </div>
+                          </div>
+                          <!-- Extra stats -->
+                          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                              <div class="v-card p-3 border-[#333]">
+                                  <p class="text-[10px] text-gray-500 uppercase font-bold">Active</p>
+                                  <p id="stat-active-users" class="text-lg font-semibold text-green-500">0</p>
+                              </div>
+                              <div class="v-card p-3 border-[#333]">
+                                  <p class="text-[10px] text-gray-500 uppercase font-bold">Banned</p>
+                                  <p id="stat-banned-users" class="text-lg font-semibold text-red-500">0</p>
+                              </div>
+                              <div class="v-card p-3 border-[#333]">
+                                  <p class="text-[10px] text-gray-500 uppercase font-bold">Unverified</p>
+                                  <p id="stat-unverified-users" class="text-lg font-semibold text-yellow-500">0</p>
+                              </div>
+                              <div class="v-card p-3 border-[#333]">
+                                  <p class="text-[10px] text-gray-500 uppercase font-bold">Suspicious</p>
+                                  <p id="stat-suspicious-users" class="text-lg font-semibold text-orange-500">0</p>
                               </div>
                           </div>
                       </div>
@@ -287,6 +307,47 @@
                   </section>
 
                   <!-- SETTINGS -->
+                  <!-- USERS -->
+                  <section id="view-users" class="view-section hidden space-y-6">
+                      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                          <div>
+                              <h1 class="text-2xl font-semibold tracking-tight text-white">User Management</h1>
+                              <p class="text-xs text-gray-500 mt-1">Review accounts and manage access permissions.</p>
+                          </div>
+                          <div class="relative max-w-sm w-full">
+                              <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-xs"></i>
+                              <input type="text" id="search-users" class="v-input pl-9" placeholder="Search by email, name or fingerprint...">
+                          </div>
+                      </div>
+
+                      <div class="flex flex-wrap items-center gap-2">
+                          <button data-filter="all" class="user-filter-btn px-3 py-1.5 rounded-md text-xs font-medium bg-[#111] text-white border border-[#333]">All</button>
+                          <button data-filter="active" class="user-filter-btn px-3 py-1.5 rounded-md text-xs font-medium text-gray-400 hover:text-white border border-transparent hover:border-[#333]">Active</button>
+                          <button data-filter="banned" class="user-filter-btn px-3 py-1.5 rounded-md text-xs font-medium text-gray-400 hover:text-white border border-transparent hover:border-[#333]">Banned</button>
+                          <button data-filter="verified" class="user-filter-btn px-3 py-1.5 rounded-md text-xs font-medium text-gray-400 hover:text-white border border-transparent hover:border-[#333]">Verified</button>
+                          <button data-filter="unverified" class="user-filter-btn px-3 py-1.5 rounded-md text-xs font-medium text-gray-400 hover:text-white border border-transparent hover:border-[#333]">Unverified</button>
+                          <button data-filter="suspicious" class="user-filter-btn px-3 py-1.5 rounded-md text-xs font-medium text-gray-400 hover:text-white border border-transparent hover:border-[#333]">Suspicious</button>
+                      </div>
+
+                      <div class="v-card overflow-hidden">
+                          <div class="overflow-x-auto">
+                              <table class="w-full text-left text-sm whitespace-nowrap">
+                                  <thead class="bg-[#0a0a0a] text-gray-400 border-b border-[#333]">
+                                      <tr>
+                                          <th class="px-5 py-3 font-medium">User</th>
+                                          <th class="px-5 py-3 font-medium">Status</th>
+                                          <th class="px-5 py-3 font-medium">Verification</th>
+                                          <th class="px-5 py-3 font-medium">Joined</th>
+                                          <th class="px-5 py-3 font-medium text-right">Actions</th>
+                                      </tr>
+                                  </thead>
+                                  <tbody id="users-tbody" class="divide-y divide-[#333]"></tbody>
+                              </table>
+                          </div>
+                          <div id="users-empty" class="hidden text-center py-20 text-gray-500">No users found</div>
+                      </div>
+                  </section>
+
                   <section id="view-settings" class="view-section hidden space-y-8">
                        <div>
                            <h1 class="text-2xl font-semibold tracking-tight text-white mb-6">Settings</h1>
@@ -399,6 +460,42 @@
       </div>
   </div>
 
+  <!-- User Detail Modal -->
+  <div id="modal-user" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+      <div class="v-card w-full max-w-lg overflow-hidden flex flex-col">
+          <div class="v-card-header flex justify-between items-center">
+              <h3 class="font-medium text-lg text-white">User Details</h3>
+              <button class="btn-cancel-modal text-gray-400 hover:text-white transition-colors"><i class="fas fa-times pointer-events-none"></i></button>
+          </div>
+          <div id="user-details-content" class="v-card-body space-y-6">
+              <!-- Content injected by JS -->
+          </div>
+          <div class="p-4 border-t border-[#333] flex justify-end gap-3 bg-[#0a0a0a]">
+              <button class="btn-cancel-modal v-btn-secondary">Close</button>
+          </div>
+      </div>
+  </div>
+
+  <!-- Ban Modal -->
+  <div id="modal-ban" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+      <div class="v-card w-full max-w-md">
+          <div class="v-card-header">
+              <h3 class="font-medium text-lg text-red-500">Ban User</h3>
+          </div>
+          <div class="v-card-body space-y-4">
+              <p class="text-sm text-gray-400">Please provide a reason for banning <span id="ban-user-email" class="text-white font-medium"></span>.</p>
+              <div>
+                  <label class="v-label">Ban Reason</label>
+                  <textarea id="ban-reason-input" class="v-input" rows="3" placeholder="Violation of terms..."></textarea>
+              </div>
+          </div>
+          <div class="p-4 border-t border-[#333] flex justify-end gap-3 bg-[#0a0a0a]">
+              <button class="btn-cancel-modal v-btn-secondary">Cancel</button>
+              <button id="confirm-ban-btn" class="v-btn-danger">Confirm Ban</button>
+          </div>
+      </div>
+  </div>
+
   <!-- Delete Modal -->
   <div id="modal-delete" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
       <div class="v-card w-full max-w-sm text-center p-6">
@@ -416,7 +513,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc, updateDoc, onSnapshot, serverTimestamp, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getFirestore, collection, getDocs, getDoc, doc, setDoc, deleteDoc, updateDoc, onSnapshot, serverTimestamp, addDoc, deleteField } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
     import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
     const firebaseConfig = {
@@ -436,6 +533,8 @@
         global: { siteName: 'Study Materials Pro', logoUrl: '' },
         resources: [],
         categories: [],
+        users: [],
+        usersCount: 0,
         homepage: { title: 'Educational Resources', subtitle: 'Discover and share premium study materials, notes, previous year papers, and assignments designed to help you excel.', bgImage: 'https://images.unsplash.com/photo-1513258496099-48168024aec0?q=80&w=800&auto=format&fit=crop' },
         creator: { name: 'Aasim Muneer', email: 'aasimmuneer349@gmail.com', bio: 'Student and developer creating free resources.', image: 'https://placehold.co/400x400/1e293b/0ea5e9?text=Creator' },
         socials: { enabled: true, youtube: '', instagram: '', telegram: '', facebook: '' },
@@ -486,11 +585,31 @@
         }
     }
 
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, async (user) => {
         if (user) {
-            state.isLoggedIn = true;
-            checkAuth();
-            initListeners();
+            try {
+                const userDoc = await getDoc(doc(db, 'users', user.uid));
+                const isAdminEmail = ['admin@example.com', 'aasimmuneer349@gmail.com', 'admin@eduplatform.com'].includes(user.email);
+                const role = userDoc.exists() ? userDoc.data().role : null;
+                const isAdminRole = ['admin', 'superadmin', 'moderator'].includes(role);
+
+                if (isAdminEmail || isAdminRole) {
+                    state.isLoggedIn = true;
+                    checkAuth();
+                    initListeners();
+                } else {
+                    showToast("Access Denied: Admin privileges required.", "error");
+                    signOut(auth);
+                    state.isLoggedIn = false;
+                    checkAuth();
+                }
+            } catch (err) {
+                console.error("Auth check failed:", err);
+                showToast("Authentication error. Please try again.", "error");
+                signOut(auth);
+                state.isLoggedIn = false;
+                checkAuth();
+            }
         } else {
             state.isLoggedIn = false;
             checkAuth();
@@ -583,7 +702,8 @@
         
         try {
             unsubscribes.push(onSnapshot(collection(db, 'users'), (snap) => {
-                state.usersCount = snap.size;
+                state.users = snap.docs.map(d => ({id: d.id, uid: d.id, ...d.data()}));
+                state.usersCount = state.users.length;
                 updateUI();
             }, (error) => {
                 console.warn("Could not fetch users (might be permission issue):", error);
@@ -618,11 +738,22 @@
         if(document.getElementById('stat-categories')) document.getElementById('stat-categories').textContent = state.categories.length;
         if (document.getElementById('stat-users')) document.getElementById('stat-users').textContent = state.usersCount || 0;
 
+        // Detailed User Stats
+        const activeCount = state.users.filter(u => !u.isBanned).length;
+        const bannedCount = state.users.filter(u => u.isBanned).length;
+        const unverifiedCount = state.users.filter(u => u.verificationRequired && !u.emailVerified).length;
+        const suspiciousCount = state.users.filter(u => u.accountStatus === 'suspicious').length;
+        
+        if (document.getElementById('stat-active-users')) document.getElementById('stat-active-users').textContent = activeCount;
+        if (document.getElementById('stat-banned-users')) document.getElementById('stat-banned-users').textContent = bannedCount;
+        if (document.getElementById('stat-unverified-users')) document.getElementById('stat-unverified-users').textContent = unverifiedCount;
+        if (document.getElementById('stat-suspicious-users')) document.getElementById('stat-suspicious-users').textContent = suspiciousCount;
+
         renderRecentResources();
         renderAnalyticsTables();
         renderResourcesTable();
         renderCategoriesList();
-        // We don't indiscriminately populate forms every update UI anymore
+        renderUsersTable();
         populateCategorySelects();
     }
 
@@ -939,6 +1070,233 @@
     }
 
     if(document.getElementById('search-resource')) document.getElementById('search-resource').addEventListener('input', e => renderResourcesTable(e.target.value));
+
+    let userSearchTerm = '';
+    let userFilter = 'all';
+
+    function renderUsersTable() {
+        const tbody = document.getElementById('users-tbody');
+        const empty = document.getElementById('users-empty');
+        if(!tbody) return;
+
+        let filtered = state.users;
+        
+        if (userFilter !== 'all') {
+            if (userFilter === 'active') filtered = filtered.filter(u => !u.isBanned);
+            if (userFilter === 'banned') filtered = filtered.filter(u => u.isBanned);
+            if (userFilter === 'verified') filtered = filtered.filter(u => u.emailVerified);
+            if (userFilter === 'unverified') filtered = filtered.filter(u => u.verificationRequired && !u.emailVerified);
+            if (userFilter === 'suspicious') filtered = filtered.filter(u => u.accountStatus === 'suspicious');
+        }
+
+        if (userSearchTerm) {
+            const s = userSearchTerm.toLowerCase();
+            filtered = filtered.filter(u => 
+                (u.email||'').toLowerCase().includes(s) || 
+                (u.displayName||'').toLowerCase().includes(s) ||
+                (u.deviceFingerprint||'').toLowerCase().includes(s)
+            );
+        }
+
+        if (filtered.length === 0) {
+            tbody.innerHTML = '';
+            empty.classList.remove('hidden'); return;
+        }
+        empty.classList.add('hidden');
+
+        tbody.innerHTML = filtered.map(u => {
+            const joinedDate = u.createdAt ? (u.createdAt.toDate ? u.createdAt.toDate().toLocaleDateString() : new Date(u.createdAt).toLocaleDateString()) : '-';
+            const isBanned = u.isBanned;
+            const isVerified = u.emailVerified;
+            const isSuspicious = u.accountStatus === 'suspicious';
+            const isUnverified = u.verificationRequired && !isVerified;
+
+            return `
+                <tr class="hover:bg-white/5 transition-colors group border-b border-[#333]">
+                    <td class="px-5 py-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center text-xs font-bold text-gray-400">
+                                ${u.displayName ? u.displayName.charAt(0).toUpperCase() : u.email.charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                                <p class="font-medium text-white text-sm">${u.displayName || 'Unnamed User'}</p>
+                                <p class="text-[10px] text-gray-500 font-mono">${u.email}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-5 py-4">
+                        ${isBanned ? 
+                            `<span class="bg-red-500/10 text-red-500 border border-red-500/20 px-2 py-0.5 rounded text-[10px] font-bold">BANNED</span>` : 
+                            (isSuspicious ? 
+                                `<span class="bg-orange-500/10 text-orange-500 border border-orange-500/20 px-2 py-0.5 rounded text-[10px] font-bold">SUSPICIOUS</span>` :
+                                `<span class="bg-green-500/10 text-green-500 border border-green-500/20 px-2 py-0.5 rounded text-[10px] font-bold">ACTIVE</span>`)
+                        }
+                    </td>
+                    <td class="px-5 py-4">
+                        ${isVerified ? 
+                            `<span class="text-green-500 flex items-center gap-1 text-xs"><i class="fas fa-check-circle"></i> Verified</span>` : 
+                            (isUnverified ? 
+                                `<span class="text-yellow-500 flex items-center gap-1 text-xs"><i class="fas fa-exclamation-triangle"></i> Required</span>` :
+                                `<span class="text-gray-500 flex items-center gap-1 text-xs"><i class="fas fa-circle-notch"></i> Pending</span>`)
+                        }
+                    </td>
+                    <td class="px-5 py-4 text-xs text-gray-400">
+                        ${joinedDate}
+                    </td>
+                    <td class="px-5 py-4 text-right space-x-1">
+                        <button class="action-user-details p-2 hover:text-white text-gray-500 transition-colors" data-uid="${u.uid}" title="View Details"><i class="fas fa-info-circle"></i></button>
+                        ${isBanned ? 
+                            `<button class="action-user-unban p-2 hover:text-green-500 text-gray-500 transition-colors" data-uid="${u.uid}" title="Unban User"><i class="fas fa-user-check"></i></button>` :
+                            `<button class="action-user-ban p-2 hover:text-red-500 text-gray-500 transition-colors" data-uid="${u.uid}" title="Ban User"><i class="fas fa-user-slash"></i></button>`
+                        }
+                        ${!isVerified ? `<button class="action-user-verify p-2 hover:text-blue-500 text-gray-500 transition-colors" data-uid="${u.uid}" title="Force Verification"><i class="fas fa-envelope-open-text"></i></button>` : ''}
+                        <button class="action-user-delete p-2 hover:text-red-600 text-gray-500 transition-colors" data-uid="${u.uid}" title="Delete Record"><i class="fas fa-trash-alt"></i></button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    if(document.getElementById('search-users')) document.getElementById('search-users').addEventListener('input', e => {
+        userSearchTerm = e.target.value;
+        renderUsersTable();
+    });
+
+    document.querySelectorAll('.user-filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.user-filter-btn').forEach(b => {
+                b.classList.remove('bg-[#111]', 'text-white', 'border-[#333]');
+                b.classList.add('text-gray-400', 'border-transparent');
+            });
+            btn.classList.add('bg-[#111]', 'text-white', 'border-[#333]');
+            btn.classList.remove('text-gray-400', 'border-transparent');
+            userFilter = btn.getAttribute('data-filter');
+            renderUsersTable();
+        });
+    });
+
+    let selectedUserForAction = null;
+    const modalUser = document.getElementById('modal-user');
+    const modalBan = document.getElementById('modal-ban');
+    const userDetailsContent = document.getElementById('user-details-content');
+
+    function showUserDetails(uid) {
+        const u = state.users.find(user => user.uid === uid);
+        if(!u) return;
+        
+        const joinedDate = u.createdAt ? (u.createdAt.toDate ? u.createdAt.toDate().toLocaleString() : new Date(u.createdAt).toLocaleString()) : 'Unknown';
+        const lastLogin = u.lastLogin ? (u.lastLogin.toDate ? u.lastLogin.toDate().toLocaleString() : new Date(u.lastLogin).toLocaleString()) : 'Never';
+
+        userDetailsContent.innerHTML = `
+            <div class="flex items-center gap-4 mb-6">
+                <div class="w-16 h-16 rounded-full bg-blue-500/10 text-blue-500 flex items-center justify-center text-2xl font-bold border border-blue-500/20">
+                    ${u.displayName ? u.displayName.charAt(0).toUpperCase() : u.email.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                    <h4 class="text-xl font-bold text-white">${u.displayName || 'Unnamed User'}</h4>
+                    <p class="text-gray-400">${u.email}</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-y-4 gap-x-8 text-sm">
+                <div><p class="text-gray-500 text-[10px] uppercase font-bold mb-1">Role</p><p class="text-white">${u.role || 'User'}</p></div>
+                <div><p class="text-gray-500 text-[10px] uppercase font-bold mb-1">Status</p><p class="${u.isBanned ? 'text-red-500' : 'text-green-500'} font-bold">${u.accountStatus || (u.isBanned ? 'Banned' : 'Active')}</p></div>
+                <div><p class="text-gray-500 text-[10px] uppercase font-bold mb-1">UID</p><p class="text-gray-300 font-mono text-[10px] break-all">${u.uid}</p></div>
+                <div><p class="text-gray-500 text-[10px] uppercase font-bold mb-1">Verification</p><p class="${u.emailVerified ? 'text-green-500' : 'text-yellow-500'}">${u.emailVerified ? 'Verified' : (u.verificationRequired ? 'Required (Blocked)' : 'Not Verified')}</p></div>
+                <div><p class="text-gray-500 text-[10px] uppercase font-bold mb-1">Joined</p><p class="text-gray-300">${joinedDate}</p></div>
+                <div><p class="text-gray-500 text-[10px] uppercase font-bold mb-1">Last Login</p><p class="text-gray-300">${lastLogin}</p></div>
+                <div class="col-span-2"><p class="text-gray-500 text-[10px] uppercase font-bold mb-1">Fingerprint</p><p class="text-gray-400 font-mono text-[10px] break-all p-2 bg-[#0a0a0a] rounded border border-[#333]">${u.deviceFingerprint || 'None'}</p></div>
+                ${u.isBanned ? `<div class="col-span-2"><p class="text-red-500/50 text-[10px] uppercase font-bold mb-1">Ban Reason</p><p class="text-red-400 p-3 bg-red-500/5 border border-red-500/20 rounded italic">"${u.banReason || 'No reason specified'}"</p></div>` : ''}
+            </div>
+        `;
+        modalUser.classList.remove('hidden');
+    }
+
+    async function handleUnban(uid) {
+        const u = state.users.find(user => user.uid === uid);
+        if(!u || !confirm(`Unban ${u.email}?`)) return;
+        try {
+            await updateDoc(doc(db, 'users', uid), {
+                isBanned: false,
+                accountStatus: 'active',
+                banReason: deleteField()
+            });
+            // If we tracked fingerprints, we might want to keep them banned? 
+            // The spec says "Banned users are added to bannedFingerprints". 
+            // Unbanning usually unbans the specific user.
+            showToast('User unbanned');
+        } catch(err) { showToast(err.message, 'error'); }
+    }
+
+    async function handleForceVerify(uid) {
+        const u = state.users.find(user => user.uid === uid);
+        if(!u || !confirm(`Force verification for ${u.email}? This will block their access until verified.`)) return;
+        try {
+            await updateDoc(doc(db, 'users', uid), {
+                verificationRequired: true
+            });
+            showToast('Verification required for user');
+        } catch(err) { showToast(err.message, 'error'); }
+    }
+
+    async function handleUserDelete(uid) {
+        const u = state.users.find(user => user.uid === uid);
+        if(!u || !confirm(`Permanently delete user record for ${u.email}? This only deletes their database profile, not their Auth account.`)) return;
+        try {
+            await deleteDoc(doc(db, 'users', uid));
+            showToast('User record deleted');
+        } catch(err) { showToast(err.message, 'error'); }
+    }
+
+    document.addEventListener('click', (e) => {
+        const target = e.target.closest('button');
+        if(!target) return;
+        
+        const uid = target.getAttribute('data-uid');
+        if(!uid) return;
+
+        if(target.classList.contains('action-user-details')) showUserDetails(uid);
+        if(target.classList.contains('action-user-unban')) handleUnban(uid);
+        if(target.classList.contains('action-user-verify')) handleForceVerify(uid);
+        if(target.classList.contains('action-user-delete')) handleUserDelete(uid);
+        if(target.classList.contains('action-user-ban')) {
+            const u = state.users.find(user => user.uid === uid);
+            selectedUserForAction = u;
+            document.getElementById('ban-user-email').textContent = u.email;
+            document.getElementById('ban-reason-input').value = '';
+            modalBan.classList.remove('hidden');
+        }
+    });
+
+    document.getElementById('confirm-ban-btn').addEventListener('click', async () => {
+        if(!selectedUserForAction) return;
+        const reason = document.getElementById('ban-reason-input').value.trim() || 'Violation of terms';
+        try {
+            await updateDoc(doc(db, 'users', selectedUserForAction.uid), {
+                isBanned: true,
+                accountStatus: 'banned',
+                banReason: reason
+            });
+            
+            // Add fingerprint to banned collection
+            if (selectedUserForAction.deviceFingerprint) {
+                await setDoc(doc(db, 'bannedFingerprints', selectedUserForAction.deviceFingerprint), {
+                    bannedAt: serverTimestamp(),
+                    email: selectedUserForAction.email,
+                    reason: reason
+                });
+            }
+            
+            modalBan.classList.add('hidden');
+            showToast('User banned and fingerprint blacklisted');
+        } catch(err) { showToast(err.message, 'error'); }
+    });
+
+    document.querySelectorAll('.btn-cancel-modal').forEach(btn => {
+        btn.addEventListener('click', () => {
+            modalUser.classList.add('hidden');
+            modalBan.classList.add('hidden');
+        });
+    });
 
     function renderCategoriesList() {
         const list = document.getElementById('categories-list');
