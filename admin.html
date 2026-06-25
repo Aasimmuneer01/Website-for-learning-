@@ -3,1321 +3,1465 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard</title>
-    <!-- Inter Font -->
+    <title>Admin Panel | Study Materials Pro</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        .hidden { display: none !important; }
-        .flex { display: flex !important; }
-        .view-section { display: none; }
-        .view-section.active { display: block; }
-        .toast { padding: 1rem; border-radius: 6px; margin-top: 0.5rem; color: white; background: #333; animation: fadein 0.3s; border: 1px solid #444; font-size: 0.875rem; }
-        .toast.success { background-color: #000; border-color: #333; color: #ededed; }
-        .toast.error { background-color: #5c0000; border-color: #e5484d; color: #fff; }
-        @keyframes fadein { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        #app-layout { height: 100vh; height: 100dvh; }
-
-        /* Vercel-like form controls */
-        .v-input {
-            width: 100%;
-            background-color: transparent;
-            border: 1px solid #333;
-            color: #ededed;
-            padding: 0.5rem 0.75rem;
-            border-radius: 6px;
-            font-size: 0.875rem;
-            outline: none;
-            transition: border-color 0.15s ease;
+        :root {
+            --sidebar-width: 260px;
         }
-        .v-input:focus {
-            border-color: #888;
-        }
+        body { font-family: 'Inter', sans-serif; background-color: #000; color: #fff; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
         
-        .v-btn-primary {
-            background-color: #ededed;
-            color: #000;
-            font-weight: 500;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            font-size: 0.875rem;
-            transition: background-color 0.15s ease;
-            border: 1px solid transparent;
-        }
-        .v-btn-primary:hover {
-            background-color: #fff;
-        }
-        
-        .v-btn-secondary {
-            background-color: transparent;
-            color: #ededed;
-            font-weight: 500;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            font-size: 0.875rem;
-            transition: background-color 0.15s ease, border-color 0.15s ease;
-            border: 1px solid #333;
-        }
-        .v-btn-secondary:hover {
-            background-color: #111;
-            border-color: #444;
-        }
-
-        .v-btn-danger {
-            background-color: #e5484d;
-            color: #fff;
-            font-weight: 500;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            font-size: 0.875rem;
-            transition: background-color 0.15s ease;
-            border: 1px solid transparent;
-        }
-        .v-btn-danger:hover {
-            background-color: #ff4d4f;
-        }
-
-        .v-label {
-            display: block;
-            font-size: 0.875rem;
-            color: #a1a1aa;
-            margin-bottom: 0.375rem;
-            font-weight: 500;
-        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #444; }
 
         .v-card {
+            background-color: #0a0a0a;
+            border: 1px solid #222;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .v-input {
             background-color: #000;
             border: 1px solid #333;
             border-radius: 8px;
+            color: #fff;
+            padding: 0.625rem 0.875rem;
+            font-size: 0.875rem;
+            width: 100%;
+            transition: all 0.2s ease;
+        }
+        .v-input:focus {
+            border-color: #666;
+            outline: none;
+            box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
+        }
+        .v-btn-primary {
+            background-color: #fff;
+            color: #000;
+            font-weight: 500;
+            padding: 0.625rem 1.25rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            transition: opacity 0.2s ease;
+        }
+        .v-btn-primary:hover { opacity: 0.9; }
+        .v-btn-secondary {
+            background-color: #111;
+            color: #fff;
+            border: 1px solid #333;
+            font-weight: 500;
+            padding: 0.625rem 1.25rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+        .v-btn-secondary:hover { background-color: #1a1a1a; border-color: #444; }
+        .v-btn-danger {
+            background-color: #ff4d4d;
+            color: #fff;
+            font-weight: 500;
+            padding: 0.625rem 1.25rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+        }
+        .nav-link.active {
+            background-color: #1a1a1a;
+            color: #fff;
+        }
+        .view-section { display: none; }
+        .view-section.active { display: block; }
+
+        .toast {
+            animation: slideIn 0.3s ease-out;
+            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.3);
+        }
+        @keyframes slideIn {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
 
-        .v-card-header {
-            padding: 1.25rem 1.5rem;
-            border-bottom: 1px solid #333;
-        }
-        .v-card-body {
-            padding: 1.5rem;
+        /* Modal specific */
+        .modal-overlay {
+            background-color: rgba(0,0,0,0.8);
+            backdrop-filter: blur(4px);
         }
     </style>
 </head>
-<body class="bg-black text-[#ededed] font-sans antialiased">
-  <div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2"></div>
-  
-  <div id="login-view" class="active flex items-center justify-center min-h-screen bg-black p-4">
-      <form id="login-form" class="v-card w-full max-w-sm">
-          <div class="v-card-header text-center border-b-0 pb-0">
-              <h2 class="text-xl font-semibold text-white">Admin Login</h2>
-              <p class="text-sm text-gray-400 mt-2">Enter your credentials to continue</p>
-          </div>
-          <div class="v-card-body space-y-4">
-              <div>
-                  <label class="v-label">Email</label>
-                  <input type="email" id="login-user" class="v-input" placeholder="admin@example.com" required>
-              </div>
-              <div>
-                  <label class="v-label">Password</label>
-                  <input type="password" id="login-pass" class="v-input" required>
-              </div>
-              <button type="submit" class="v-btn-primary w-full mt-4">Log in</button>
-          </div>
-      </form>
-  </div>
-
-  <div id="app-layout" class="hidden flex h-screen overflow-hidden">
-      <!-- Sidebar -->
-      <aside id="sidebar" class="fixed inset-y-0 left-0 bg-black w-64 transform -translate-x-full md:translate-x-0 transition-transform duration-200 z-30 flex flex-col border-r border-[#333]">
-          <div class="flex items-center justify-between px-6 py-4 shrink-0 border-b border-[#333]">
-              <div class="flex items-center gap-2">
-                 <div class="w-6 h-6 bg-white rounded-full flex items-center justify-center"><i class="fas fa-play text-black text-[10px] ml-0.5"></i></div>
-                 <h1 id="sidebar-site-name" class="font-semibold text-sm tracking-tight text-white mb-0 pb-0 mt-0 pt-0">Admin</h1>
-              </div>
-              <button id="close-sidebar" class="md:hidden text-gray-500 hover:text-white"><i class="fas fa-times text-lg"></i></button>
-          </div>
-          <nav class="px-3 py-4 space-y-1 overflow-y-auto flex-1">
-              <a href="#" data-target="dashboard" class="nav-link active-nav flex items-center px-3 py-2 text-sm rounded-md hover:bg-[#111] text-gray-400 hover:text-white transition-colors"><i class="fas fa-layer-group w-5 text-center mr-2"></i> Overview</a>
-              <a href="#" data-target="resources" class="nav-link flex items-center px-3 py-2 text-sm rounded-md hover:bg-[#111] text-gray-400 hover:text-white transition-colors"><i class="fas fa-file-alt w-5 text-center mr-2"></i> Resources</a>
-              <a href="#" data-target="categories" class="nav-link flex items-center px-3 py-2 text-sm rounded-md hover:bg-[#111] text-gray-400 hover:text-white transition-colors"><i class="fas fa-folder w-5 text-center mr-2"></i> Categories</a>
-              <a href="#" data-target="users" class="nav-link flex items-center px-3 py-2 text-sm rounded-md hover:bg-[#111] text-gray-400 hover:text-white transition-colors"><i class="fas fa-users w-5 text-center mr-2"></i> Users</a>
-              <a href="#" data-target="settings" class="nav-link flex items-center px-3 py-2 text-sm rounded-md hover:bg-[#111] text-gray-400 hover:text-white transition-colors"><i class="fas fa-cog w-5 text-center mr-2"></i> Settings</a>
-          </nav>
-          <div class="p-4 shrink-0 border-t border-[#333]">
-               <button id="logout-btn" class="w-full flex items-center px-3 py-2 text-sm rounded-md text-red-500 hover:bg-[#111] transition-colors"><i class="fas fa-sign-out-alt w-5 text-center mr-2"></i> Log Out</button>
-          </div>
-      </aside>
-      
-      <div id="sidebar-overlay" class="fixed inset-0 bg-black/60 hidden z-20"></div>
-
-      <!-- Main Content -->
-      <main class="flex-1 flex flex-col h-screen md:ml-64 relative min-w-0 bg-[#000]">
-          <header class="bg-black border-b border-[#333] px-6 py-4 flex justify-between items-center z-10 shrink-0">
-             <div class="flex items-center gap-4">
-                 <button id="toggle-sidebar" class="md:hidden text-gray-400 hover:text-white transition-colors"><i class="fas fa-bars"></i></button>
-                 <h2 id="topbar-title" class="text-sm font-medium text-gray-200">Overview</h2>
-             </div>
-             <div class="flex items-center gap-4">
-                 <!-- Theme toggle is obsolete since we are forcing dark per instructions, but kept functionally alive if needed, simply disguised or we just hide the icon as we default to dark and no neon colors. -->
-                 <button id="theme-toggle" class="text-gray-400 hover:text-white transition-colors hidden"><i class="fas fa-moon text-sm"></i></button>
-                 <img id="topbar-avatar" src="https://placehold.co/100" class="w-8 h-8 rounded-full border border-[#333] object-cover">
-             </div>
-          </header>
-
-          <div class="flex-1 overflow-x-hidden overflow-y-auto w-full">
-              <div class="max-w-6xl mx-auto pb-12 p-6 md:p-8">
-                  <!-- DASHBOARD -->
-                  <section id="view-dashboard" class="view-section active space-y-8">
-                      <div>
-                          <h1 class="text-2xl font-semibold tracking-tight text-white mb-6">Dashboard</h1>
-                          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                              <div class="v-card p-5">
-                                  <h3 class="text-xs text-gray-400 font-medium uppercase tracking-wider mb-2">Total Resources</h3>
-                                  <p id="stat-resources" class="text-3xl font-semibold text-white">0</p>
-                              </div>
-                              <div class="v-card p-5">
-                                  <h3 class="text-xs text-gray-400 font-medium uppercase tracking-wider mb-2">Downloads</h3>
-                                  <p id="stat-downloads" class="text-3xl font-semibold text-white">0</p>
-                              </div>
-                              <div class="v-card p-5">
-                                  <h3 class="text-xs text-gray-400 font-medium uppercase tracking-wider mb-2">Total Views</h3>
-                                  <p id="stat-views" class="text-3xl font-semibold text-white">0</p>
-                              </div>
-                              <div class="v-card p-5">
-                                  <h3 class="text-xs text-gray-400 font-medium uppercase tracking-wider mb-2">Total Users</h3>
-                                  <p id="stat-users" class="text-3xl font-semibold text-white">0</p>
-                              </div>
-                          </div>
-                          <!-- Extra stats -->
-                          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
-                              <div class="v-card p-3 border-[#333]">
-                                  <p class="text-[10px] text-gray-500 uppercase font-bold">Active</p>
-                                  <p id="stat-active-users" class="text-lg font-semibold text-green-500">0</p>
-                              </div>
-                              <div class="v-card p-3 border-[#333]">
-                                  <p class="text-[10px] text-gray-500 uppercase font-bold">Banned</p>
-                                  <p id="stat-banned-users" class="text-lg font-semibold text-red-500">0</p>
-                              </div>
-                              <div class="v-card p-3 border-[#333]">
-                                  <p class="text-[10px] text-gray-500 uppercase font-bold">Unverified</p>
-                                  <p id="stat-unverified-users" class="text-lg font-semibold text-yellow-500">0</p>
-                              </div>
-                              <div class="v-card p-3 border-[#333]">
-                                  <p class="text-[10px] text-gray-500 uppercase font-bold">Suspicious</p>
-                                  <p id="stat-suspicious-users" class="text-lg font-semibold text-orange-500">0</p>
-                              </div>
-                          </div>
-                      </div>
-
-                      <div>
-                          <h2 class="text-lg font-semibold text-white mb-4">Recent Uploads</h2>
-                          <div class="v-card overflow-hidden">
-                              <div class="overflow-x-auto">
-                                  <table class="w-full text-left text-sm whitespace-nowrap">
-                                      <thead class="bg-[#0a0a0a] text-gray-400 border-b border-[#333]">
-                                          <tr>
-                                              <th class="px-5 py-3 font-medium">Resource</th>
-                                              <th class="px-5 py-3 font-medium">Category</th>
-                                              <th class="px-5 py-3 font-medium text-right">Actions</th>
-                                          </tr>
-                                      </thead>
-                                      <tbody id="recent-resources-tbody" class="divide-y divide-[#333]"></tbody>
-                                  </table>
-                              </div>
-                              <div id="recent-empty" class="hidden text-center py-10 text-gray-500 text-sm">No resources found</div>
-                          </div>
-                      </div>
-                  
-                      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
-                          <div>
-                              <h2 class="text-lg font-semibold text-white mb-4">Most Viewed Resources</h2>
-                              <div class="v-card overflow-hidden">
-                                  <div class="overflow-x-auto">
-                                      <table class="w-full text-left text-sm whitespace-nowrap">
-                                          <thead class="bg-[#0a0a0a] text-gray-400 border-b border-[#333]">
-                                              <tr>
-                                                  <th class="px-5 py-3 font-medium">Resource</th>
-                                                  <th class="px-5 py-3 font-medium text-right">Views</th>
-                                              </tr>
-                                          </thead>
-                                          <tbody id="most-viewed-tbody" class="divide-y divide-[#333]"></tbody>
-                                      </table>
-                                  </div>
-                              </div>
-                          </div>
-                          <div>
-                              <h2 class="text-lg font-semibold text-white mb-4">Most Downloaded Resources</h2>
-                              <div class="v-card overflow-hidden">
-                                  <div class="overflow-x-auto">
-                                      <table class="w-full text-left text-sm whitespace-nowrap">
-                                          <thead class="bg-[#0a0a0a] text-gray-400 border-b border-[#333]">
-                                              <tr>
-                                                  <th class="px-5 py-3 font-medium">Resource</th>
-                                                  <th class="px-5 py-3 font-medium text-right">Downloads</th>
-                                              </tr>
-                                          </thead>
-                                          <tbody id="most-downloaded-tbody" class="divide-y divide-[#333]"></tbody>
-                                      </table>
-                                  </div>
-                              </div>
-                          </div>
-                      </div>
-</section>
-
-                  <!-- RESOURCES -->
-                  <section id="view-resources" class="view-section hidden space-y-6">
-                      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-                          <h1 class="text-2xl font-semibold tracking-tight text-white">Resources</h1>
-                          <div class="flex items-center gap-3 w-full sm:w-auto">
-                              <div class="relative w-full sm:w-64">
-                                  <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm"></i>
-                                  <input type="text" id="search-resource" placeholder="Search..." class="v-input pl-9">
-                              </div>
-                              <button id="btn-add-resource" class="v-btn-primary whitespace-nowrap"><i class="fas fa-plus mr-1"></i> Add Resource</button>
-                          </div>
-                      </div>
-
-                      <div class="v-card overflow-hidden">
-                          <div class="overflow-x-auto">
-                              <table class="w-full text-left text-sm whitespace-nowrap lg:whitespace-normal">
-                                  <thead class="bg-[#0a0a0a] text-gray-400 border-b border-[#333]">
-                                      <tr>
-                                          <th class="px-5 py-3 font-medium w-full">Resource</th>
-                                          <th class="px-5 py-3 font-medium min-w-[120px]">Category</th>
-                                          <th class="px-5 py-3 font-medium text-right min-w-[100px]">Actions</th>
-                                      </tr>
-                                  </thead>
-                                  <tbody id="resources-tbody" class="divide-y divide-[#333] align-middle"></tbody>
-                              </table>
-                          </div>
-                          <div id="resources-empty" class="hidden py-12 text-center text-gray-500 text-sm">No matching resources</div>
-                      </div>
-                  </section>
-
-                  <!-- CATEGORIES -->
-                  <section id="view-categories" class="view-section hidden space-y-6">
-                       <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-                           <h1 class="text-2xl font-semibold tracking-tight text-white">Categories</h1>
-                           <button id="btn-add-category" class="v-btn-primary"><i class="fas fa-plus mr-1"></i> Add Category</button>
-                       </div>
-                       
-                       <div id="categories-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"></div>
-                       <div id="categories-empty" class="hidden p-12 text-center text-gray-500 v-card text-sm">No categories defined</div>
-                  </section>
-
-                  <!-- SETTINGS -->
-                  <!-- USERS -->
-                  <section id="view-users" class="view-section hidden space-y-6">
-                      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                          <div>
-                              <h1 class="text-2xl font-semibold tracking-tight text-white">User Management</h1>
-                              <p class="text-xs text-gray-500 mt-1">Review accounts and manage access permissions.</p>
-                          </div>
-                          <div class="relative max-w-sm w-full">
-                              <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-xs"></i>
-                              <input type="text" id="search-users" class="v-input pl-9" placeholder="Search by email, name or fingerprint...">
-                          </div>
-                      </div>
-
-                      <div class="flex flex-wrap items-center gap-2">
-                          <button data-filter="all" class="user-filter-btn px-3 py-1.5 rounded-md text-xs font-medium bg-[#111] text-white border border-[#333]">All</button>
-                          <button data-filter="active" class="user-filter-btn px-3 py-1.5 rounded-md text-xs font-medium text-gray-400 hover:text-white border border-transparent hover:border-[#333]">Active</button>
-                          <button data-filter="banned" class="user-filter-btn px-3 py-1.5 rounded-md text-xs font-medium text-gray-400 hover:text-white border border-transparent hover:border-[#333]">Banned</button>
-                          <button data-filter="verified" class="user-filter-btn px-3 py-1.5 rounded-md text-xs font-medium text-gray-400 hover:text-white border border-transparent hover:border-[#333]">Verified</button>
-                          <button data-filter="unverified" class="user-filter-btn px-3 py-1.5 rounded-md text-xs font-medium text-gray-400 hover:text-white border border-transparent hover:border-[#333]">Unverified</button>
-                          <button data-filter="suspicious" class="user-filter-btn px-3 py-1.5 rounded-md text-xs font-medium text-gray-400 hover:text-white border border-transparent hover:border-[#333]">Suspicious</button>
-                      </div>
-
-                      <div class="v-card overflow-hidden">
-                          <div class="overflow-x-auto">
-                              <table class="w-full text-left text-sm whitespace-nowrap">
-                                  <thead class="bg-[#0a0a0a] text-gray-400 border-b border-[#333]">
-                                      <tr>
-                                          <th class="px-5 py-3 font-medium">User</th>
-                                          <th class="px-5 py-3 font-medium">Status</th>
-                                          <th class="px-5 py-3 font-medium">Verification</th>
-                                          <th class="px-5 py-3 font-medium">Joined</th>
-                                          <th class="px-5 py-3 font-medium text-right">Actions</th>
-                                      </tr>
-                                  </thead>
-                                  <tbody id="users-tbody" class="divide-y divide-[#333]"></tbody>
-                              </table>
-                          </div>
-                          <div id="users-empty" class="hidden text-center py-20 text-gray-500">No users found</div>
-                      </div>
-                  </section>
-
-                  <section id="view-settings" class="view-section hidden space-y-8">
-                       <div>
-                           <h1 class="text-2xl font-semibold tracking-tight text-white mb-6">Settings</h1>
-                       </div>
-                       <div class="max-w-3xl space-y-8">
-                           <!-- Homepage Config -->
-                           <form id="form-homepage" class="v-card">
-                               <div class="v-card-header">
-                                   <h3 class="text-lg font-medium text-white">Homepage Configuration</h3>
-                                   <p class="text-sm text-gray-400 mt-1">Update the main landing page details.</p>
-                               </div>
-                               <div class="v-card-body space-y-5">
-                                   <div><label class="v-label">Hero Title</label><input type="text" id="hp-title" class="v-input"></div>
-                                   <div><label class="v-label">Subtitle Description</label><textarea id="hp-subtitle" rows="3" class="v-input"></textarea></div>
-                                   <div><label class="v-label">Hero Background Image</label><input type="url" id="hp-bg" class="v-input"></div>
-                               </div>
-                               <div class="p-4 border-t border-[#333] flex justify-end bg-[#0a0a0a] rounded-b-lg">
-                                   <button type="submit" class="v-btn-primary">Save Changes</button>
-                               </div>
-                           </form>
-                           
-                           <!-- Creator Profile -->
-                           <form id="form-creator" class="v-card">
-                               <div class="v-card-header">
-                                   <h3 class="text-lg font-medium text-white">Creator Profile</h3>
-                                   <p class="text-sm text-gray-400 mt-1">Information displayed on the about section.</p>
-                               </div>
-                               <div class="v-card-body space-y-5">
-                                   <div class="flex items-center gap-5">
-                                       <img id="creator-img-preview" src="https://placehold.co/150" class="w-16 h-16 rounded-full object-cover border border-[#333]">
-                                       <div class="flex-1"><label class="v-label">Avatar Image URL</label><input type="url" id="cr-image" class="v-input" placeholder="https://..."></div>
-                                   </div>
-                                   <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                                       <div><label class="v-label">Display Name</label><input type="text" id="cr-name" class="v-input"></div>
-                                       <div><label class="v-label">Public Email</label><input type="email" id="cr-email" class="v-input"></div>
-                                   </div>
-                                   <div><label class="v-label">Short Bio</label><textarea id="cr-bio" class="v-input" rows="3"></textarea></div>
-                               </div>
-                               <div class="p-4 border-t border-[#333] flex justify-end bg-[#0a0a0a] rounded-b-lg">
-                                   <button type="submit" class="v-btn-primary">Update Profile</button>
-                               </div>
-                           </form>
-                           
-                           <form id="form-socials" class="hidden"></form>
-                           <form id="form-ads" class="hidden"></form>
-                           <form id="form-settings" class="hidden"></form>
-                           
-                           <div class="v-card border-red-900/50 bg-[#1a0505]">
-                               <div class="p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                                   <div>
-                                        <h3 class="text-lg font-medium text-red-500">Danger Zone</h3>
-                                        <p class="text-sm text-gray-400 mt-1">Clear all database records. This is for demo purposes.</p>
-                                   </div>
-                                   <button type="button" id="btn-clear-data" class="v-btn-danger whitespace-nowrap">Clear Database</button>
-                               </div>
-                           </div>
-                       </div>
-                  </section>
-              </div>
-          </div>
-      </main>
-  </div>
-
-  <!-- Resource Modal -->
-  <div id="modal-resource" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
-      <div class="v-card w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
-          <div class="v-card-header flex justify-between items-center shrink-0">
-              <h3 id="modal-resource-title" class="font-medium text-lg text-white">Add Resource</h3>
-              <button class="btn-cancel-modal text-gray-400 hover:text-white transition-colors"><i class="fas fa-times pointer-events-none"></i></button>
-          </div>
-          <div class="v-card-body overflow-y-auto flex-1">
-              <form id="form-resource" class="space-y-4">
-                  <input type="hidden" id="res-id">
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div class="md:col-span-2"><label class="v-label">Title *</label><input type="text" id="res-title" class="v-input" required></div>
-                      <div><label class="v-label">Subject</label><input type="text" id="res-subject" class="v-input"></div>
-                      <div><label class="v-label">Class Level</label><input type="text" id="res-class" class="v-input"></div>
-                      <div><label class="v-label">Category</label><select id="res-category" class="v-input text-gray-300 bg-black"><option value="">Select Category</option></select></div>
-                      <div><label class="v-label">PDF URL *</label><input type="url" id="res-pdf" class="v-input" required></div>
-                      <div class="md:col-span-2"><label class="v-label">Thumbnail URL</label><input type="url" id="res-thumb" class="v-input"></div>
-                  </div>
-                  <div><label class="v-label">Short Description</label><textarea id="res-desc" class="v-input" rows="3"></textarea></div>
-                  <div class="flex items-center gap-2 mt-2">
-                      <input type="checkbox" id="res-featured" class="w-4 h-4 rounded border-[#333] bg-black accent-white cursor-pointer"><label for="res-featured" class="text-sm font-medium text-gray-300 cursor-pointer select-none">Mark as Featured</label>
-                  </div>
-              </form>
-          </div>
-          <div class="p-4 border-t border-[#333] bg-[#0a0a0a] flex justify-end gap-3 shrink-0">
-              <button class="btn-cancel-modal v-btn-secondary">Cancel</button>
-              <button id="btn-save-resource" type="submit" form="form-resource" class="v-btn-primary">Save Changes</button>
-          </div>
-      </div>
-  </div>
-
-  <!-- Category Modal -->
-  <div id="modal-category" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
-      <div class="v-card w-full max-w-sm overflow-hidden">
-          <div class="v-card-header"><h3 id="modal-category-title" class="font-medium text-lg text-white">Add Category</h3></div>
-          <div class="v-card-body">
-              <form id="form-category">
-                  <input type="hidden" id="cat-id">
-                  <label class="v-label">Category Name *</label>
-                  <input type="text" id="cat-name" class="v-input" required>
-              </form>
-          </div>
-          <div class="p-4 border-t border-[#333] bg-[#0a0a0a] flex justify-end gap-3">
-              <button class="btn-cancel-modal v-btn-secondary">Cancel</button>
-              <button id="btn-save-category" type="submit" form="form-category" class="v-btn-primary">Save</button>
-          </div>
-      </div>
-  </div>
-
-  <!-- User Detail Modal -->
-  <div id="modal-user" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
-      <div class="v-card w-full max-w-lg overflow-hidden flex flex-col">
-          <div class="v-card-header flex justify-between items-center">
-              <h3 class="font-medium text-lg text-white">User Details</h3>
-              <button class="btn-cancel-modal text-gray-400 hover:text-white transition-colors"><i class="fas fa-times pointer-events-none"></i></button>
-          </div>
-          <div id="user-details-content" class="v-card-body space-y-6">
-              <!-- Content injected by JS -->
-          </div>
-          <div class="p-4 border-t border-[#333] flex justify-end gap-3 bg-[#0a0a0a]">
-              <button class="btn-cancel-modal v-btn-secondary">Close</button>
-          </div>
-      </div>
-  </div>
-
-  <!-- Ban Modal -->
-  <div id="modal-ban" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
-      <div class="v-card w-full max-w-md">
-          <div class="v-card-header">
-              <h3 class="font-medium text-lg text-red-500">Ban User</h3>
-          </div>
-          <div class="v-card-body space-y-4">
-              <p class="text-sm text-gray-400">Please provide a reason for banning <span id="ban-user-email" class="text-white font-medium"></span>.</p>
-              <div>
-                  <label class="v-label">Ban Reason</label>
-                  <textarea id="ban-reason-input" class="v-input" rows="3" placeholder="Violation of terms..."></textarea>
-              </div>
-          </div>
-          <div class="p-4 border-t border-[#333] flex justify-end gap-3 bg-[#0a0a0a]">
-              <button class="btn-cancel-modal v-btn-secondary">Cancel</button>
-              <button id="confirm-ban-btn" class="v-btn-danger">Confirm Ban</button>
-          </div>
-      </div>
-  </div>
-
-  <!-- Delete Modal -->
-  <div id="modal-delete" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
-      <div class="v-card w-full max-w-sm text-center p-6">
-          <div class="w-12 h-12 rounded-full bg-red-950 text-red-500 flex items-center justify-center mx-auto mb-4 border border-red-900">
-              <i class="fas fa-exclamation-triangle text-xl"></i>
-          </div>
-          <h3 class="font-medium text-lg text-white mb-2">Delete Item</h3>
-          <p class="text-gray-400 text-sm mb-6">Are you sure you want to delete this item? This action cannot be undone.</p>
-          <div class="flex justify-center gap-3">
-              <button class="btn-cancel-modal v-btn-secondary flex-1">Cancel</button>
-              <button id="btn-confirm-delete" type="button" class="v-btn-danger flex-1">Delete</button>
-          </div>
-      </div>
-  </div>
-
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, collection, getDocs, getDoc, doc, setDoc, deleteDoc, updateDoc, onSnapshot, serverTimestamp, addDoc, deleteField } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-
-    const firebaseConfig = {
-        projectId: "resourceswebsite-4871a",
-        appId: "1:499105267177:web:d88137205e617e294c1f78",
-        apiKey: "AIzaSyAjpGS1Oj6yhHv3wv4F2tET69N_Qe9DMh0",
-        authDomain: "resourceswebsite-4871a.firebaseapp.com",
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth(app);
-
-    const defaultState = {
-        isLoggedIn: false,
-        theme: 'dark',
-        global: { siteName: 'Study Materials Pro', logoUrl: '' },
-        resources: [],
-        categories: [],
-        users: [],
-        usersCount: 0,
-        homepage: { title: 'Educational Resources', subtitle: 'Discover and share premium study materials, notes, previous year papers, and assignments designed to help you excel.', bgImage: 'https://images.unsplash.com/photo-1513258496099-48168024aec0?q=80&w=800&auto=format&fit=crop' },
-        creator: { name: 'Aasim Muneer', email: 'aasimmuneer349@gmail.com', bio: 'Student and developer creating free resources.', image: 'https://placehold.co/400x400/1e293b/0ea5e9?text=Creator' },
-        socials: { enabled: true, youtube: '', instagram: '', telegram: '', facebook: '' },
-        ads: { header: '', sidebar: '', footer: '' }
-    };
-
-    let state = { ...defaultState };
-
-    const toastContainer = document.getElementById('toast-container');
-    function showToast(message, type = 'success') {
-        const toast = document.createElement('div');
-        toast.className = `toast ${type}`;
-        toast.textContent = message;
-        toastContainer.appendChild(toast);
-        setTimeout(() => toast.remove(), 3000);
-    }
-    
-    function applyTheme() {
-        if (state.theme === 'dark') {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
-    }
-    applyTheme();
-
-    document.getElementById('theme-toggle').addEventListener('click', () => {
-        state.theme = state.theme === 'dark' ? 'light' : 'dark';
-        applyTheme();
-    });
-
-    const loginView = document.getElementById('login-view');
-    const appLayout = document.getElementById('app-layout');
-    const loginForm = document.getElementById('login-form');
-
-    function checkAuth() {
-        if (state.isLoggedIn) {
-            loginView.classList.add('hidden');
-            loginView.classList.remove('flex');
-            appLayout.classList.remove('hidden');
-            appLayout.classList.add('flex');
-            updateUI();
-        } else {
-            loginView.classList.remove('hidden');
-            loginView.classList.add('flex');
-            appLayout.classList.add('hidden');
-            appLayout.classList.remove('flex');
-        }
-    }
-
-    onAuthStateChanged(auth, async (user) => {
-        if (user) {
-            try {
-                const userDoc = await getDoc(doc(db, 'users', user.uid));
-                const isAdminEmail = ['admin@example.com', 'aasimmuneer349@gmail.com', 'admin@eduplatform.com'].includes(user.email);
-                const role = userDoc.exists() ? userDoc.data().role : null;
-                const isAdminRole = ['admin', 'superadmin', 'moderator'].includes(role);
-
-                if (isAdminEmail || isAdminRole) {
-                    state.isLoggedIn = true;
-                    checkAuth();
-                    initListeners();
-                } else {
-                    showToast("Access Denied: Admin privileges required.", "error");
-                    signOut(auth);
-                    state.isLoggedIn = false;
-                    checkAuth();
-                }
-            } catch (err) {
-                console.error("Auth check failed:", err);
-                showToast("Authentication error. Please try again.", "error");
-                signOut(auth);
-                state.isLoggedIn = false;
-                checkAuth();
-            }
-        } else {
-            state.isLoggedIn = false;
-            checkAuth();
-        }
-    });
-
-    loginForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const u = document.getElementById('login-user').value;
-        const p = document.getElementById('login-pass').value;
-        signInWithEmailAndPassword(auth, u, p).then(() => {
-            showToast('Logged in successfully');
-        }).catch(err => {
-            showToast(err.message, 'error');
-        });
-    });
-
-    document.getElementById('logout-btn').addEventListener('click', () => {
-        signOut(auth).then(()=>showToast('Logged out'));
-    });
-
-    // Navigation logic
-    let currentView = 'dashboard';
-    const navLinks = document.querySelectorAll('.nav-link');
-    const viewSections = document.querySelectorAll('#app-layout .view-section');
-    const topbarTitle = document.getElementById('topbar-title');
-
-    navLinks.forEach(link => {
-        link.addEventListener('click', (e) => {
-            e.preventDefault();
-            const target = link.getAttribute('data-target');
-            switchView(target);
-            document.getElementById('sidebar').classList.remove('translate-x-0');
-            document.getElementById('sidebar').classList.add('-translate-x-full');
-            document.getElementById('sidebar-overlay').classList.add('hidden');
-        });
-    });
-
-    function switchView(target) {
-        currentView = target;
-        navLinks.forEach(l => {
-            l.classList.remove('active-nav', 'bg-[#111]', 'text-white'); l.classList.add('text-gray-400');
-            if(l.getAttribute('data-target') === target) {
-                l.classList.add('active-nav', 'bg-[#111]', 'text-white'); l.classList.remove('text-gray-400');
-                topbarTitle.textContent = l.textContent.trim();
-            }
-        });
-        viewSections.forEach(v => {
-            v.classList.remove('active');
-            v.classList.add('hidden');
-            if(v.id === `view-${target}`) {
-                v.classList.add('active');
-                v.classList.remove('hidden');
-            }
-        });
-    }
-
-    document.getElementById('toggle-sidebar').addEventListener('click', () => {
-        document.getElementById('sidebar').classList.remove('-translate-x-full');
-        document.getElementById('sidebar').classList.add('translate-x-0');
-        document.getElementById('sidebar-overlay').classList.remove('hidden');
-    });
-    
-    document.getElementById('close-sidebar').addEventListener('click', () => {
-        document.getElementById('sidebar').classList.remove('translate-x-0');
-        document.getElementById('sidebar').classList.add('-translate-x-full');
-        document.getElementById('sidebar-overlay').classList.add('hidden');
-    });
-    document.getElementById('sidebar-overlay').addEventListener('click', () => {
-        document.getElementById('sidebar').classList.remove('translate-x-0');
-        document.getElementById('sidebar').classList.add('-translate-x-full');
-        document.getElementById('sidebar-overlay').classList.add('hidden');
-    });
-
-    // Firetore Listeners
-    let unsubscribes = [];
-    function initListeners() {
-        unsubscribes.forEach(u => u());
-        unsubscribes = [];
-        
-        unsubscribes.push(onSnapshot(collection(db, 'resources'), (snap) => {
-            state.resources = snap.docs.map(d => ({id: d.id, ...d.data()}));
-            updateUI();
-        }));
-        
-        unsubscribes.push(onSnapshot(collection(db, 'categories'), (snap) => {
-            state.categories = snap.docs.map(d => ({id: d.id, ...d.data()}));
-            updateUI();
-        }));
-        
-        try {
-            unsubscribes.push(onSnapshot(collection(db, 'users'), (snap) => {
-                state.users = snap.docs.map(d => ({id: d.id, uid: d.id, ...d.data()}));
-                state.usersCount = state.users.length;
-                updateUI();
-            }, (error) => {
-                console.warn("Could not fetch users (might be permission issue):", error);
-            }));
-        } catch(e) {}
-        
-        unsubscribes.push(onSnapshot(doc(db, 'creatorInfo', 'profile'), (snap) => {
-            if(snap.exists()) {
-                state.creator = { ...state.creator, ...snap.data() };
-                updateUI();
-                populateCreatorForm();
-            }
-        }));
-
-        unsubscribes.push(onSnapshot(doc(db, 'settings', 'homepage'), (snap) => {
-            if(snap.exists()) {
-                state.homepage = { ...state.homepage, ...snap.data() };
-                updateUI();
-                populateHomepageForm();
-            }
-        }));
-    }
-
-    function updateUI() {
-        if (!state.isLoggedIn) return;
-        document.getElementById('sidebar-site-name').textContent = state.global.siteName || 'AdminPanel';
-        document.getElementById('topbar-avatar').src = state.creator.image || state.creator.imageUrl || 'https://placehold.co/100x100/0ea5e9/ffffff?text=A';
-
-        document.getElementById('stat-resources').textContent = state.resources.length;
-        document.getElementById('stat-downloads').textContent = state.resources.reduce((acc, r) => acc + (r.downloadCount || 0), 0);
-        if(document.getElementById('stat-views')) document.getElementById('stat-views').textContent = state.resources.reduce((acc, r) => acc + (r.viewCount || 0), 0); 
-        if(document.getElementById('stat-categories')) document.getElementById('stat-categories').textContent = state.categories.length;
-        if (document.getElementById('stat-users')) document.getElementById('stat-users').textContent = state.usersCount || 0;
-
-        // Detailed User Stats
-        const activeCount = state.users.filter(u => !u.isBanned).length;
-        const bannedCount = state.users.filter(u => u.isBanned).length;
-        const unverifiedCount = state.users.filter(u => u.verificationRequired && !u.emailVerified).length;
-        const suspiciousCount = state.users.filter(u => u.accountStatus === 'suspicious').length;
-        
-        if (document.getElementById('stat-active-users')) document.getElementById('stat-active-users').textContent = activeCount;
-        if (document.getElementById('stat-banned-users')) document.getElementById('stat-banned-users').textContent = bannedCount;
-        if (document.getElementById('stat-unverified-users')) document.getElementById('stat-unverified-users').textContent = unverifiedCount;
-        if (document.getElementById('stat-suspicious-users')) document.getElementById('stat-suspicious-users').textContent = suspiciousCount;
-
-        renderRecentResources();
-        renderAnalyticsTables();
-        renderResourcesTable();
-        renderCategoriesList();
-        renderUsersTable();
-        populateCategorySelects();
-    }
-
-    function populateHomepageForm() {
-        if(document.activeElement && (document.activeElement.id.startsWith('hp-'))) return;
-        document.getElementById('hp-title').value = state.homepage.title || '';
-        document.getElementById('hp-subtitle').value = state.homepage.subtitle || '';
-        document.getElementById('hp-bg').value = state.homepage.bgImage || state.homepage.heroImage || '';
-    }
-
-    function populateCreatorForm() {
-        if(document.activeElement && (document.activeElement.id.startsWith('cr-'))) return;
-        document.getElementById('cr-name').value = state.creator.name || '';
-        document.getElementById('cr-email').value = state.creator.email || '';
-        document.getElementById('cr-bio').value = state.creator.bio || '';
-        document.getElementById('cr-image').value = state.creator.image || state.creator.imageUrl || '';
-        document.getElementById('creator-img-preview').src = state.creator.image || state.creator.imageUrl || 'https://placehold.co/400/1e293b/ccc';
-    }
-
-    function populateForms() {
-        document.getElementById('hp-title').value = state.homepage.title || '';
-        document.getElementById('hp-subtitle').value = state.homepage.subtitle || '';
-        document.getElementById('hp-bg').value = state.homepage.bgImage || state.homepage.heroImage || '';
-
-        document.getElementById('cr-name').value = state.creator.name || '';
-        document.getElementById('cr-email').value = state.creator.email || '';
-        document.getElementById('cr-bio').value = state.creator.bio || '';
-        document.getElementById('cr-image').value = state.creator.image || state.creator.imageUrl || '';
-        document.getElementById('creator-img-preview').src = state.creator.image || state.creator.imageUrl || 'https://placehold.co/400/1e293b/ccc';
-    }
-
-    function populateCategorySelects() {
-        const select = document.getElementById('res-category');
-        select.innerHTML = '<option value="">Select Category</option>';
-        state.categories.forEach(c => {
-            const opt = document.createElement('option');
-            opt.value = c.name;
-            opt.textContent = c.name;
-            select.appendChild(opt);
-        });
-    }
-
-    // Forms Submission
-    if(document.getElementById('form-homepage')) document.getElementById('form-homepage').addEventListener('submit', async e => {
-        e.preventDefault();
-        try {
-            await setDoc(doc(db, 'settings', 'homepage'), {
-                title: document.getElementById('hp-title').value,
-                subtitle: document.getElementById('hp-subtitle').value,
-                bgImage: document.getElementById('hp-bg').value,
-                heroImage: document.getElementById('hp-bg').value
-            }, { merge: true });
-            showToast('Homepage settings saved');
-        } catch(err) {
-            showToast('Error saving: '+err.message, 'error');
-        }
-    });
-
-    if(document.getElementById('form-creator')) document.getElementById('form-creator').addEventListener('submit', async e => {
-        e.preventDefault();
-        try {
-            await setDoc(doc(db, 'creatorInfo', 'profile'), {
-                name: document.getElementById('cr-name').value,
-                email: document.getElementById('cr-email').value,
-                bio: document.getElementById('cr-bio').value,
-                imageUrl: document.getElementById('cr-image').value
-            }, { merge: true });
-            showToast('Creator profile saved');
-        } catch(err) {
-            showToast('Error saving: '+err.message, 'error');
-        }
-    });
-
-    if (document.getElementById('form-socials')) document.getElementById('form-socials').addEventListener('submit', e => { e.preventDefault(); showToast('Not Implemented', 'error'); });
-    if (document.getElementById('form-ads')) document.getElementById('form-ads').addEventListener('submit', e => { e.preventDefault(); showToast('Not Implemented', 'error'); });
-    if (document.getElementById('form-settings')) document.getElementById('form-settings').addEventListener('submit', e => { e.preventDefault(); showToast('Not Implemented', 'error'); });
-    if (document.getElementById('btn-clear-data')) document.getElementById('btn-clear-data').addEventListener('click', () => { showToast('Not Implemented in Firebase Demo', 'error'); });
-
-    // Modals
-    const modalResource = document.getElementById('modal-resource');
-    const modalCategory = document.getElementById('modal-category');
-    const modalDelete = document.getElementById('modal-delete');
-    let itemToDelete = null;
-
-    document.querySelectorAll('.btn-cancel-modal').forEach(btn => {
-        btn.addEventListener('click', () => {
-            modalResource.classList.add('hidden');
-            modalCategory.classList.add('hidden');
-            modalDelete.classList.add('hidden');
-            itemToDelete = null;
-        });
-    });
-
-    document.getElementById('btn-add-resource').addEventListener('click', () => {
-        document.getElementById('form-resource').reset();
-        document.getElementById('res-id').value = '';
-        document.getElementById('modal-resource-title').textContent = 'Add Resource';
-        modalResource.classList.remove('hidden');
-    });
-
-    document.getElementById('btn-add-category').addEventListener('click', () => {
-        document.getElementById('cat-id').value = '';
-        document.getElementById('cat-name').value = '';
-        document.getElementById('modal-category-title').textContent = 'Add Category';
-        modalCategory.classList.remove('hidden');
-    });
-
-    document.getElementById('form-resource').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const id = document.getElementById('res-id').value;
-        const data = {
-            title: document.getElementById('res-title').value,
-            subject: document.getElementById('res-subject').value,
-            classLvl: document.getElementById('res-class').value,
-            category: document.getElementById('res-category').value,
-            featured: document.getElementById('res-featured').checked,
-            description: document.getElementById('res-desc').value,
-            thumbnailUrl: document.getElementById('res-thumb').value,
-            pdfUrl: document.getElementById('res-pdf').value,
-            updatedAt: serverTimestamp()
-        };
-        
-        try {
-            if(id) {
-                await updateDoc(doc(db, 'resources', id), data);
-                showToast('Resource updated');
-            } else {
-                data.createdAt = serverTimestamp();
-                await addDoc(collection(db, 'resources'), data);
-                showToast('Resource added');
-            }
-            modalResource.classList.add('hidden');
-        } catch(err) {
-            showToast('Error: ' + err.message, 'error');
-        }
-    });
-
-    document.getElementById('form-category').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const id = document.getElementById('cat-id').value;
-        try {
-            if(id) {
-                await updateDoc(doc(db, 'categories', id), { name: document.getElementById('cat-name').value });
-                showToast('Category updated');
-            } else {
-                await addDoc(collection(db, 'categories'), { name: document.getElementById('cat-name').value });
-                showToast('Category added');
-            }
-            modalCategory.classList.add('hidden');
-        } catch(err) {
-            showToast('Error: ' + err.message, 'error');
-        }
-    });
-
-    document.getElementById('btn-confirm-delete').addEventListener('click', async () => {
-        if(!itemToDelete) return;
-        try {
-            await deleteDoc(doc(db, itemToDelete.collection, itemToDelete.id));
-            showToast('Deleted successfully');
-            modalDelete.classList.add('hidden');
-            itemToDelete = null;
-        } catch(err) {
-            showToast('Error: ' + err.message, 'error');
-        }
-    });
-
-    function editResource(id) {
-        const item = state.resources.find(r => r.id === id);
-        if(!item) return;
-        document.getElementById('res-id').value = item.id;
-        document.getElementById('res-title').value = item.title;
-        document.getElementById('res-subject').value = item.subject || '';
-        document.getElementById('res-class').value = item.classLvl || '';
-        document.getElementById('res-category').value = item.category || '';
-        document.getElementById('res-featured').checked = !!item.featured;
-        document.getElementById('res-desc').value = item.description || item.desc || '';
-        document.getElementById('res-thumb').value = item.thumbnailUrl || item.thumbUrl || '';
-        document.getElementById('res-pdf').value = item.pdfUrl || '';
-        document.getElementById('modal-resource-title').textContent = 'Edit Resource';
-        modalResource.classList.remove('hidden');
-    }
-
-    function deleteResource(id) {
-        itemToDelete = { collection: 'resources', id };
-        modalDelete.classList.remove('hidden');
-    }
-
-    function editCategory(id) {
-        const item = state.categories.find(c => c.id === id);
-        if(!item) return;
-        document.getElementById('cat-id').value = item.id;
-        document.getElementById('cat-name').value = item.name;
-        document.getElementById('modal-category-title').textContent = 'Edit Category';
-        modalCategory.classList.remove('hidden');
-    }
-
-    function deleteCategory(id) {
-        itemToDelete = { collection: 'categories', id };
-        modalDelete.classList.remove('hidden');
-    }
-
-    async function toggleFeatured(id, isFeatured) {
-        try {
-            await updateDoc(doc(db, 'resources', id), { featured: !isFeatured });
-            showToast('Featured status updated');
-        } catch(err) {
-            showToast('Error: ' + err.message, 'error');
-        }
-    }
-
-    document.addEventListener('click', (e) => {
-        const editResBtn = e.target.closest('.action-edit-res');
-        if(editResBtn) { e.preventDefault(); editResource(editResBtn.getAttribute('data-id')); }
-        
-        const delResBtn = e.target.closest('.action-del-res');
-        if(delResBtn) { e.preventDefault(); deleteResource(delResBtn.getAttribute('data-id')); }
-
-        const featResBtn = e.target.closest('.action-feat-res');
-        if(featResBtn) { e.preventDefault(); toggleFeatured(featResBtn.getAttribute('data-id'), featResBtn.getAttribute('data-featured') === 'true'); }
-
-        const editCatBtn = e.target.closest('.action-edit-cat');
-        if(editCatBtn) { e.preventDefault(); editCategory(editCatBtn.getAttribute('data-id')); }
-
-        const delCatBtn = e.target.closest('.action-del-cat');
-        if(delCatBtn) { e.preventDefault(); deleteCategory(delCatBtn.getAttribute('data-id')); }
-    });
-
-    function renderRecentResources() {
-        const tbody = document.getElementById('recent-resources-tbody');
-        const empty = document.getElementById('recent-empty');
-        if(!tbody) return;
-        const sorted = [...state.resources].reverse().slice(0, 5);
-        if(sorted.length === 0) {
-            tbody.innerHTML = '';
-            empty.classList.remove('hidden'); return;
-        }
-        empty.classList.add('hidden');
-        tbody.innerHTML = sorted.map(r => `
-            <tr class="border-b border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
-                <td class="py-3 font-medium dark:text-gray-200">${r.title}</td>
-                <td class="py-3 text-gray-500">${r.subject || '-'}</td>
-                <td class="py-3"><span class="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 px-2 py-1 rounded text-xs">${r.category||'-'}</span></td>
-                <td class="py-3 text-gray-400 text-xs text-right">Just now</td>
-            </tr>
-        `).join('');
-    }
-
-    
-    function renderAnalyticsTables() {
-        const viewsTbody = document.getElementById('most-viewed-tbody');
-        const dlsTbody = document.getElementById('most-downloaded-tbody');
-        if(!viewsTbody || !dlsTbody) return;
-
-        const sortedByViews = [...state.resources].sort((a,b) => (b.viewCount||0) - (a.viewCount||0)).slice(0, 5);
-        viewsTbody.innerHTML = sortedByViews.map(r => `
-            <tr class="hover:bg-[#111] transition-colors">
-                <td class="px-5 py-3 font-medium text-[#ededed]">${r.title}</td>
-                <td class="px-5 py-3 text-right text-gray-400">${r.viewCount||0}</td>
-            </tr>
-        `).join('');
-
-        const sortedByDls = [...state.resources].sort((a,b) => (b.downloadCount||0) - (a.downloadCount||0)).slice(0, 5);
-        dlsTbody.innerHTML = sortedByDls.map(r => `
-            <tr class="hover:bg-[#111] transition-colors">
-                <td class="px-5 py-3 font-medium text-[#ededed]">${r.title}</td>
-                <td class="px-5 py-3 text-right text-gray-400">${r.downloadCount||0}</td>
-            </tr>
-        `).join('');
-    }
-
-    function renderResourcesTable(searchTerm = '') {
-        const tbody = document.getElementById('resources-tbody');
-        const empty = document.getElementById('resources-empty');
-        if(!tbody) return;
-        let filtered = state.resources;
-        if(searchTerm) {
-            const s = searchTerm.toLowerCase();
-            filtered = filtered.filter(r => r.title.toLowerCase().includes(s) || (r.subject||'').toLowerCase().includes(s));
-        }
-        if(filtered.length === 0) {
-            tbody.innerHTML = '';
-            empty.classList.remove('hidden'); return;
-        }
-        empty.classList.add('hidden');
-        
-        tbody.innerHTML = filtered.map(r => `
-            <tr class="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group">
-                <td class="p-3 border-b border-gray-200 dark:border-gray-700/50">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded bg-gray-200 dark:bg-gray-800 shrink-0 overflow-hidden text-blue-500 flex items-center justify-center">
-                            ${r.thumbnailUrl || r.thumbUrl ? `<img src="${r.thumbnailUrl || r.thumbUrl}" class="w-full h-full object-cover" referrerPolicy="no-referrer">` : '<i class="fa-solid fa-file-pdf"></i>'}
-                        </div>
-                        <div>
-                            <p class="font-bold text-gray-900 dark:text-white">${r.title} <a href="${r.pdfUrl}" target="_blank" class="text-blue-500 hover:text-blue-600 hover:underline text-xs ml-1"><i class="fa-solid fa-external-link"></i></a></p>
-                            <p class="text-xs text-gray-500">${r.subject || ''} ${r.classLvl ? '· '+r.classLvl : ''}</p>
-                        </div>
-                    </div>
-                </td>
-                <td class="p-3 border-b border-gray-200 dark:border-gray-700/50">
-                    <span class="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 px-2 py-1 rounded text-xs inline-block">${r.category || 'Uncategorized'}</span>
-                </td>
-                <td class="p-3 border-b border-gray-200 dark:border-gray-700/50">
-                    <button class="action-feat-res pointer-events-auto text-lg transition-colors ${r.featured ? 'text-orange-500 hover:text-orange-600' : 'text-gray-300 dark:text-gray-600 hover:text-gray-400 dark:hover:text-gray-500'}" data-id="${r.id}" data-featured="${r.featured}">
-                        <i class="fa-solid fa-star pointer-events-none"></i>
-                    </button>
-                </td>
-                <td class="p-3 border-b border-gray-200 dark:border-gray-700/50 text-right space-x-2 w-[110px]">
-                    <button class="action-edit-res pointer-events-auto w-8 h-8 rounded bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-blue-500 hover:text-white transition-colors inline-flex items-center justify-center m-0" data-id="${r.id}"><i class="fa-solid fa-pen pointer-events-none"></i></button>
-                    <button class="action-del-res pointer-events-auto w-8 h-8 rounded bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-red-500 hover:text-white transition-colors inline-flex items-center justify-center m-0" data-id="${r.id}"><i class="fa-solid fa-trash pointer-events-none"></i></button>
-                </td>
-            </tr>
-        `).join('');
-    }
-
-    if(document.getElementById('search-resource')) document.getElementById('search-resource').addEventListener('input', e => renderResourcesTable(e.target.value));
-
-    let userSearchTerm = '';
-    let userFilter = 'all';
-
-    function renderUsersTable() {
-        const tbody = document.getElementById('users-tbody');
-        const empty = document.getElementById('users-empty');
-        if(!tbody) return;
-
-        let filtered = state.users;
-        
-        if (userFilter !== 'all') {
-            if (userFilter === 'active') filtered = filtered.filter(u => !u.isBanned);
-            if (userFilter === 'banned') filtered = filtered.filter(u => u.isBanned);
-            if (userFilter === 'verified') filtered = filtered.filter(u => u.emailVerified);
-            if (userFilter === 'unverified') filtered = filtered.filter(u => u.verificationRequired && !u.emailVerified);
-            if (userFilter === 'suspicious') filtered = filtered.filter(u => u.accountStatus === 'suspicious');
-        }
-
-        if (userSearchTerm) {
-            const s = userSearchTerm.toLowerCase();
-            filtered = filtered.filter(u => 
-                (u.email||'').toLowerCase().includes(s) || 
-                (u.displayName||'').toLowerCase().includes(s) ||
-                (u.deviceFingerprint||'').toLowerCase().includes(s)
-            );
-        }
-
-        if (filtered.length === 0) {
-            tbody.innerHTML = '';
-            empty.classList.remove('hidden'); return;
-        }
-        empty.classList.add('hidden');
-
-        tbody.innerHTML = filtered.map(u => {
-            const joinedDate = u.createdAt ? (u.createdAt.toDate ? u.createdAt.toDate().toLocaleDateString() : new Date(u.createdAt).toLocaleDateString()) : '-';
-            const isBanned = u.isBanned;
-            const isVerified = u.emailVerified;
-            const isSuspicious = u.accountStatus === 'suspicious';
-            const isUnverified = u.verificationRequired && !isVerified;
-
-            return `
-                <tr class="hover:bg-white/5 transition-colors group border-b border-[#333]">
-                    <td class="px-5 py-4">
-                        <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center text-xs font-bold text-gray-400">
-                                ${u.displayName ? u.displayName.charAt(0).toUpperCase() : u.email.charAt(0).toUpperCase()}
-                            </div>
-                            <div>
-                                <p class="font-medium text-white text-sm">${u.displayName || 'Unnamed User'}</p>
-                                <p class="text-[10px] text-gray-500 font-mono">${u.email}</p>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="px-5 py-4">
-                        ${isBanned ? 
-                            `<span class="bg-red-500/10 text-red-500 border border-red-500/20 px-2 py-0.5 rounded text-[10px] font-bold">BANNED</span>` : 
-                            (isSuspicious ? 
-                                `<span class="bg-orange-500/10 text-orange-500 border border-orange-500/20 px-2 py-0.5 rounded text-[10px] font-bold">SUSPICIOUS</span>` :
-                                `<span class="bg-green-500/10 text-green-500 border border-green-500/20 px-2 py-0.5 rounded text-[10px] font-bold">ACTIVE</span>`)
-                        }
-                    </td>
-                    <td class="px-5 py-4">
-                        ${isVerified ? 
-                            `<span class="text-green-500 flex items-center gap-1 text-xs"><i class="fas fa-check-circle"></i> Verified</span>` : 
-                            (isUnverified ? 
-                                `<span class="text-yellow-500 flex items-center gap-1 text-xs"><i class="fas fa-exclamation-triangle"></i> Required</span>` :
-                                `<span class="text-gray-500 flex items-center gap-1 text-xs"><i class="fas fa-circle-notch"></i> Pending</span>`)
-                        }
-                    </td>
-                    <td class="px-5 py-4 text-xs text-gray-400">
-                        ${joinedDate}
-                    </td>
-                    <td class="px-5 py-4 text-right space-x-1">
-                        <button class="action-user-details p-2 hover:text-white text-gray-500 transition-colors" data-uid="${u.uid}" title="View Details"><i class="fas fa-info-circle"></i></button>
-                        ${isBanned ? 
-                            `<button class="action-user-unban p-2 hover:text-green-500 text-gray-500 transition-colors" data-uid="${u.uid}" title="Unban User"><i class="fas fa-user-check"></i></button>` :
-                            `<button class="action-user-ban p-2 hover:text-red-500 text-gray-500 transition-colors" data-uid="${u.uid}" title="Ban User"><i class="fas fa-user-slash"></i></button>`
-                        }
-                        ${!isVerified ? `<button class="action-user-verify p-2 hover:text-blue-500 text-gray-500 transition-colors" data-uid="${u.uid}" title="Force Verification"><i class="fas fa-envelope-open-text"></i></button>` : ''}
-                        <button class="action-user-delete p-2 hover:text-red-600 text-gray-500 transition-colors" data-uid="${u.uid}" title="Delete Record"><i class="fas fa-trash-alt"></i></button>
-                    </td>
-                </tr>
-            `;
-        }).join('');
-    }
-
-    if(document.getElementById('search-users')) document.getElementById('search-users').addEventListener('input', e => {
-        userSearchTerm = e.target.value;
-        renderUsersTable();
-    });
-
-    document.querySelectorAll('.user-filter-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('.user-filter-btn').forEach(b => {
-                b.classList.remove('bg-[#111]', 'text-white', 'border-[#333]');
-                b.classList.add('text-gray-400', 'border-transparent');
-            });
-            btn.classList.add('bg-[#111]', 'text-white', 'border-[#333]');
-            btn.classList.remove('text-gray-400', 'border-transparent');
-            userFilter = btn.getAttribute('data-filter');
-            renderUsersTable();
-        });
-    });
-
-    let selectedUserForAction = null;
-    const modalUser = document.getElementById('modal-user');
-    const modalBan = document.getElementById('modal-ban');
-    const userDetailsContent = document.getElementById('user-details-content');
-
-    function showUserDetails(uid) {
-        const u = state.users.find(user => user.uid === uid);
-        if(!u) return;
-        
-        const joinedDate = u.createdAt ? (u.createdAt.toDate ? u.createdAt.toDate().toLocaleString() : new Date(u.createdAt).toLocaleString()) : 'Unknown';
-        const lastLogin = u.lastLogin ? (u.lastLogin.toDate ? u.lastLogin.toDate().toLocaleString() : new Date(u.lastLogin).toLocaleString()) : 'Never';
-
-        userDetailsContent.innerHTML = `
-            <div class="flex items-center gap-4 mb-6">
-                <div class="w-16 h-16 rounded-full bg-blue-500/10 text-blue-500 flex items-center justify-center text-2xl font-bold border border-blue-500/20">
-                    ${u.displayName ? u.displayName.charAt(0).toUpperCase() : u.email.charAt(0).toUpperCase()}
+<body class="antialiased selection:bg-white/10">
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-[100] flex flex-col gap-3"></div>
+
+    <!-- Login View -->
+    <div id="login-view" class="fixed inset-0 z-50 flex items-center justify-center bg-black p-6">
+        <div class="w-full max-w-md">
+            <div class="mb-8 text-center">
+                <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-play text-black text-xl"></i>
+                </div>
+                <h1 class="text-2xl font-bold tracking-tight">Admin Portal</h1>
+                <p class="text-gray-500 mt-2 text-sm">Secure access for authorized administrators only.</p>
+            </div>
+            <form id="login-form" class="v-card p-6 space-y-5">
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-2">Email Address</label>
+                    <input type="email" id="login-user" class="v-input" placeholder="admin@example.com" required>
                 </div>
                 <div>
-                    <h4 class="text-xl font-bold text-white">${u.displayName || 'Unnamed User'}</h4>
-                    <p class="text-gray-400">${u.email}</p>
+                    <label class="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-2">Password</label>
+                    <input type="password" id="login-pass" class="v-input" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="v-btn-primary w-full py-3 mt-2">Sign in to Dashboard</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- App Layout -->
+    <div id="app-layout" class="hidden min-h-screen flex">
+        
+        <!-- Sidebar -->
+        <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 w-[var(--sidebar-width)] bg-black border-r border-[#222] flex flex-col transform -translate-x-full lg:translate-x-0 transition-transform duration-300">
+            <div class="p-6 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
+                        <i class="fas fa-play text-black text-sm"></i>
+                    </div>
+                    <span id="sidebar-site-name" class="font-bold tracking-tight text-lg">Admin</span>
+                </div>
+                <button id="close-sidebar" class="lg:hidden text-gray-500 hover:text-white transition-colors">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <nav class="flex-1 px-4 py-2 space-y-1">
+                <p class="px-4 py-2 text-[10px] font-bold text-gray-600 uppercase tracking-[0.2em] mb-2">General</p>
+                <a href="#" data-target="dashboard" class="nav-link active flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-[#111] transition-all">
+                    <i class="fas fa-grid-2 w-5"></i> Dashboard
+                </a>
+                <a href="#" data-target="resources" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-[#111] transition-all">
+                    <i class="fas fa-file-lines w-5"></i> Resources
+                </a>
+                <a href="#" data-target="categories" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-[#111] transition-all">
+                    <i class="fas fa-folders w-5"></i> Categories
+                </a>
+                <a href="#" data-target="users" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-[#111] transition-all">
+                    <i class="fas fa-users-gear w-5"></i> User Management
+                </a>
+                
+                <p class="px-4 py-6 text-[10px] font-bold text-gray-600 uppercase tracking-[0.2em] mb-2">System</p>
+                <a href="#" data-target="settings" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-[#111] transition-all">
+                    <i class="fas fa-sliders w-5"></i> Settings
+                </a>
+            </nav>
+
+            <div class="p-4 border-t border-[#222]">
+                <button id="logout-btn" class="flex items-center gap-3 px-4 py-3 w-full rounded-lg text-sm font-medium text-red-500 hover:bg-red-500/10 transition-all">
+                    <i class="fas fa-arrow-right-from-bracket w-5"></i> Sign Out
+                </button>
+            </div>
+        </aside>
+
+        <!-- Sidebar Overlay (Mobile) -->
+        <div id="sidebar-overlay" class="fixed inset-0 bg-black/60 z-30 hidden lg:hidden"></div>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 lg:ml-[var(--sidebar-width)] flex flex-col min-w-0">
+            
+            <!-- Navbar -->
+            <header class="sticky top-0 z-20 h-16 border-b border-[#222] bg-black/80 backdrop-blur-md px-6 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <button id="toggle-sidebar" class="lg:hidden w-10 h-10 rounded-lg flex items-center justify-center text-gray-400 hover:text-white hover:bg-[#111] transition-all">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h2 id="topbar-title" class="text-sm font-semibold tracking-tight">Dashboard</h2>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="flex flex-col items-end mr-2 hidden sm:flex">
+                        <span id="admin-display-name" class="text-xs font-medium text-white">Admin User</span>
+                        <span id="admin-email" class="text-[10px] text-gray-500">admin@example.com</span>
+                    </div>
+                    <img id="topbar-avatar" src="https://placehold.co/100" class="w-9 h-9 rounded-full border border-[#222] object-cover ring-2 ring-transparent hover:ring-white/10 transition-all">
+                </div>
+            </header>
+
+            <!-- Page Scrollable Area -->
+            <div class="flex-1 overflow-y-auto">
+                <div class="max-w-7xl mx-auto p-6 md:p-10">
+                    
+                    <!-- VIEW: DASHBOARD -->
+                    <section id="view-dashboard" class="view-section active space-y-10">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                            <div>
+                                <h1 class="text-3xl font-bold tracking-tight">Overview</h1>
+                                <p class="text-gray-500 mt-1">Monitor your application statistics and growth.</p>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <button onclick="switchView('resources')" class="v-btn-secondary py-2.5">Manage Content</button>
+                                <button onclick="switchView('users')" class="v-btn-primary py-2.5">Review Users</button>
+                            </div>
+                        </div>
+
+                        <!-- Stats Grid -->
+                        <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+                            <div class="v-card p-5 group">
+                                <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider block mb-3 group-hover:text-gray-400 transition-colors">Resources</span>
+                                <div class="flex items-end justify-between">
+                                    <p id="stat-resources" class="text-3xl font-bold">0</p>
+                                    <i class="fas fa-file-alt text-gray-800 text-xl"></i>
+                                </div>
+                            </div>
+                            <div class="v-card p-5 group">
+                                <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider block mb-3 group-hover:text-gray-400 transition-colors">Downloads</span>
+                                <div class="flex items-end justify-between">
+                                    <p id="stat-downloads" class="text-3xl font-bold">0</p>
+                                    <i class="fas fa-download text-gray-800 text-xl"></i>
+                                </div>
+                            </div>
+                            <div class="v-card p-5 group">
+                                <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider block mb-3 group-hover:text-gray-400 transition-colors">Total Views</span>
+                                <div class="flex items-end justify-between">
+                                    <p id="stat-views" class="text-3xl font-bold">0</p>
+                                    <i class="fas fa-eye text-gray-800 text-xl"></i>
+                                </div>
+                            </div>
+                            <div class="v-card p-5 group">
+                                <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider block mb-3 group-hover:text-gray-400 transition-colors">Users</span>
+                                <div class="flex items-end justify-between">
+                                    <p id="stat-users" class="text-3xl font-bold">0</p>
+                                    <i class="fas fa-users text-gray-800 text-xl"></i>
+                                </div>
+                            </div>
+                            <div class="v-card p-5 group border-green-950/30">
+                                <span class="text-[10px] font-bold text-green-500 uppercase tracking-wider block mb-3 opacity-70">Active</span>
+                                <div class="flex items-end justify-between">
+                                    <p id="stat-active-users" class="text-3xl font-bold text-green-400">0</p>
+                                    <i class="fas fa-user-check text-green-900/40 text-xl"></i>
+                                </div>
+                            </div>
+                            <div class="v-card p-5 group border-red-950/30">
+                                <span class="text-[10px] font-bold text-red-500 uppercase tracking-wider block mb-3 opacity-70">Banned</span>
+                                <div class="flex items-end justify-between">
+                                    <p id="stat-banned-users" class="text-3xl font-bold text-red-400">0</p>
+                                    <i class="fas fa-user-slash text-red-900/40 text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Secondary Stats -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="v-card p-4 flex items-center justify-between border-yellow-950/20">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-10 h-10 rounded-lg bg-yellow-500/10 flex items-center justify-center text-yellow-500">
+                                        <i class="fas fa-shield-exclamation"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-medium">Unverified Users</p>
+                                        <p class="text-xs text-gray-500">Require action for access</p>
+                                    </div>
+                                </div>
+                                <span id="stat-unverified-users" class="text-xl font-bold text-yellow-500">0</span>
+                            </div>
+                            <div class="v-card p-4 flex items-center justify-between border-orange-950/20">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center text-orange-500">
+                                        <i class="fas fa-fingerprint"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-medium">Suspicious Activity</p>
+                                        <p class="text-xs text-gray-500">Potential abuse detected</p>
+                                    </div>
+                                </div>
+                                <span id="stat-suspicious-users" class="text-xl font-bold text-orange-500">0</span>
+                            </div>
+                        </div>
+
+                        <!-- Recent Activity Section -->
+                        <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
+                            
+                            <!-- Left: Recent Uploads -->
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between">
+                                    <h3 class="font-bold">Recent Uploads</h3>
+                                    <button onclick="switchView('resources')" class="text-xs text-gray-500 hover:text-white transition-colors">View All</button>
+                                </div>
+                                <div class="v-card">
+                                    <div class="overflow-x-auto">
+                                        <table class="w-full text-left text-sm">
+                                            <thead class="text-[10px] font-bold text-gray-500 uppercase tracking-wider bg-[#050505] border-b border-[#222]">
+                                                <tr>
+                                                    <th class="px-6 py-3">Resource</th>
+                                                    <th class="px-6 py-3">Subject</th>
+                                                    <th class="px-6 py-3 text-right">Added</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="recent-resources-tbody" class="divide-y divide-[#1a1a1a]">
+                                                <!-- Row example -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div id="recent-empty" class="hidden py-10 text-center text-gray-600 italic text-sm">No recent activity</div>
+                                </div>
+                            </div>
+
+                            <!-- Right: Top Performance -->
+                            <div class="space-y-6">
+                                <div class="v-card p-6">
+                                    <h3 class="font-bold mb-6 text-sm flex items-center gap-2">
+                                        <i class="fas fa-chart-line text-blue-500"></i> Top Performed Resources
+                                    </h3>
+                                    <div class="space-y-8">
+                                        <div>
+                                            <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-3">Most Viewed</p>
+                                            <div id="most-viewed-list" class="space-y-3"></div>
+                                        </div>
+                                        <div>
+                                            <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-3">Most Downloaded</p>
+                                            <div id="most-downloaded-list" class="space-y-3"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </section>
+
+                    <!-- VIEW: RESOURCES -->
+                    <section id="view-resources" class="view-section hidden space-y-8">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                            <div>
+                                <h1 class="text-3xl font-bold tracking-tight">Resources</h1>
+                                <p class="text-gray-500 mt-1">Organize and manage your educational content.</p>
+                            </div>
+                            <button id="btn-add-resource" class="v-btn-primary flex items-center gap-2">
+                                <i class="fas fa-plus"></i> Add New Resource
+                            </button>
+                        </div>
+
+                        <div class="v-card">
+                            <!-- Filters/Search -->
+                            <div class="p-4 border-b border-[#222] bg-[#050505] flex flex-col sm:flex-row gap-4 items-center">
+                                <div class="relative flex-1 w-full">
+                                    <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-xs"></i>
+                                    <input type="text" id="search-resource" placeholder="Search by title, subject or class..." class="v-input pl-9 w-full">
+                                </div>
+                                <select id="filter-category" class="v-input w-full sm:w-48">
+                                    <option value="">All Categories</option>
+                                </select>
+                            </div>
+
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-sm whitespace-nowrap">
+                                    <thead class="text-[10px] font-bold text-gray-500 uppercase tracking-wider bg-[#050505] border-b border-[#222]">
+                                        <tr>
+                                            <th class="px-6 py-4">Resource Info</th>
+                                            <th class="px-6 py-4">Category</th>
+                                            <th class="px-6 py-4 text-center">Featured</th>
+                                            <th class="px-6 py-4 text-center">Analytics</th>
+                                            <th class="px-6 py-4 text-right">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="resources-tbody" class="divide-y divide-[#1a1a1a]">
+                                        <!-- Rows injected by JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div id="resources-empty" class="hidden py-20 text-center text-gray-500">
+                                <i class="fas fa-folder-open text-3xl mb-3 block opacity-20"></i>
+                                <p>No resources found matching your criteria.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- VIEW: CATEGORIES -->
+                    <section id="view-categories" class="view-section hidden space-y-8">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                            <div>
+                                <h1 class="text-3xl font-bold tracking-tight">Categories</h1>
+                                <p class="text-gray-500 mt-1">Group your materials for better accessibility.</p>
+                            </div>
+                            <button id="btn-add-category" class="v-btn-primary flex items-center gap-2">
+                                <i class="fas fa-plus"></i> Create Category
+                            </button>
+                        </div>
+
+                        <div id="categories-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                            <!-- Cards injected by JS -->
+                        </div>
+                        <div id="categories-empty" class="hidden py-20 text-center text-gray-500 v-card border-dashed">
+                            <i class="fas fa-tags text-3xl mb-3 block opacity-20"></i>
+                            <p>No categories available. Start by adding one.</p>
+                        </div>
+                    </section>
+
+                    <!-- VIEW: USERS -->
+                    <section id="view-users" class="view-section hidden space-y-8">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                            <div>
+                                <h1 class="text-3xl font-bold tracking-tight">User Management</h1>
+                                <p class="text-gray-500 mt-1">Review accounts and manage platform access.</p>
+                            </div>
+                            <div class="relative w-full md:w-80">
+                                <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-xs"></i>
+                                <input type="text" id="search-users" placeholder="Search by email, name or fingerprint..." class="v-input pl-9">
+                            </div>
+                        </div>
+
+                        <!-- Filters -->
+                        <div class="flex flex-wrap items-center gap-2 p-1 bg-[#111] rounded-xl w-fit">
+                            <button data-filter="all" class="user-filter-btn px-4 py-1.5 rounded-lg text-xs font-semibold transition-all bg-white text-black">All</button>
+                            <button data-filter="active" class="user-filter-btn px-4 py-1.5 rounded-lg text-xs font-semibold text-gray-400 hover:text-white transition-all">Active</button>
+                            <button data-filter="banned" class="user-filter-btn px-4 py-1.5 rounded-lg text-xs font-semibold text-gray-400 hover:text-white transition-all">Banned</button>
+                            <button data-filter="verified" class="user-filter-btn px-4 py-1.5 rounded-lg text-xs font-semibold text-gray-400 hover:text-white transition-all">Verified</button>
+                            <button data-filter="unverified" class="user-filter-btn px-4 py-1.5 rounded-lg text-xs font-semibold text-gray-400 hover:text-white transition-all">Unverified</button>
+                            <button data-filter="suspicious" class="user-filter-btn px-4 py-1.5 rounded-lg text-xs font-semibold text-gray-400 hover:text-white transition-all">Suspicious</button>
+                        </div>
+
+                        <div class="v-card">
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-sm whitespace-nowrap">
+                                    <thead class="text-[10px] font-bold text-gray-500 uppercase tracking-wider bg-[#050505] border-b border-[#222]">
+                                        <tr>
+                                            <th class="px-6 py-4">User Identity</th>
+                                            <th class="px-6 py-4">Account Status</th>
+                                            <th class="px-6 py-4 text-center">Security</th>
+                                            <th class="px-6 py-4">Registered</th>
+                                            <th class="px-6 py-4 text-right">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="users-tbody" class="divide-y divide-[#1a1a1a]">
+                                        <!-- Rows injected by JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div id="users-empty" class="hidden py-20 text-center text-gray-500">
+                                <i class="fas fa-users-slash text-3xl mb-3 block opacity-20"></i>
+                                <p>No users found matching your search.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- VIEW: SETTINGS -->
+                    <section id="view-settings" class="view-section hidden space-y-10">
+                        <div>
+                            <h1 class="text-3xl font-bold tracking-tight">Settings</h1>
+                            <p class="text-gray-500 mt-1">Configure your application appearance and details.</p>
+                        </div>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+                            
+                            <!-- Left: Nav -->
+                            <div class="lg:col-span-1 space-y-1">
+                                <button data-settings-tab="homepage" class="settings-tab-btn active w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium transition-all bg-[#111] text-white">Homepage Configuration</button>
+                                <button data-settings-tab="creator" class="settings-tab-btn w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium transition-all text-gray-400 hover:text-white hover:bg-[#111]">Creator Profile</button>
+                                <button data-settings-tab="danger" class="settings-tab-btn w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium transition-all text-red-500 hover:bg-red-500/10">Danger Zone</button>
+                            </div>
+
+                            <!-- Right: Content -->
+                            <div class="lg:col-span-2">
+                                
+                                <!-- Tab: Homepage -->
+                                <form id="form-homepage" class="settings-view active space-y-6">
+                                    <div class="v-card p-6 space-y-6">
+                                        <div class="border-b border-[#222] pb-4">
+                                            <h3 class="font-bold">Branding & Hero</h3>
+                                            <p class="text-xs text-gray-500 mt-1">Visual identity of your main landing page.</p>
+                                        </div>
+                                        <div class="grid grid-cols-1 gap-6">
+                                            <div>
+                                                <label class="v-label text-xs uppercase tracking-widest font-bold text-gray-500 mb-2 block">Application Title</label>
+                                                <input type="text" id="hp-title" class="v-input" placeholder="e.g. Study Materials Pro">
+                                            </div>
+                                            <div>
+                                                <label class="v-label text-xs uppercase tracking-widest font-bold text-gray-500 mb-2 block">Hero Subtitle</label>
+                                                <textarea id="hp-subtitle" rows="3" class="v-input" placeholder="Brief description of your platform..."></textarea>
+                                            </div>
+                                            <div>
+                                                <label class="v-label text-xs uppercase tracking-widest font-bold text-gray-500 mb-2 block">Background Media (URL)</label>
+                                                <input type="url" id="hp-bg" class="v-input" placeholder="https://unsplash.com/...">
+                                                <p class="text-[10px] text-gray-600 mt-2 italic">Recommended: High resolution landscape image.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex justify-end">
+                                        <button type="submit" class="v-btn-primary">Save Changes</button>
+                                    </div>
+                                </form>
+
+                                <!-- Tab: Creator -->
+                                <form id="form-creator" class="settings-view hidden space-y-6">
+                                    <div class="v-card p-6 space-y-8">
+                                        <div class="border-b border-[#222] pb-4">
+                                            <h3 class="font-bold">Public Profile</h3>
+                                            <p class="text-xs text-gray-500 mt-1">Personalize how users see you in the about section.</p>
+                                        </div>
+                                        
+                                        <div class="flex flex-col sm:flex-row items-center gap-8">
+                                            <div class="relative group">
+                                                <img id="creator-img-preview" src="https://placehold.co/400" class="w-24 h-24 rounded-full object-cover border-2 border-[#333] group-hover:border-white transition-all">
+                                                <div class="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 rounded-full transition-all cursor-default">
+                                                    <i class="fas fa-camera text-white"></i>
+                                                </div>
+                                            </div>
+                                            <div class="flex-1 w-full space-y-4">
+                                                <div>
+                                                    <label class="text-[10px] font-bold text-gray-600 uppercase tracking-widest block mb-2">Avatar URL</label>
+                                                    <input type="url" id="cr-image" class="v-input" placeholder="https://...">
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                            <div>
+                                                <label class="text-[10px] font-bold text-gray-600 uppercase tracking-widest block mb-2">Full Name</label>
+                                                <input type="text" id="cr-name" class="v-input" placeholder="John Doe">
+                                            </div>
+                                            <div>
+                                                <label class="text-[10px] font-bold text-gray-600 uppercase tracking-widest block mb-2">Public Email</label>
+                                                <input type="email" id="cr-email" class="v-input" placeholder="contact@example.com">
+                                            </div>
+                                        </div>
+                                        
+                                        <div>
+                                            <label class="text-[10px] font-bold text-gray-600 uppercase tracking-widest block mb-2">Short Professional Bio</label>
+                                            <textarea id="cr-bio" class="v-input" rows="4" placeholder="Tell users about yourself..."></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="flex justify-end">
+                                        <button type="submit" class="v-btn-primary">Update Profile</button>
+                                    </div>
+                                </form>
+
+                                <!-- Tab: Danger -->
+                                <div id="tab-danger" class="settings-view hidden space-y-6">
+                                    <div class="v-card border-red-900/40 p-8">
+                                        <div class="flex items-center gap-4 mb-6">
+                                            <div class="w-12 h-12 bg-red-500/10 rounded-xl flex items-center justify-center text-red-500">
+                                                <i class="fas fa-radiation text-2xl"></i>
+                                            </div>
+                                            <div>
+                                                <h3 class="font-bold text-red-500 text-lg">System Wipe</h3>
+                                                <p class="text-sm text-gray-400">Irreversible actions that affect the entire database.</p>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="space-y-4">
+                                            <div class="p-4 bg-red-500/5 rounded-lg border border-red-500/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                                <div>
+                                                    <p class="text-sm font-semibold text-white">Clear All Records</p>
+                                                    <p class="text-xs text-gray-500">Delete all resources, categories, and logs.</p>
+                                                </div>
+                                                <button id="btn-clear-data" class="v-btn-danger whitespace-nowrap">Execute Wipe</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </section>
+
                 </div>
             </div>
-            <div class="grid grid-cols-2 gap-y-4 gap-x-8 text-sm">
-                <div><p class="text-gray-500 text-[10px] uppercase font-bold mb-1">Role</p><p class="text-white">${u.role || 'User'}</p></div>
-                <div><p class="text-gray-500 text-[10px] uppercase font-bold mb-1">Status</p><p class="${u.isBanned ? 'text-red-500' : 'text-green-500'} font-bold">${u.accountStatus || (u.isBanned ? 'Banned' : 'Active')}</p></div>
-                <div><p class="text-gray-500 text-[10px] uppercase font-bold mb-1">UID</p><p class="text-gray-300 font-mono text-[10px] break-all">${u.uid}</p></div>
-                <div><p class="text-gray-500 text-[10px] uppercase font-bold mb-1">Verification</p><p class="${u.emailVerified ? 'text-green-500' : 'text-yellow-500'}">${u.emailVerified ? 'Verified' : (u.verificationRequired ? 'Required (Blocked)' : 'Not Verified')}</p></div>
-                <div><p class="text-gray-500 text-[10px] uppercase font-bold mb-1">Joined</p><p class="text-gray-300">${joinedDate}</p></div>
-                <div><p class="text-gray-500 text-[10px] uppercase font-bold mb-1">Last Login</p><p class="text-gray-300">${lastLogin}</p></div>
-                <div class="col-span-2"><p class="text-gray-500 text-[10px] uppercase font-bold mb-1">Fingerprint</p><p class="text-gray-400 font-mono text-[10px] break-all p-2 bg-[#0a0a0a] rounded border border-[#333]">${u.deviceFingerprint || 'None'}</p></div>
-                ${u.isBanned ? `<div class="col-span-2"><p class="text-red-500/50 text-[10px] uppercase font-bold mb-1">Ban Reason</p><p class="text-red-400 p-3 bg-red-500/5 border border-red-500/20 rounded italic">"${u.banReason || 'No reason specified'}"</p></div>` : ''}
+        </main>
+    </div>
+
+    <!-- MODAL: RESOURCE -->
+    <div id="modal-resource" class="fixed inset-0 z-[60] hidden modal-overlay flex items-center justify-center p-4">
+        <div class="v-card w-full max-w-2xl max-h-[90vh] flex flex-col">
+            <div class="px-6 py-4 border-b border-[#222] flex items-center justify-between">
+                <h3 id="modal-resource-title" class="font-bold text-lg">Add Resource</h3>
+                <button class="btn-cancel-modal text-gray-500 hover:text-white transition-colors"><i class="fas fa-times"></i></button>
             </div>
-        `;
-        modalUser.classList.remove('hidden');
-    }
+            <div class="p-6 overflow-y-auto space-y-6">
+                <form id="form-resource" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <input type="hidden" id="res-id">
+                    
+                    <div class="md:col-span-2">
+                        <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest block mb-2">Resource Title *</label>
+                        <input type="text" id="res-title" class="v-input" placeholder="e.g. Mathematics Chapter 1 Notes" required>
+                    </div>
+                    
+                    <div>
+                        <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest block mb-2">Subject / Topic</label>
+                        <input type="text" id="res-subject" class="v-input" placeholder="e.g. Advanced Calculus">
+                    </div>
+                    
+                    <div>
+                        <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest block mb-2">Class / Grade Level</label>
+                        <input type="text" id="res-class" class="v-input" placeholder="e.g. 12th Grade">
+                    </div>
+                    
+                    <div>
+                        <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest block mb-2">Category *</label>
+                        <select id="res-category" class="v-input" required>
+                            <option value="">Select Category</option>
+                        </select>
+                    </div>
 
-    async function handleUnban(uid) {
-        const u = state.users.find(user => user.uid === uid);
-        if(!u || !confirm(`Unban ${u.email}?`)) return;
-        try {
-            await updateDoc(doc(db, 'users', uid), {
-                isBanned: false,
-                accountStatus: 'active',
-                banReason: deleteField()
+                    <div>
+                        <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest block mb-2">Featured Item</label>
+                        <div class="flex items-center h-10 gap-2">
+                            <input type="checkbox" id="res-featured" class="w-5 h-5 accent-white rounded bg-black border-[#333]">
+                            <span class="text-sm text-gray-400">Show in featured section</span>
+                        </div>
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest block mb-2">PDF Document URL *</label>
+                        <input type="url" id="res-pdf" class="v-input" placeholder="https://..." required>
+                    </div>
+                    
+                    <div class="md:col-span-2">
+                        <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest block mb-2">Thumbnail Preview URL</label>
+                        <input type="url" id="res-thumb" class="v-input" placeholder="https://...">
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest block mb-2">Short Description</label>
+                        <textarea id="res-desc" rows="3" class="v-input" placeholder="Provide a brief summary of the resource..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="p-6 border-t border-[#222] bg-[#050505] flex justify-end gap-3">
+                <button class="btn-cancel-modal v-btn-secondary">Discard</button>
+                <button type="submit" form="form-resource" class="v-btn-primary">Save Resource</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: CATEGORY -->
+    <div id="modal-category" class="fixed inset-0 z-[60] hidden modal-overlay flex items-center justify-center p-4">
+        <div class="v-card w-full max-w-sm">
+            <div class="px-6 py-4 border-b border-[#222]">
+                <h3 id="modal-category-title" class="font-bold text-lg">Add Category</h3>
+            </div>
+            <div class="p-6">
+                <form id="form-category">
+                    <input type="hidden" id="cat-id">
+                    <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest block mb-2">Category Label *</label>
+                    <input type="text" id="cat-name" class="v-input" placeholder="e.g. Previous Year Papers" required>
+                </form>
+            </div>
+            <div class="p-6 border-t border-[#222] bg-[#050505] flex justify-end gap-3">
+                <button class="btn-cancel-modal v-btn-secondary">Cancel</button>
+                <button type="submit" form="form-category" class="v-btn-primary">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: USER DETAILS -->
+    <div id="modal-user" class="fixed inset-0 z-[60] hidden modal-overlay flex items-center justify-center p-4">
+        <div class="v-card w-full max-w-xl max-h-[90vh] flex flex-col">
+            <div class="px-6 py-4 border-b border-[#222] flex items-center justify-between">
+                <h3 class="font-bold text-lg">Profile Inspection</h3>
+                <button class="btn-cancel-modal text-gray-500 hover:text-white"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="user-details-content" class="p-6 overflow-y-auto">
+                <!-- Injected via JS -->
+            </div>
+            <div class="p-6 border-t border-[#222] bg-[#050505] flex justify-end">
+                <button class="btn-cancel-modal v-btn-secondary">Close View</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: BAN REASON -->
+    <div id="modal-ban" class="fixed inset-0 z-[60] hidden modal-overlay flex items-center justify-center p-4">
+        <div class="v-card w-full max-w-md">
+            <div class="p-6">
+                <div class="w-12 h-12 bg-red-500/10 text-red-500 rounded-xl flex items-center justify-center mb-6">
+                    <i class="fas fa-user-slash text-xl"></i>
+                </div>
+                <h3 class="font-bold text-xl mb-2">Restrict User Access</h3>
+                <p class="text-sm text-gray-500 mb-6">Banning <span id="ban-user-email" class="text-white font-medium"></span> will immediately revoke their access to all materials.</p>
+                
+                <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest block mb-2">Reason for Suspension</label>
+                <textarea id="ban-reason-input" class="v-input" rows="3" placeholder="Explain why this account is being restricted..."></textarea>
+            </div>
+            <div class="p-6 border-t border-[#222] bg-[#050505] flex justify-end gap-3">
+                <button class="btn-cancel-modal v-btn-secondary">Abort</button>
+                <button id="confirm-ban-btn" class="v-btn-danger">Confirm Restriction</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: DELETE CONFIRMATION -->
+    <div id="modal-delete" class="fixed inset-0 z-[60] hidden modal-overlay flex items-center justify-center p-4">
+        <div class="v-card w-full max-w-sm p-8 text-center">
+            <div class="w-16 h-16 bg-red-500/10 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i class="fas fa-trash-can text-2xl"></i>
+            </div>
+            <h3 class="font-bold text-xl mb-2">Delete Permanently?</h3>
+            <p class="text-gray-500 text-sm mb-8">This action is irreversible. All associated data will be removed from the cloud.</p>
+            <div class="grid grid-cols-2 gap-3">
+                <button class="btn-cancel-modal v-btn-secondary">Cancel</button>
+                <button id="btn-confirm-delete" class="v-btn-danger">Yes, Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getFirestore, collection, getDocs, getDoc, doc, setDoc, deleteDoc, updateDoc, onSnapshot, serverTimestamp, addDoc, deleteField } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+        // APP CONFIG
+        const firebaseConfig = {
+            projectId: "resourceswebsite-4871a",
+            appId: "1:499105267177:web:d88137205e617e294c1f78",
+            apiKey: "AIzaSyAjpGS1Oj6yhHv3wv4F2tET69N_Qe9DMh0",
+            authDomain: "resourceswebsite-4871a.firebaseapp.com",
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        // GLOBAL STATE
+        const state = {
+            isLoggedIn: false,
+            adminUser: null,
+            resources: [],
+            categories: [],
+            users: [],
+            siteConfig: { siteName: 'Study Materials Pro' },
+            homepage: {},
+            creator: {}
+        };
+
+        // DOM ELEMENTS
+        const loginView = document.getElementById('login-view');
+        const appLayout = document.getElementById('app-layout');
+        const toastContainer = document.getElementById('toast-container');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+
+        // UTILITIES
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            const bg = type === 'success' ? 'bg-[#111] border-green-500/30' : 'bg-red-950/20 border-red-500/30';
+            const icon = type === 'success' ? 'fa-check-circle text-green-500' : 'fa-exclamation-circle text-red-500';
+            
+            toast.className = `toast flex items-center gap-3 p-4 rounded-xl border ${bg} text-white text-sm min-w-[300px] z-[100]`;
+            toast.innerHTML = `<i class="fas ${icon} text-lg"></i> <span>${message}</span>`;
+            
+            toastContainer.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(10px)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // AUTHENTICATION
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                try {
+                    const userDoc = await getDoc(doc(db, 'users', user.uid));
+                    const isAdminEmail = ['admin@example.com', 'aasimmuneer349@gmail.com', 'admin@eduplatform.com'].includes(user.email);
+                    const role = userDoc.exists() ? userDoc.data().role : null;
+                    const isAdminRole = ['admin', 'superadmin', 'moderator'].includes(role);
+
+                    if (isAdminEmail || isAdminRole) {
+                        state.isLoggedIn = true;
+                        state.adminUser = { ...user, role };
+                        toggleView();
+                        initDataListeners();
+                    } else {
+                        showToast("Access Denied: Administrative privileges required.", "error");
+                        signOut(auth);
+                        state.isLoggedIn = false;
+                        toggleView();
+                    }
+                } catch (err) {
+                    console.error("Auth verify failed:", err);
+                    signOut(auth);
+                    state.isLoggedIn = false;
+                    toggleView();
+                }
+            } else {
+                state.isLoggedIn = false;
+                state.adminUser = null;
+                toggleView();
+            }
+        });
+
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-user').value;
+            const pass = document.getElementById('login-pass').value;
+            const btn = e.target.querySelector('button');
+            
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Authenticating...';
+            
+            try {
+                await signInWithEmailAndPassword(auth, email, pass);
+                showToast("Welcome back, Administrator.");
+            } catch (err) {
+                showToast(err.message, "error");
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Sign in to Dashboard';
+            }
+        });
+
+        document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
+
+        function toggleView() {
+            if (state.isLoggedIn) {
+                loginView.classList.add('hidden');
+                appLayout.classList.remove('hidden');
+                updateAdminProfile();
+            } else {
+                loginView.classList.remove('hidden');
+                appLayout.classList.add('hidden');
+            }
+        }
+
+        function updateAdminProfile() {
+            if (!state.adminUser) return;
+            document.getElementById('admin-display-name').textContent = state.adminUser.displayName || 'Administrator';
+            document.getElementById('admin-email').textContent = state.adminUser.email;
+        }
+
+        // NAVIGATION
+        const navLinks = document.querySelectorAll('.nav-link');
+        const viewSections = document.querySelectorAll('.view-section');
+        const topbarTitle = document.getElementById('topbar-title');
+
+        window.switchView = function(target) {
+            navLinks.forEach(link => {
+                const isActive = link.getAttribute('data-target') === target;
+                link.classList.toggle('active', isActive);
+                link.classList.toggle('bg-[#111]', isActive);
+                link.classList.toggle('text-white', isActive);
+                link.classList.toggle('text-gray-400', !isActive);
+                if (isActive) topbarTitle.textContent = link.textContent.trim();
             });
-            // If we tracked fingerprints, we might want to keep them banned? 
-            // The spec says "Banned users are added to bannedFingerprints". 
-            // Unbanning usually unbans the specific user.
-            showToast('User unbanned');
-        } catch(err) { showToast(err.message, 'error'); }
-    }
 
-    async function handleForceVerify(uid) {
-        const u = state.users.find(user => user.uid === uid);
-        if(!u || !confirm(`Force verification for ${u.email}? This will block their access until verified.`)) return;
-        try {
-            await updateDoc(doc(db, 'users', uid), {
-                verificationRequired: true
+            viewSections.forEach(section => {
+                const isActive = section.id === `view-${target}`;
+                section.classList.toggle('active', isActive);
+                section.classList.toggle('hidden', !isActive);
             });
-            showToast('Verification required for user');
-        } catch(err) { showToast(err.message, 'error'); }
-    }
 
-    async function handleUserDelete(uid) {
-        const u = state.users.find(user => user.uid === uid);
-        if(!u || !confirm(`Permanently delete user record for ${u.email}? This only deletes their database profile, not their Auth account.`)) return;
-        try {
-            await deleteDoc(doc(db, 'users', uid));
-            showToast('User record deleted');
-        } catch(err) { showToast(err.message, 'error'); }
-    }
+            // Close sidebar on mobile
+            sidebar.classList.add('-translate-x-full');
+            sidebarOverlay.classList.add('hidden');
+        };
 
-    document.addEventListener('click', (e) => {
-        const target = e.target.closest('button');
-        if(!target) return;
-        
-        const uid = target.getAttribute('data-uid');
-        if(!uid) return;
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                switchView(link.getAttribute('data-target'));
+            });
+        });
 
-        if(target.classList.contains('action-user-details')) showUserDetails(uid);
-        if(target.classList.contains('action-user-unban')) handleUnban(uid);
-        if(target.classList.contains('action-user-verify')) handleForceVerify(uid);
-        if(target.classList.contains('action-user-delete')) handleUserDelete(uid);
-        if(target.classList.contains('action-user-ban')) {
-            const u = state.users.find(user => user.uid === uid);
-            selectedUserForAction = u;
-            document.getElementById('ban-user-email').textContent = u.email;
+        document.getElementById('toggle-sidebar').addEventListener('click', () => {
+            sidebar.classList.remove('-translate-x-full');
+            sidebarOverlay.classList.remove('hidden');
+        });
+        document.getElementById('close-sidebar').addEventListener('click', () => {
+            sidebar.classList.add('-translate-x-full');
+            sidebarOverlay.classList.add('hidden');
+        });
+        sidebarOverlay.addEventListener('click', () => {
+            sidebar.classList.add('-translate-x-full');
+            sidebarOverlay.classList.add('hidden');
+        });
+
+        // SETTINGS TABS
+        const tabBtns = document.querySelectorAll('.settings-tab-btn');
+        const tabViews = document.querySelectorAll('.settings-view');
+
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const target = btn.getAttribute('data-settings-tab');
+                tabBtns.forEach(b => {
+                    const isActive = b === btn;
+                    b.classList.toggle('active', isActive);
+                    b.classList.toggle('bg-[#111]', isActive);
+                    b.classList.toggle('text-white', isActive);
+                    b.classList.toggle('text-gray-400', !isActive);
+                    if (target === 'danger') b.classList.add('text-red-500');
+                });
+                tabViews.forEach(v => {
+                    const isActive = v.id === `form-${target}` || v.id === `tab-${target}`;
+                    v.classList.toggle('active', isActive);
+                    v.classList.toggle('hidden', !isActive);
+                });
+            });
+        });
+
+        // DATA LISTENERS
+        let unsubs = [];
+        function initDataListeners() {
+            unsubs.forEach(u => u());
+            unsubs = [];
+
+            unsubs.push(onSnapshot(collection(db, 'resources'), (snap) => {
+                state.resources = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                renderAll();
+            }));
+
+            unsubs.push(onSnapshot(collection(db, 'categories'), (snap) => {
+                state.categories = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                renderAll();
+            }));
+
+            unsubs.push(onSnapshot(collection(db, 'users'), (snap) => {
+                state.users = snap.docs.map(d => ({ uid: d.id, ...d.data() }));
+                renderAll();
+            }));
+
+            unsubs.push(onSnapshot(doc(db, 'settings', 'homepage'), (snap) => {
+                if (snap.exists()) {
+                    state.homepage = snap.data();
+                    populateHomepageForm();
+                }
+            }));
+
+            unsubs.push(onSnapshot(doc(db, 'creatorInfo', 'profile'), (snap) => {
+                if (snap.exists()) {
+                    state.creator = snap.data();
+                    populateCreatorForm();
+                }
+            }));
+        }
+
+        // RENDERING ENGINES
+        function renderAll() {
+            renderStats();
+            renderDashboardActivity();
+            renderResourcesTable();
+            renderCategoriesList();
+            renderUsersTable();
+            populateCategorySelects();
+        }
+
+        function renderStats() {
+            document.getElementById('stat-resources').textContent = state.resources.length;
+            document.getElementById('stat-downloads').textContent = state.resources.reduce((acc, r) => acc + (r.downloadCount || 0), 0);
+            document.getElementById('stat-views').textContent = state.resources.reduce((acc, r) => acc + (r.viewCount || 0), 0);
+            document.getElementById('stat-users').textContent = state.users.length;
+            document.getElementById('stat-active-users').textContent = state.users.filter(u => !u.isBanned).length;
+            document.getElementById('stat-banned-users').textContent = state.users.filter(u => u.isBanned).length;
+            document.getElementById('stat-unverified-users').textContent = state.users.filter(u => u.verificationRequired && !u.emailVerified).length;
+            document.getElementById('stat-suspicious-users').textContent = state.users.filter(u => u.accountStatus === 'suspicious').length;
+        }
+
+        function renderDashboardActivity() {
+            // Recent Uploads
+            const recentTbody = document.getElementById('recent-resources-tbody');
+            const recentSorted = [...state.resources].sort((a,b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0)).slice(0, 5);
+            
+            recentTbody.innerHTML = recentSorted.map(r => `
+                <tr class="group hover:bg-white/5 transition-colors">
+                    <td class="px-6 py-4 font-medium text-white">${r.title}</td>
+                    <td class="px-6 py-4 text-gray-500">${r.subject || 'N/A'}</td>
+                    <td class="px-6 py-4 text-right text-[10px] font-mono text-gray-600">${r.createdAt ? new Date(r.createdAt.toMillis()).toLocaleDateString() : 'Pending'}</td>
+                </tr>
+            `).join('');
+            document.getElementById('recent-empty').classList.toggle('hidden', recentSorted.length > 0);
+
+            // Performance Lists
+            const viewsList = document.getElementById('most-viewed-list');
+            const sortedViews = [...state.resources].sort((a,b) => (b.viewCount || 0) - (a.viewCount || 0)).slice(0, 4);
+            viewsList.innerHTML = sortedViews.map(r => `
+                <div class="flex items-center justify-between p-3 bg-white/[0.02] border border-white/[0.05] rounded-lg">
+                    <span class="text-xs font-medium truncate pr-4">${r.title}</span>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-500/10 text-blue-500">${r.viewCount || 0} views</span>
+                </div>
+            `).join('');
+
+            const dlsList = document.getElementById('most-downloaded-list');
+            const sortedDls = [...state.resources].sort((a,b) => (b.downloadCount || 0) - (a.downloadCount || 0)).slice(0, 4);
+            dlsList.innerHTML = sortedDls.map(r => `
+                <div class="flex items-center justify-between p-3 bg-white/[0.02] border border-white/[0.05] rounded-lg">
+                    <span class="text-xs font-medium truncate pr-4">${r.title}</span>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-green-500/10 text-green-500">${r.downloadCount || 0} DLs</span>
+                </div>
+            `).join('');
+        }
+
+        let resSearchTerm = '';
+        function renderResourcesTable() {
+            const tbody = document.getElementById('resources-tbody');
+            let filtered = state.resources;
+            
+            if (resSearchTerm) {
+                const s = resSearchTerm.toLowerCase();
+                filtered = filtered.filter(r => r.title.toLowerCase().includes(s) || (r.subject||'').toLowerCase().includes(s));
+            }
+
+            tbody.innerHTML = filtered.map(r => `
+                <tr class="group hover:bg-white/5 transition-colors">
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-lg bg-[#111] border border-[#222] flex items-center justify-center shrink-0 overflow-hidden">
+                                ${r.thumbnailUrl ? `<img src="${r.thumbnailUrl}" class="w-full h-full object-cover">` : `<i class="fas fa-file-pdf text-blue-500"></i>`}
+                            </div>
+                            <div class="min-w-0">
+                                <p class="font-bold text-white truncate text-sm">${r.title}</p>
+                                <p class="text-[10px] text-gray-500 truncate">${r.subject || 'No Subject'} • ${r.classLvl || 'All Levels'}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="px-2 py-1 rounded bg-[#111] border border-[#222] text-[10px] font-medium text-gray-400">${r.category || 'Unassigned'}</span>
+                    </td>
+                    <td class="px-6 py-4 text-center">
+                        <button onclick="toggleFeatured('${r.id}', ${r.featured})" class="w-8 h-8 rounded-full flex items-center justify-center transition-all ${r.featured ? 'text-orange-500 bg-orange-500/10' : 'text-gray-600 hover:text-gray-400'}">
+                            <i class="fas fa-star"></i>
+                        </button>
+                    </td>
+                    <td class="px-6 py-4 text-center">
+                        <div class="flex flex-col gap-1">
+                            <span class="text-[10px] text-gray-500 font-bold">${r.viewCount || 0} VIEWS</span>
+                            <span class="text-[10px] text-gray-600 font-bold">${r.downloadCount || 0} DOWNLOADS</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                        <div class="flex items-center justify-end gap-1">
+                            <button onclick="editResource('${r.id}')" class="w-8 h-8 rounded-lg flex items-center justify-center text-gray-500 hover:text-white hover:bg-[#222] transition-all"><i class="fas fa-edit text-xs"></i></button>
+                            <button onclick="deletePrompt('resources', '${r.id}')" class="w-8 h-8 rounded-lg flex items-center justify-center text-gray-500 hover:text-red-500 hover:bg-red-500/10 transition-all"><i class="fas fa-trash-alt text-xs"></i></button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+            document.getElementById('resources-empty').classList.toggle('hidden', filtered.length > 0);
+        }
+
+        function renderCategoriesList() {
+            const list = document.getElementById('categories-list');
+            list.innerHTML = state.categories.map(c => `
+                <div class="v-card p-4 group hover:border-gray-500 transition-all flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-500 flex items-center justify-center text-xs">
+                            <i class="fas fa-tag"></i>
+                        </div>
+                        <span class="font-medium text-sm">${c.name}</span>
+                    </div>
+                    <div class="flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button onclick="editCategory('${c.id}')" class="p-2 text-gray-500 hover:text-white"><i class="fas fa-edit text-xs"></i></button>
+                        <button onclick="deletePrompt('categories', '${c.id}')" class="p-2 text-gray-500 hover:text-red-500"><i class="fas fa-trash-alt text-xs"></i></button>
+                    </div>
+                </div>
+            `).join('');
+            document.getElementById('categories-empty').classList.toggle('hidden', state.categories.length > 0);
+        }
+
+        let userSearchTerm = '';
+        let userFilter = 'all';
+        function renderUsersTable() {
+            const tbody = document.getElementById('users-tbody');
+            let filtered = state.users;
+
+            if (userFilter !== 'all') {
+                if (userFilter === 'active') filtered = filtered.filter(u => !u.isBanned);
+                if (userFilter === 'banned') filtered = filtered.filter(u => u.isBanned);
+                if (userFilter === 'verified') filtered = filtered.filter(u => u.emailVerified);
+                if (userFilter === 'unverified') filtered = filtered.filter(u => u.verificationRequired && !u.emailVerified);
+                if (userFilter === 'suspicious') filtered = filtered.filter(u => u.accountStatus === 'suspicious');
+            }
+
+            if (userSearchTerm) {
+                const s = userSearchTerm.toLowerCase();
+                filtered = filtered.filter(u => 
+                    (u.email||'').toLowerCase().includes(s) || 
+                    (u.displayName||'').toLowerCase().includes(s) ||
+                    (u.deviceFingerprint||'').toLowerCase().includes(s)
+                );
+            }
+
+            tbody.innerHTML = filtered.map(u => {
+                const isBanned = u.isBanned;
+                const statusClass = isBanned ? 'bg-red-500/10 text-red-500 border-red-500/20' : 'bg-green-500/10 text-green-500 border-green-500/20';
+                const statusText = isBanned ? 'BANNED' : 'ACTIVE';
+                const joined = u.createdAt ? new Date(u.createdAt.toMillis()).toLocaleDateString() : '---';
+
+                return `
+                    <tr class="group hover:bg-white/5 transition-colors">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-full bg-[#111] border border-[#222] flex items-center justify-center text-xs font-bold">
+                                    ${(u.displayName || u.email || '?').charAt(0).toUpperCase()}
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="font-bold text-white text-sm truncate">${u.displayName || 'Unnamed User'}</p>
+                                    <p class="text-[10px] text-gray-500 font-mono truncate">${u.email}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="px-2 py-0.5 rounded border text-[10px] font-bold ${statusClass}">${statusText}</span>
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            <div class="flex flex-col items-center gap-1">
+                                ${u.emailVerified ? 
+                                    '<span class="text-[10px] text-green-500 font-bold flex items-center gap-1"><i class="fas fa-check-circle"></i> VERIFIED</span>' : 
+                                    (u.verificationRequired ? 
+                                        '<span class="text-[10px] text-yellow-500 font-bold flex items-center gap-1"><i class="fas fa-clock"></i> PENDING</span>' : 
+                                        '<span class="text-[10px] text-gray-600 font-bold">OPTIONAL</span>')
+                                }
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-gray-500 text-xs">${joined}</td>
+                        <td class="px-6 py-4 text-right">
+                            <div class="flex items-center justify-end gap-1">
+                                <button onclick="showUserDetails('${u.uid}')" class="p-2 text-gray-500 hover:text-white"><i class="fas fa-info-circle"></i></button>
+                                ${isBanned ? 
+                                    `<button onclick="handleUnban('${u.uid}')" class="p-2 text-green-500/50 hover:text-green-500"><i class="fas fa-user-check"></i></button>` : 
+                                    `<button onclick="banPrompt('${u.uid}', '${u.email}')" class="p-2 text-red-500/50 hover:text-red-500"><i class="fas fa-user-slash"></i></button>`
+                                }
+                                ${!u.emailVerified && !u.verificationRequired ? `<button onclick="handleForceVerify('${u.uid}')" class="p-2 text-blue-500/50 hover:text-blue-500"><i class="fas fa-envelope-open-text"></i></button>` : ''}
+                                <button onclick="deletePrompt('users', '${u.uid}')" class="p-2 text-gray-500 hover:text-red-500"><i class="fas fa-trash-alt"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+            document.getElementById('users-empty').classList.toggle('hidden', filtered.length > 0);
+        }
+
+        // ACTIONS & FORMS
+        const modalRes = document.getElementById('modal-resource');
+        const modalCat = document.getElementById('modal-category');
+        const modalDel = document.getElementById('modal-delete');
+        const modalBan = document.getElementById('modal-ban');
+        const modalUsr = document.getElementById('modal-user');
+
+        let pendingDelete = null;
+        let pendingBanUid = null;
+
+        document.querySelectorAll('.btn-cancel-modal').forEach(b => b.addEventListener('click', closeModal));
+        function closeModal() {
+            [modalRes, modalCat, modalDel, modalBan, modalUsr].forEach(m => m.classList.add('hidden'));
+            pendingDelete = null;
+            pendingBanUid = null;
+        }
+
+        // Resource Add/Edit
+        document.getElementById('btn-add-resource').addEventListener('click', () => {
+            document.getElementById('form-resource').reset();
+            document.getElementById('res-id').value = '';
+            document.getElementById('modal-resource-title').textContent = 'Add Resource';
+            modalRes.classList.remove('hidden');
+        });
+
+        window.editResource = function(id) {
+            const r = state.resources.find(res => res.id === id);
+            if (!r) return;
+            document.getElementById('res-id').value = r.id;
+            document.getElementById('res-title').value = r.title || '';
+            document.getElementById('res-subject').value = r.subject || '';
+            document.getElementById('res-class').value = r.classLvl || '';
+            document.getElementById('res-category').value = r.category || '';
+            document.getElementById('res-pdf').value = r.pdfUrl || '';
+            document.getElementById('res-thumb').value = r.thumbnailUrl || '';
+            document.getElementById('res-desc').value = r.description || '';
+            document.getElementById('res-featured').checked = !!r.featured;
+            document.getElementById('modal-resource-title').textContent = 'Modify Resource';
+            modalRes.classList.remove('hidden');
+        };
+
+        document.getElementById('form-resource').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('res-id').value;
+            const data = {
+                title: document.getElementById('res-title').value,
+                subject: document.getElementById('res-subject').value,
+                classLvl: document.getElementById('res-class').value,
+                category: document.getElementById('res-category').value,
+                pdfUrl: document.getElementById('res-pdf').value,
+                thumbnailUrl: document.getElementById('res-thumb').value,
+                description: document.getElementById('res-desc').value,
+                featured: document.getElementById('res-featured').checked,
+                updatedAt: serverTimestamp()
+            };
+
+            try {
+                if (id) {
+                    await updateDoc(doc(db, 'resources', id), data);
+                    showToast("Resource details updated.");
+                } else {
+                    data.createdAt = serverTimestamp();
+                    data.viewCount = 0;
+                    data.downloadCount = 0;
+                    await addDoc(collection(db, 'resources'), data);
+                    showToast("New resource successfully added.");
+                }
+                closeModal();
+            } catch (err) {
+                showToast(err.message, "error");
+            }
+        });
+
+        // Category Add/Edit
+        document.getElementById('btn-add-category').addEventListener('click', () => {
+            document.getElementById('cat-id').value = '';
+            document.getElementById('cat-name').value = '';
+            document.getElementById('modal-category-title').textContent = 'Create Category';
+            modalCat.classList.remove('hidden');
+        });
+
+        window.editCategory = function(id) {
+            const c = state.categories.find(cat => cat.id === id);
+            if (!c) return;
+            document.getElementById('cat-id').value = c.id;
+            document.getElementById('cat-name').value = c.name;
+            document.getElementById('modal-category-title').textContent = 'Edit Category';
+            modalCat.classList.remove('hidden');
+        };
+
+        document.getElementById('form-category').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('cat-id').value;
+            const name = document.getElementById('cat-name').value;
+
+            try {
+                if (id) {
+                    await updateDoc(doc(db, 'categories', id), { name });
+                    showToast("Category renamed.");
+                } else {
+                    await addDoc(collection(db, 'categories'), { name });
+                    showToast("Category created.");
+                }
+                closeModal();
+            } catch (err) {
+                showToast(err.message, "error");
+            }
+        });
+
+        // Deletion
+        window.deletePrompt = function(col, id) {
+            pendingDelete = { col, id };
+            modalDel.classList.remove('hidden');
+        };
+
+        document.getElementById('btn-confirm-delete').addEventListener('click', async () => {
+            if (!pendingDelete) return;
+            try {
+                await deleteDoc(doc(db, pendingDelete.col, pendingDelete.id));
+                showToast("Item permanently removed.");
+                closeModal();
+            } catch (err) {
+                showToast(err.message, "error");
+            }
+        });
+
+        // Featured Toggle
+        window.toggleFeatured = async function(id, current) {
+            try {
+                await updateDoc(doc(db, 'resources', id), { featured: !current });
+            } catch (err) { showToast(err.message, "error"); }
+        };
+
+        // User Management Actions
+        window.showUserDetails = function(uid) {
+            const u = state.users.find(usr => usr.uid === uid);
+            if (!u) return;
+            
+            const joined = u.createdAt ? new Date(u.createdAt.toMillis()).toLocaleString() : 'N/A';
+            const last = u.lastLogin ? new Date(u.lastLogin.toMillis()).toLocaleString() : 'Never';
+            
+            document.getElementById('user-details-content').innerHTML = `
+                <div class="flex items-center gap-6 mb-8">
+                    <div class="w-20 h-20 rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center text-3xl font-bold border border-blue-500/20">
+                        ${(u.displayName || u.email).charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                        <h4 class="text-2xl font-bold text-white">${u.displayName || 'Unnamed User'}</h4>
+                        <p class="text-gray-500 font-mono text-xs">${u.email}</p>
+                        <div class="flex items-center gap-2 mt-2">
+                             <span class="px-2 py-0.5 rounded-full bg-[#111] border border-[#222] text-[10px] font-bold text-gray-500">${u.role?.toUpperCase() || 'USER'}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 bg-white/[0.02] p-6 rounded-xl border border-white/[0.05]">
+                    <div>
+                        <p class="text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-1">Status</p>
+                        <p class="text-sm ${u.isBanned ? 'text-red-500' : 'text-green-500'} font-bold">${u.isBanned ? 'BANNED ACCOUNT' : 'ACTIVE ACCOUNT'}</p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-1">Email Verification</p>
+                        <p class="text-sm font-semibold">${u.emailVerified ? 'Verified Account' : (u.verificationRequired ? 'Pending Force Verify' : 'Not Required')}</p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-1">Registered On</p>
+                        <p class="text-sm text-gray-300">${joined}</p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-1">Last Interaction</p>
+                        <p class="text-sm text-gray-300">${last}</p>
+                    </div>
+                    <div class="sm:col-span-2">
+                        <p class="text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-1">Security Fingerprint</p>
+                        <p class="text-xs text-gray-500 font-mono bg-black p-3 rounded-lg border border-[#222] truncate">${u.deviceFingerprint || 'No fingerprint logged yet'}</p>
+                    </div>
+                    ${u.isBanned ? `
+                    <div class="sm:col-span-2 p-4 bg-red-500/5 rounded-lg border border-red-500/10">
+                        <p class="text-[10px] font-bold text-red-500/50 uppercase tracking-widest mb-1">Suspension Reason</p>
+                        <p class="text-sm text-red-400 italic">"${u.banReason || 'No reason provided.'}"</p>
+                    </div>` : ''}
+                </div>
+            `;
+            modalUsr.classList.remove('hidden');
+        };
+
+        window.banPrompt = function(uid, email) {
+            pendingBanUid = uid;
+            document.getElementById('ban-user-email').textContent = email;
             document.getElementById('ban-reason-input').value = '';
             modalBan.classList.remove('hidden');
-        }
-    });
+        };
 
-    document.getElementById('confirm-ban-btn').addEventListener('click', async () => {
-        if(!selectedUserForAction) return;
-        const reason = document.getElementById('ban-reason-input').value.trim() || 'Violation of terms';
-        try {
-            await updateDoc(doc(db, 'users', selectedUserForAction.uid), {
-                isBanned: true,
-                accountStatus: 'banned',
-                banReason: reason
-            });
-            
-            // Add fingerprint to banned collection
-            if (selectedUserForAction.deviceFingerprint) {
-                await setDoc(doc(db, 'bannedFingerprints', selectedUserForAction.deviceFingerprint), {
-                    bannedAt: serverTimestamp(),
-                    email: selectedUserForAction.email,
-                    reason: reason
+        document.getElementById('confirm-ban-btn').addEventListener('click', async () => {
+            if (!pendingBanUid) return;
+            const reason = document.getElementById('ban-reason-input').value.trim() || 'Violation of service terms.';
+            try {
+                await updateDoc(doc(db, 'users', pendingBanUid), {
+                    isBanned: true,
+                    accountStatus: 'banned',
+                    banReason: reason
                 });
-            }
-            
-            modalBan.classList.add('hidden');
-            showToast('User banned and fingerprint blacklisted');
-        } catch(err) { showToast(err.message, 'error'); }
-    });
+                
+                // Add to blacklisted fingerprints if exists
+                const u = state.users.find(usr => usr.uid === pendingBanUid);
+                if (u && u.deviceFingerprint) {
+                    await setDoc(doc(db, 'bannedFingerprints', u.deviceFingerprint), {
+                        email: u.email,
+                        reason: reason,
+                        bannedAt: serverTimestamp()
+                    });
+                }
 
-    document.querySelectorAll('.btn-cancel-modal').forEach(btn => {
-        btn.addEventListener('click', () => {
-            modalUser.classList.add('hidden');
-            modalBan.classList.add('hidden');
+                showToast("User successfully restricted.");
+                closeModal();
+            } catch (err) { showToast(err.message, "error"); }
         });
-    });
 
-    function renderCategoriesList() {
-        const list = document.getElementById('categories-list');
-        const empty = document.getElementById('categories-empty');
-        if(!list) return;
-        if(state.categories.length === 0) {
-            list.innerHTML = '';
-            empty.classList.remove('hidden'); return;
+        window.handleUnban = async function(uid) {
+            if (!confirm("Are you sure you want to restore access for this user?")) return;
+            try {
+                await updateDoc(doc(db, 'users', uid), {
+                    isBanned: false,
+                    accountStatus: 'active',
+                    banReason: deleteField()
+                });
+                showToast("Account access restored.");
+            } catch (err) { showToast(err.message, "error"); }
+        };
+
+        window.handleForceVerify = async function(uid) {
+            if (!confirm("Force email verification for this user? They will be blocked until verified.")) return;
+            try {
+                await updateDoc(doc(db, 'users', uid), { verificationRequired: true });
+                showToast("Verification requirement enforced.");
+            } catch (err) { showToast(err.message, "error"); }
+        };
+
+        // SETTINGS FORMS
+        document.getElementById('form-homepage').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                await setDoc(doc(db, 'settings', 'homepage'), {
+                    title: document.getElementById('hp-title').value,
+                    subtitle: document.getElementById('hp-subtitle').value,
+                    bgImage: document.getElementById('hp-bg').value,
+                    heroImage: document.getElementById('hp-bg').value
+                }, { merge: true });
+                showToast("Landing page settings synchronized.");
+            } catch (err) { showToast(err.message, "error"); }
+        });
+
+        document.getElementById('form-creator').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                await setDoc(doc(db, 'creatorInfo', 'profile'), {
+                    name: document.getElementById('cr-name').value,
+                    email: document.getElementById('cr-email').value,
+                    bio: document.getElementById('cr-bio').value,
+                    imageUrl: document.getElementById('cr-image').value
+                }, { merge: true });
+                showToast("Creator profile updated.");
+            } catch (err) { showToast(err.message, "error"); }
+        });
+
+        document.getElementById('btn-clear-data').addEventListener('click', () => {
+            showToast("Destructive actions are disabled in this environment.", "error");
+        });
+
+        // POPULATORS
+        function populateHomepageForm() {
+            if (document.activeElement?.id.startsWith('hp-')) return;
+            document.getElementById('hp-title').value = state.homepage.title || '';
+            document.getElementById('hp-subtitle').value = state.homepage.subtitle || '';
+            document.getElementById('hp-bg').value = state.homepage.bgImage || state.homepage.heroImage || '';
         }
-        empty.classList.add('hidden');
-        list.innerHTML = state.categories.map(c => `
-            <div class="flex justify-between items-center bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-3 rounded-lg hover:border-blue-500/50 transition-colors">
-                <span class="font-medium dark:text-white"><i class="fa-solid fa-tag text-blue-500 mr-2 opacity-50"></i>${c.name}</span>
-                <div class="flex items-center gap-2">
-                    <button class="action-edit-cat pointer-events-auto w-8 h-8 rounded bg-gray-200 dark:bg-gray-800 text-gray-500 hover:text-blue-500 transition-colors flex items-center justify-center" data-id="${c.id}"><i class="fa-solid fa-pen pointer-events-none"></i></button>
-                    <button class="action-del-cat pointer-events-auto w-8 h-8 rounded bg-gray-200 dark:bg-gray-800 text-gray-500 hover:text-red-500 transition-colors flex items-center justify-center" data-id="${c.id}"><i class="fa-solid fa-trash pointer-events-none"></i></button>
-                </div>
-            </div>
-        `).join('');
-    }
-</script>
 
+        function populateCreatorForm() {
+            if (document.activeElement?.id.startsWith('cr-')) return;
+            document.getElementById('cr-name').value = state.creator.name || '';
+            document.getElementById('cr-email').value = state.creator.email || '';
+            document.getElementById('cr-bio').value = state.creator.bio || '';
+            document.getElementById('cr-image').value = state.creator.imageUrl || state.creator.image || '';
+            document.getElementById('creator-img-preview').src = state.creator.imageUrl || state.creator.image || 'https://placehold.co/400';
+        }
+
+        function populateCategorySelects() {
+            const select = document.getElementById('res-category');
+            const resFilter = document.getElementById('filter-category');
+            
+            const options = state.categories.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+            
+            const currentVal = select.value;
+            select.innerHTML = '<option value="">Select Category</option>' + options;
+            select.value = currentVal;
+
+            const currentFilter = resFilter.value;
+            resFilter.innerHTML = '<option value="">All Categories</option>' + options;
+            resFilter.value = currentFilter;
+        }
+
+        // SEARCH/FILTER HANDLERS
+        document.getElementById('search-resource').addEventListener('input', (e) => {
+            resSearchTerm = e.target.value;
+            renderResourcesTable();
+        });
+        document.getElementById('filter-category').addEventListener('change', (e) => {
+            // Can be expanded to filter by category
+            renderResourcesTable();
+        });
+
+        document.getElementById('search-users').addEventListener('input', (e) => {
+            userSearchTerm = e.target.value;
+            renderUsersTable();
+        });
+
+        document.querySelectorAll('.user-filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.user-filter-btn').forEach(b => {
+                    b.classList.remove('bg-white', 'text-black');
+                    b.classList.add('text-gray-400');
+                });
+                btn.classList.add('bg-white', 'text-black');
+                btn.classList.remove('text-gray-400');
+                userFilter = btn.getAttribute('data-filter');
+                renderUsersTable();
+            });
+        });
+
+    </script>
 </body>
 </html>
