@@ -45,9 +45,56 @@ export default function PDFViewer() {
   const [highlights, setHighlights] = useState<AppHighlight[]>([]);
   const [isAddingHighlight, setIsAddingHighlight] = useState(false);
   const [isPageSaved, setIsPageSaved] = useState(false);
+  const [secondsSpent, setSecondsSpent] = useState(0);
 
   const displayEmail = userData?.email || user?.email || 'Unauthorized';
   const isPremium = userData?.isPremium || ['admin', 'superadmin', 'moderator'].includes(userData?.role || '');
+
+  // Study Time Tracker
+  useEffect(() => {
+    if (!isPremium || !user || !resourceId) return;
+
+    const interval = setInterval(() => {
+      setSecondsSpent(prev => prev + 1);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [isPremium, user, resourceId]);
+
+  // Periodic Save (Every 30 seconds or on page/scale change)
+  useEffect(() => {
+    if (!isPremium || !user || !resource || !numPages || secondsSpent === 0) return;
+
+    const saveStats = async () => {
+      try {
+        const historyRef = doc(db, 'users', user.uid, 'history', resource.id);
+        await setDoc(historyRef, {
+          resourceId: resource.id,
+          resourceTitle: resource.title,
+          lastPage: currentPage,
+          totalPages: numPages,
+          percentage: Math.round((currentPage / numPages) * 100),
+          zoom: scale,
+          timeSpent: increment(secondsSpent),
+          updatedAt: serverTimestamp()
+        }, { merge: true });
+        
+        // Reset session seconds after saving to prevent double counting
+        setSecondsSpent(0);
+      } catch (err) {
+        console.error("Error saving reading stats:", err);
+      }
+    };
+
+    // Save every 30 seconds of activity
+    if (secondsSpent >= 30) {
+      saveStats();
+    }
+
+    // Also handle regular updates for page/scale
+    const timeout = setTimeout(saveStats, 5000);
+    return () => clearTimeout(timeout);
+  }, [secondsSpent, currentPage, scale, isPremium, user, resource, numPages]);
 
   useEffect(() => {
     const handleFullscreenChange = () => {
@@ -191,29 +238,6 @@ export default function PDFViewer() {
     if (!numPages) return;
     setProgress(Math.round((currentPage / numPages) * 100));
   }, [currentPage, numPages]);
-
-  useEffect(() => {
-    if (!isPremium || !user || !resource || !numPages) return;
-
-    const saveHistory = async () => {
-      try {
-        await setDoc(doc(db, 'users', user.uid, 'history', resource.id), {
-          resourceId: resource.id,
-          resourceTitle: resource.title,
-          lastPage: currentPage,
-          totalPages: numPages,
-          percentage: Math.round((currentPage / numPages) * 100),
-          zoom: scale,
-          updatedAt: serverTimestamp()
-        }, { merge: true });
-      } catch (err) {
-        console.error("Error saving history:", err);
-      }
-    };
-
-    const timeout = setTimeout(saveHistory, 3000);
-    return () => clearTimeout(timeout);
-  }, [currentPage, scale, isPremium, user, resource, numPages]);
 
   const toggleBookmark = async () => {
     if (!isPremium || !user || !resource) return;

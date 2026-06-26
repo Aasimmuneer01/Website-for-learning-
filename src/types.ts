@@ -39,7 +39,8 @@ export interface ReadingHistory {
   totalPages: number;
   percentage: number;
   zoom: number;
-  scrollPosition: { x: number; y: number };
+  scrollPosition?: { x: number; y: number };
+  timeSpent: number; // in seconds
   updatedAt: any;
 }
 

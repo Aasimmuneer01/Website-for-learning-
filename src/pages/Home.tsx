@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { BookOpen, Download, User as UserIcon, MonitorPlay, Clock, Bookmark, Layers, CheckCircle2, History, Crown } from 'lucide-react';
 import { db } from '../firebase/config';
-import { doc, getDoc, collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
+import { doc, getDoc, collection, query, orderBy, limit, getDocs, onSnapshot } from 'firebase/firestore';
 import { useAuth } from '../hooks/useAuth';
 import { ReadingHistory, User } from '../types';
 import CreatorSection from '../components/CreatorSection';
@@ -42,38 +42,50 @@ export default function Home() {
       }
     };
 
-    const fetchPremiumData = async () => {
+    const fetchPremiumData = () => {
       if (!user) return;
-      try {
-        // Fetch History
-        const historyQuery = query(
-          collection(db, 'users', user.uid, 'history'),
-          orderBy('updatedAt', 'desc'),
-          limit(5)
-        );
-        const historySnap = await getDocs(historyQuery);
-        const historyList = historySnap.docs.map(doc => doc.data() as ReadingHistory);
+      
+      const historyQuery = query(
+        collection(db, 'users', user.uid, 'history'),
+        orderBy('updatedAt', 'desc')
+      );
+
+      const unsubscribeHistory = onSnapshot(historyQuery, async (historySnap) => {
+        const historyList = historySnap.docs.slice(0, 5).map(doc => doc.data() as ReadingHistory);
         setHistory(historyList);
 
-        // Fetch Stats
-        const bookmarksSnap = await getDocs(collection(db, 'users', user.uid, 'bookmarks'));
-        const resourcesRead = historySnap.size;
+        const historyAll = historySnap.docs.map(doc => doc.data() as ReadingHistory);
+        const resourcesRead = historyAll.length;
         let pagesRead = 0;
-        historySnap.docs.forEach(doc => pagesRead += doc.data().lastPage || 0);
+        let totalSeconds = 0;
+        
+        historyAll.forEach(item => {
+          pagesRead += item.lastPage || 0;
+          totalSeconds += item.timeSpent || 0;
+        });
+
+        // Fetch bookmarks separately as they are in a different subcollection
+        const bookmarksSnap = await getDocs(collection(db, 'users', user.uid, 'bookmarks'));
 
         setStats({
           resourcesRead,
           pagesRead,
           bookmarks: bookmarksSnap.size,
-          studyTime: resourcesRead * 15 // Mock study time calculation
+          studyTime: Math.floor(totalSeconds / 60)
         });
-      } catch (err) {
-        console.error("Error fetching premium home data:", err);
-      }
+      }, (err) => {
+        console.error("Error listening to history:", err);
+      });
+
+      return unsubscribeHistory;
     };
 
     fetchHomepageSettings();
-    fetchPremiumData();
+    const unsubscribeHistory = fetchPremiumData();
+    
+    return () => {
+      if (unsubscribeHistory) unsubscribeHistory();
+    };
   }, [user]);
 
   const isPremium = userData?.isPremium || ['admin', 'superadmin', 'moderator'].includes(userData?.role || '');
