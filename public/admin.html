@@ -16,9 +16,9 @@
     <style>
         :root {
             --primary: #0ea5e9;
-            --secondary: #1e293b;
-            --background: #0f172a;
-            --surface: #1e293b;
+            --secondary: #0f172a;
+            --background: #020617;
+            --surface: #0a0f1e;
         }
         body {
             font-family: 'Inter', sans-serif;
@@ -27,9 +27,9 @@
         }
         .font-mono { font-family: 'JetBrains Mono', monospace; }
         .glass {
-            background: rgba(30, 41, 59, 0.7);
+            background: rgba(2, 6, 23, 0.8);
             backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.03);
         }
         .sidebar-item.active {
             background: rgba(14, 165, 233, 0.1);
@@ -69,12 +69,12 @@
             </div>
             <div class="space-y-4">
                 <div class="relative">
-                    <i data-lucide="mail" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4"></i>
-                    <input id="login-email" type="email" placeholder="Admin Email" class="w-full bg-background border border-white/5 rounded-xl pl-12 pr-4 py-3 outline-none focus:border-primary transition-all">
+                    <i data-lucide="mail" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4"></i>
+                    <input id="login-email" type="email" placeholder="Admin Email" class="w-full bg-black border border-white/5 rounded-xl pl-12 pr-4 py-3 outline-none focus:border-primary text-white transition-all">
                 </div>
                 <div class="relative">
-                    <i data-lucide="lock" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4"></i>
-                    <input id="login-password" type="password" placeholder="Passcode" class="w-full bg-background border border-white/5 rounded-xl pl-12 pr-4 py-3 outline-none focus:border-primary transition-all">
+                    <i data-lucide="lock" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4"></i>
+                    <input id="login-password" type="password" placeholder="Passcode" class="w-full bg-black border border-white/5 rounded-xl pl-12 pr-4 py-3 outline-none focus:border-primary text-white transition-all">
                 </div>
                 <button id="btn-login" class="w-full bg-primary text-secondary font-black py-4 rounded-xl hover:brightness-110 transition-all shadow-lg shadow-primary/20 uppercase tracking-widest text-sm flex items-center justify-center gap-2">
                     <span id="login-text">Initiate Access</span>
@@ -197,7 +197,7 @@
                         <div class="lg:col-span-2 bg-surface p-8 rounded-[2.5rem] border border-white/5 shadow-2xl">
                             <div class="flex items-center justify-between mb-8">
                                 <h3 class="text-xl font-bold uppercase tracking-tight flex items-center gap-3"><i data-lucide="trending-up" class="text-primary"></i> Engagement Analysis</h3>
-                                <select class="bg-background border border-white/5 rounded-xl px-4 py-2 text-xs font-bold outline-none">
+                                <select class="bg-black border border-white/5 rounded-xl px-4 py-2 text-xs font-bold outline-none text-white">
                                     <option>Last 7 Days</option>
                                     <option>Last 30 Days</option>
                                 </select>
@@ -247,7 +247,7 @@
                     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div class="relative w-full md:w-96">
                             <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4"></i>
-                            <input id="user-search" type="text" placeholder="Search by name, email or UID..." class="w-full bg-surface border border-white/5 rounded-2xl pl-12 pr-4 py-4 outline-none focus:border-primary transition-all shadow-inner">
+                            <input id="user-search" type="text" placeholder="Search by name, email or UID..." class="w-full bg-black border border-white/5 rounded-2xl pl-12 pr-4 py-4 outline-none focus:border-primary text-white transition-all shadow-inner">
                         </div>
                         <div class="flex gap-2">
                             <button id="refresh-users" class="p-4 bg-surface border border-white/5 rounded-2xl hover:bg-white/5 transition-all text-gray-400 hover:text-white"><i data-lucide="rotate-cw" class="w-5 h-5"></i></button>
@@ -314,7 +314,7 @@
                             <h3 class="text-xl font-bold uppercase tracking-tight">Platform Archives</h3>
                             <div class="relative w-64">
                                 <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-3 h-3"></i>
-                                <input id="res-search" type="text" placeholder="Filter resources..." class="w-full bg-background border border-white/5 rounded-xl pl-8 pr-4 py-2 text-xs outline-none">
+                                <input id="res-search" type="text" placeholder="Filter resources..." class="w-full bg-black border border-white/5 rounded-xl pl-8 pr-4 py-2 text-xs outline-none text-white">
                             </div>
                         </div>
                         <div id="resources-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -332,29 +332,29 @@
                     <div class="p-8 space-y-4">
                         <div class="space-y-1">
                             <label class="text-[10px] text-gray-500 font-bold uppercase ml-4">Title</label>
-                            <input id="edit-up-title" type="text" class="w-full bg-background border border-white/5 rounded-2xl px-6 py-4 outline-none focus:border-primary">
+                            <input id="edit-up-title" type="text" class="w-full bg-black border border-white/5 rounded-2xl px-6 py-4 outline-none focus:border-primary text-white">
                         </div>
                         <div class="grid grid-cols-2 gap-4">
                             <div class="space-y-1">
                                 <label class="text-[10px] text-gray-500 font-bold uppercase ml-4">Category</label>
-                                <select id="edit-up-category" class="w-full bg-background border border-white/5 rounded-2xl px-6 py-4 outline-none focus:border-primary"></select>
+                                <select id="edit-up-category" class="w-full bg-black border border-white/5 rounded-2xl px-6 py-4 outline-none focus:border-primary text-white"></select>
                             </div>
                             <div class="space-y-1">
                                 <label class="text-[10px] text-gray-500 font-bold uppercase ml-4">Class Level</label>
-                                <input id="edit-up-class" type="text" class="w-full bg-background border border-white/5 rounded-2xl px-6 py-4 outline-none focus:border-primary">
+                                <input id="edit-up-class" type="text" class="w-full bg-black border border-white/5 rounded-2xl px-6 py-4 outline-none focus:border-primary text-white">
                             </div>
                         </div>
                         <div class="space-y-1">
                             <label class="text-[10px] text-gray-500 font-bold uppercase ml-4">PDF URL</label>
-                            <input id="edit-up-pdf" type="text" class="w-full bg-background border border-white/5 rounded-2xl px-6 py-4 outline-none focus:border-primary">
+                            <input id="edit-up-pdf" type="text" class="w-full bg-black border border-white/5 rounded-2xl px-6 py-4 outline-none focus:border-primary text-white">
                         </div>
                         <div class="space-y-1">
                             <label class="text-[10px] text-gray-500 font-bold uppercase ml-4">Thumbnail URL</label>
-                            <input id="edit-up-thumb" type="text" class="w-full bg-background border border-white/5 rounded-2xl px-6 py-4 outline-none focus:border-primary">
+                            <input id="edit-up-thumb" type="text" class="w-full bg-black border border-white/5 rounded-2xl px-6 py-4 outline-none focus:border-primary text-white">
                         </div>
                         <div class="space-y-1">
                             <label class="text-[10px] text-gray-500 font-bold uppercase ml-4">Description</label>
-                            <textarea id="edit-up-desc" rows="3" class="w-full bg-background border border-white/5 rounded-2xl px-6 py-4 outline-none focus:border-primary"></textarea>
+                            <textarea id="edit-up-desc" rows="3" class="w-full bg-black border border-white/5 rounded-2xl px-6 py-4 outline-none focus:border-primary text-white"></textarea>
                         </div>
                         <div class="flex items-center gap-4 p-4 bg-background rounded-2xl border border-white/5">
                             <span class="text-sm font-bold text-gray-400">Visibility Status</span>
@@ -378,7 +378,7 @@
                     <div class="p-8 space-y-6">
                         <div class="space-y-1">
                             <label class="text-[10px] text-gray-500 font-bold uppercase ml-4">Category Name</label>
-                            <input id="edit-cat-name" type="text" class="w-full bg-background border border-white/5 rounded-2xl px-6 py-4 outline-none focus:border-primary">
+                            <input id="edit-cat-name" type="text" class="w-full bg-black border border-white/5 rounded-2xl px-6 py-4 outline-none focus:border-primary text-white">
                         </div>
                         <button id="btn-save-category" class="w-full py-5 bg-primary text-secondary font-black rounded-2xl shadow-xl shadow-primary/20 transition-all uppercase tracking-widest">Update Node</button>
                     </div>
@@ -398,29 +398,29 @@
                         <form id="upload-form" class="space-y-6">
                             <div class="space-y-1">
                                 <label class="text-[10px] text-gray-500 font-bold uppercase ml-4">Title</label>
-                                <input id="up-title" type="text" placeholder="Enter asset title" class="w-full bg-background border border-white/5 rounded-2xl px-6 py-4 outline-none focus:border-primary transition-all">
+                                <input id="up-title" type="text" placeholder="Enter asset title" class="w-full bg-black border border-white/5 rounded-2xl px-6 py-4 outline-none focus:border-primary text-white transition-all">
                             </div>
                             <div class="grid grid-cols-2 gap-4">
                                 <div class="space-y-1">
                                     <label class="text-[10px] text-gray-500 font-bold uppercase ml-4">Category</label>
-                                    <select id="up-category" class="w-full bg-background border border-white/5 rounded-2xl px-6 py-4 outline-none focus:border-primary transition-all appearance-none"></select>
+                                    <select id="up-category" class="w-full bg-black border border-white/5 rounded-2xl px-6 py-4 outline-none focus:border-primary text-white transition-all appearance-none"></select>
                                 </div>
                                 <div class="space-y-1">
                                     <label class="text-[10px] text-gray-500 font-bold uppercase ml-4">Class Level</label>
-                                    <input id="up-class" type="text" placeholder="Class Level" class="w-full bg-background border border-white/5 rounded-2xl px-6 py-4 outline-none focus:border-primary transition-all">
+                                    <input id="up-class" type="text" placeholder="Class Level" class="w-full bg-black border border-white/5 rounded-2xl px-6 py-4 outline-none focus:border-primary text-white transition-all">
                                 </div>
                             </div>
                             <div class="space-y-1">
                                 <label class="text-[10px] text-gray-500 font-bold uppercase ml-4">PDF Storage Path/URL</label>
-                                <input id="up-pdf" type="text" placeholder="URL or storage reference" class="w-full bg-background border border-white/5 rounded-2xl px-6 py-4 outline-none focus:border-primary transition-all">
+                                <input id="up-pdf" type="text" placeholder="URL or storage reference" class="w-full bg-black border border-white/5 rounded-2xl px-6 py-4 outline-none focus:border-primary text-white transition-all">
                             </div>
                              <div class="space-y-1">
                                 <label class="text-[10px] text-gray-500 font-bold uppercase ml-4">Thumbnail Path/URL</label>
-                                <input id="up-thumb" type="text" placeholder="Cover image reference" class="w-full bg-background border border-white/5 rounded-2xl px-6 py-4 outline-none focus:border-primary transition-all">
+                                <input id="up-thumb" type="text" placeholder="Cover image reference" class="w-full bg-black border border-white/5 rounded-2xl px-6 py-4 outline-none focus:border-primary text-white transition-all">
                             </div>
                             <div class="space-y-1">
                                 <label class="text-[10px] text-gray-500 font-bold uppercase ml-4">Description</label>
-                                <textarea id="up-desc" placeholder="Asset breakdown..." rows="3" class="w-full bg-background border border-white/5 rounded-2xl px-6 py-4 outline-none focus:border-primary transition-all"></textarea>
+                                <textarea id="up-desc" placeholder="Asset breakdown..." rows="3" class="w-full bg-black border border-white/5 rounded-2xl px-6 py-4 outline-none focus:border-primary text-white transition-all"></textarea>
                             </div>
                             <button type="submit" class="w-full bg-primary text-secondary font-black py-5 rounded-2xl shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-100 transition-all uppercase tracking-widest">Execute Upload</button>
                         </form>
@@ -430,9 +430,9 @@
                 <!-- Categories Content -->
                 <section id="categories" class="tab-content space-y-8">
                     <div class="bg-surface p-8 rounded-[2.5rem] border border-white/5 shadow-2xl">
-                        <h3 class="text-xl font-bold uppercase tracking-tight mb-8">Category Taxonomy</h3>
+                        <h3 class="text-xl font-bold uppercase tracking-tight mb-8 text-white">Category Taxonomy</h3>
                         <div class="flex gap-4 mb-10">
-                            <input id="new-cat-name" type="text" placeholder="New category name..." class="flex-1 bg-background border border-white/5 rounded-2xl px-6 py-4 outline-none focus:border-primary transition-all">
+                            <input id="new-cat-name" type="text" placeholder="New category name..." class="flex-1 bg-black border border-white/5 rounded-2xl px-6 py-4 outline-none focus:border-primary text-white transition-all">
                             <button id="add-cat" class="px-8 py-4 bg-primary text-secondary font-black rounded-2xl hover:brightness-110 transition-all uppercase tracking-widest text-sm">Add Node</button>
                         </div>
                         <div id="categories-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -470,24 +470,24 @@
                             </div>
                             <div class="space-y-1">
                                 <label class="text-[10px] text-gray-500 font-bold uppercase ml-4">Profile Image URL</label>
-                                <input id="c-img-url" type="text" class="w-full bg-background border border-white/5 rounded-2xl px-6 py-4 outline-none focus:border-primary transition-all" oninput="document.getElementById('c-img-preview').src = this.value">
+                                <input id="c-img-url" type="text" class="w-full bg-black border border-white/5 rounded-2xl px-6 py-4 outline-none focus:border-primary text-white transition-all" oninput="document.getElementById('c-img-preview').src = this.value">
                             </div>
                             <div class="space-y-1">
                                 <label class="text-[10px] text-gray-500 font-bold uppercase ml-4">Display Name</label>
-                                <input id="c-name" type="text" class="w-full bg-background border border-white/5 rounded-2xl px-6 py-4 outline-none focus:border-primary transition-all">
+                                <input id="c-name" type="text" class="w-full bg-black border border-white/5 rounded-2xl px-6 py-4 outline-none focus:border-primary text-white transition-all">
                             </div>
                             <div class="space-y-1">
                                 <label class="text-[10px] text-gray-500 font-bold uppercase ml-4">Biography</label>
-                                <textarea id="c-bio" rows="3" class="w-full bg-background border border-white/5 rounded-2xl px-6 py-4 outline-none focus:border-primary transition-all"></textarea>
+                                <textarea id="c-bio" rows="3" class="w-full bg-black border border-white/5 rounded-2xl px-6 py-4 outline-none focus:border-primary text-white transition-all"></textarea>
                             </div>
                             <div class="grid grid-cols-2 gap-4">
                                 <div class="space-y-1">
                                     <label class="text-[10px] text-gray-500 font-bold uppercase ml-4">Social X</label>
-                                    <input id="c-x" type="text" class="w-full bg-background border border-white/5 rounded-2xl px-6 py-4 outline-none focus:border-primary transition-all">
+                                    <input id="c-x" type="text" class="w-full bg-black border border-white/5 rounded-2xl px-6 py-4 outline-none focus:border-primary text-white transition-all">
                                 </div>
                                 <div class="space-y-1">
                                     <label class="text-[10px] text-gray-500 font-bold uppercase ml-4">Instagram</label>
-                                    <input id="c-ig" type="text" class="w-full bg-background border border-white/5 rounded-2xl px-6 py-4 outline-none focus:border-primary transition-all">
+                                    <input id="c-ig" type="text" class="w-full bg-black border border-white/5 rounded-2xl px-6 py-4 outline-none focus:border-primary text-white transition-all">
                                 </div>
                             </div>
                             <button id="save-creator" class="w-full bg-primary text-secondary font-black py-5 rounded-2xl shadow-xl shadow-primary/20 transition-all uppercase tracking-widest mt-4">Commit Changes</button>
@@ -599,8 +599,8 @@
                 <div class="space-y-4 pt-4 border-t border-white/5">
                     <h5 class="text-xs font-bold text-gray-500 uppercase tracking-widest">Temporal Customization</h5>
                     <div class="flex gap-4">
-                        <input id="prem-custom-date" type="date" class="flex-1 bg-background border border-white/5 rounded-xl p-4 text-xs font-bold uppercase outline-none focus:border-yellow-500">
-                        <input id="prem-custom-time" type="time" class="w-32 bg-background border border-white/5 rounded-xl p-4 text-xs font-bold uppercase outline-none focus:border-yellow-500">
+                        <input id="prem-custom-date" type="date" class="flex-1 bg-black border border-white/5 rounded-xl p-4 text-xs font-bold uppercase outline-none focus:border-yellow-500 text-white">
+                        <input id="prem-custom-time" type="time" class="w-32 bg-black border border-white/5 rounded-xl p-4 text-xs font-bold uppercase outline-none focus:border-yellow-500 text-white">
                     </div>
                 </div>
 
