@@ -4,6 +4,7 @@ import { useAuth } from '../hooks/useAuth';
 import { useParams, useNavigate } from 'react-router-dom';
 import { doc, getDoc, updateDoc, increment, setDoc, serverTimestamp, collection, query, where, getDocs, deleteDoc } from 'firebase/firestore';
 import { db, auth } from '../firebase/config';
+import { handleFirestoreError, OperationType } from '../firebase/utils';
 import { Resource, Bookmark, ReadingHistory, Note, AppHighlight } from '../types';
 import { 
   Download, Printer, X, ChevronLeft, ChevronRight, Loader2, 
@@ -66,6 +67,7 @@ export default function PDFViewer() {
     if (!isPremium || !user || !resource || !numPages || secondsSpent === 0) return;
 
     const saveStats = async () => {
+      const path = `users/${user.uid}/history/${resource.id}`;
       try {
         const historyRef = doc(db, 'users', user.uid, 'history', resource.id);
         await setDoc(historyRef, {
@@ -82,7 +84,7 @@ export default function PDFViewer() {
         // Reset session seconds after saving to prevent double counting
         setSecondsSpent(0);
       } catch (err) {
-        console.error("Error saving reading stats:", err);
+        handleFirestoreError(err, OperationType.WRITE, path);
       }
     };
 
@@ -416,9 +418,12 @@ export default function PDFViewer() {
     
     // Increment count in background if authenticated
     if (auth.currentUser) {
+      const path = `resources/${resource.id}`;
       updateDoc(doc(db, 'resources', resource.id), {
         downloadCount: increment(1)
-      }).catch(err => console.error("Count increment error:", err));
+      }).catch(err => {
+        handleFirestoreError(err, OperationType.UPDATE, path);
+      });
     }
 
     // Open in new tab immediately to avoid popup blocker

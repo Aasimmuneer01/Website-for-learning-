@@ -37,6 +37,23 @@ service cloud.firestore {
       }
     }
 
+    // Collection group rules for admin analytics
+    match /{path=**}/bookmarks/{doc} {
+      allow read: if isAdmin();
+    }
+    match /{path=**}/history/{doc} {
+      allow read: if isAdmin();
+    }
+    match /{path=**}/notes/{doc} {
+      allow read: if isAdmin();
+    }
+    match /{path=**}/highlights/{doc} {
+      allow read: if isAdmin();
+    }
+    match /{path=**}/folders/{doc} {
+      allow read: if isAdmin();
+    }
+
     match /bannedFingerprints/{fp} {
       allow read: if true;
       allow write: if isAdmin();
@@ -46,9 +63,7 @@ service cloud.firestore {
       allow read: if true;
       allow update: if isAdmin() || (
         request.auth != null && 
-        request.resource.data.diff(resource.data).affectedKeys().hasAny(['viewCount', 'downloadCount']) &&
-        request.resource.data.title == resource.data.title &&
-        request.resource.data.pdfUrl == resource.data.pdfUrl
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewCount', 'downloadCount'])
       );
       allow create, delete: if isAdmin();
     }

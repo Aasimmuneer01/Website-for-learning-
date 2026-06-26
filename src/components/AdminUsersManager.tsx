@@ -1,10 +1,10 @@
 import { useState, useEffect, useMemo, FormEvent } from 'react';
-import { collection, onSnapshot, doc, updateDoc, deleteDoc, setDoc, serverTimestamp, query, orderBy } from 'firebase/firestore';
+import { collection, onSnapshot, doc, updateDoc, deleteDoc, setDoc, serverTimestamp, query, orderBy, collectionGroup, getDocs } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { User as UserType, Resource } from '../types';
 import { 
   Users, Eye, Download, FileText, ShieldAlert, CheckCircle2, XCircle, 
-  Search, Filter, Ban, CheckCircle, Mail, Trash2, Info, AlertTriangle, UserCheck, Shield, Crown, Clock, Settings
+  Search, Filter, Ban, CheckCircle, Mail, Trash2, Info, AlertTriangle, UserCheck, Shield, Crown, Clock, Settings, Bookmark, Highlighter
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -18,6 +18,8 @@ export default function AdminUsersManager() {
   const [banModalUser, setBanModalUser] = useState<UserType | null>(null);
   const [banReasonInput, setBanReasonInput] = useState('');
   const [loading, setLoading] = useState(true);
+  const [totalBookmarks, setTotalBookmarks] = useState(0);
+  const [totalNotes, setTotalNotes] = useState(0);
   const [isUpdatingPremium, setIsUpdatingPremium] = useState(false);
   const [customDays, setCustomDays] = useState('');
   const [customHours, setCustomHours] = useState('');
@@ -92,6 +94,19 @@ export default function AdminUsersManager() {
       const rList = snap.docs.map(d => ({ id: d.id, ...d.data() })) as unknown as Resource[];
       setResources(rList);
     }, (err) => console.error("Res snap err:", err));
+
+    // Fetch collection group stats
+    const fetchCollectionGroupStats = async () => {
+      try {
+        const bookmarksSnap = await getDocs(query(collectionGroup(db, 'bookmarks')));
+        const notesSnap = await getDocs(query(collectionGroup(db, 'notes')));
+        setTotalBookmarks(bookmarksSnap.size);
+        setTotalNotes(notesSnap.size);
+      } catch (err) {
+        console.error("Error fetching collection group stats:", err);
+      }
+    };
+    fetchCollectionGroupStats();
 
     return () => {
       unsubUsers();
@@ -279,6 +294,22 @@ export default function AdminUsersManager() {
             </div>
             <p className="text-3xl font-bold text-white mt-2 font-mono">{stats.totalResources}</p>
           </div>
+
+          <div className="bg-surface p-5 rounded-xl border border-secondary">
+            <div className="flex items-center justify-between text-gray-400 text-xs font-semibold uppercase">
+              <span>Total Bookmarks</span>
+              <Bookmark className="w-4 h-4 text-primary" />
+            </div>
+            <p className="text-3xl font-bold text-white mt-2 font-mono">{totalBookmarks}</p>
+          </div>
+
+          <div className="bg-surface p-5 rounded-xl border border-secondary">
+            <div className="flex items-center justify-between text-gray-400 text-xs font-semibold uppercase">
+              <span>Total Notes</span>
+              <Highlighter className="w-4 h-4 text-primary" />
+            </div>
+            <p className="text-3xl font-bold text-white mt-2 font-mono">{totalNotes}</p>
+          </div>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -400,6 +431,7 @@ export default function AdminUsersManager() {
               <thead>
                 <tr className="bg-background-main border-b border-secondary text-xs font-bold text-gray-400 uppercase tracking-wider">
                   <th className="p-4">User</th>
+                  <th className="p-4">Premium</th>
                   <th className="p-4">Role</th>
                   <th className="p-4">Status</th>
                   <th className="p-4">Verification</th>
@@ -417,8 +449,27 @@ export default function AdminUsersManager() {
                   filteredUsers.map((u) => (
                     <tr key={u.uid} className="hover:bg-secondary/20 transition-colors">
                       <td className="p-4">
-                        <div className="font-bold text-white">{u.displayName || 'Student'}</div>
+                        <div className="flex items-center gap-2">
+                          <div className="font-bold text-white">{u.displayName || 'Student'}</div>
+                          {u.isPremium && (
+                            <span className="p-1 bg-yellow-500/20 text-yellow-500 rounded-md border border-yellow-500/30" title="Premium User">
+                              <Crown size={12} />
+                            </span>
+                          )}
+                        </div>
                         <div className="text-xs text-gray-400 font-mono">{u.email}</div>
+                      </td>
+                      <td className="p-4">
+                        {u.isPremium ? (
+                          <div className="flex flex-col">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 uppercase">
+                              <Crown size={10} /> Active
+                            </span>
+                            <span className="text-[10px] text-gray-500 mt-0.5 font-mono">{u.premiumPlan}</span>
+                          </div>
+                        ) : (
+                          <span className="text-[10px] text-gray-500 font-bold uppercase">No Plan</span>
+                        )}
                       </td>
                       <td className="p-4">
                         <span className={`px-2 py-0.5 rounded text-xs font-bold uppercase ${

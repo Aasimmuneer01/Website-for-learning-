@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { setDoc, serverTimestamp, deleteDoc } from 'firebase/firestore';
+import { handleFirestoreError, OperationType } from '../firebase/utils';
 import { Folder } from '../types';
 
 const SUBJECTS = ['All', 'Maths', 'English', 'Biology', 'Chemistry', 'Physics', 'Geography', 'History', 'Civics', 'Computer', 'Islamic Studies', 'Urdu'];
@@ -109,12 +110,13 @@ export default function Resources() {
     navigate(`/viewer/${resource.id}`);
 
     if (auth.currentUser && (!lastViewed || now - parseInt(lastViewed) > 24 * 60 * 60 * 1000)) {
+      const path = `resources/${resource.id}`;
       updateDoc(doc(db, 'resources', resource.id), {
         viewCount: increment(1)
       }).then(() => {
         localStorage.setItem(viewedKey, now.toString());
       }).catch(err => {
-        console.error("Failed to increment view", err);
+        handleFirestoreError(err, OperationType.UPDATE, path);
       });
     }
   };
@@ -125,9 +127,12 @@ export default function Resources() {
     
     // Increment count in background if authenticated
     if (auth.currentUser) {
+      const path = `resources/${resource.id}`;
       updateDoc(doc(db, 'resources', resource.id), {
         downloadCount: increment(1)
-      }).catch(err => console.error("Count increment error:", err));
+      }).catch(err => {
+        handleFirestoreError(err, OperationType.UPDATE, path);
+      });
     }
 
     // Open in new tab immediately to avoid popup blocker

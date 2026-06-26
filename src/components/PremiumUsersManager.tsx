@@ -1,13 +1,14 @@
 import { useState, useEffect, useMemo } from 'react';
 import { db } from '../firebase/config';
-import { collection, query, updateDoc, doc, serverTimestamp, orderBy, onSnapshot } from 'firebase/firestore';
+import { collection, query, updateDoc, doc, serverTimestamp, orderBy, onSnapshot, collectionGroup, getDocs } from 'firebase/firestore';
 import { User } from '../types';
-import { Crown, User as UserIcon, MoreHorizontal, Search, XCircle, Clock, Trash2, Settings, Users, AlertCircle, Filter, Mail } from 'lucide-react';
+import { Crown, User as UserIcon, MoreHorizontal, Search, XCircle, Clock, Trash2, Settings, Users, AlertCircle, Filter, Mail, Bookmark } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 export default function PremiumUsersManager() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+  const [totalBookmarks, setTotalBookmarks] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState<'all' | 'premium' | 'free' | 'expiring' | 'expired'>('all');
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
@@ -15,6 +16,7 @@ export default function PremiumUsersManager() {
   const [customDays, setCustomDays] = useState('');
   const [customHours, setCustomHours] = useState('');
   const [customDate, setCustomDate] = useState('');
+  const [selectedPlan, setSelectedPlan] = useState('1 Month');
   const [showCustomOptions, setShowCustomOptions] = useState(false);
 
   useEffect(() => {
@@ -30,6 +32,12 @@ export default function PremiumUsersManager() {
       console.error("Error listening to users:", error);
       setLoading(false);
     });
+
+    const fetchBookmarks = async () => {
+      const snap = await getDocs(query(collectionGroup(db, 'bookmarks')));
+      setTotalBookmarks(snap.size);
+    };
+    fetchBookmarks();
 
     return () => unsubscribe();
   }, []);
@@ -156,7 +164,7 @@ export default function PremiumUsersManager() {
     '1 Hour', '6 Hours', '12 Hours',
     '1 Day', '3 Days', '7 Days', '15 Days',
     '1 Month', '3 Months', '6 Months', '1 Year',
-    'Lifetime'
+    'Lifetime', 'Custom'
   ];
 
   const filteredUsers = users.filter(u => {
@@ -180,14 +188,14 @@ export default function PremiumUsersManager() {
       {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="bg-surface p-6 rounded-2xl border border-secondary shadow-lg">
-          <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Total Premium</p>
+          <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Premium Users</p>
           <div className="flex items-center justify-between">
             <p className="text-3xl font-bold text-white font-mono">{stats.premium}</p>
             <div className="p-2 bg-primary/10 text-primary rounded-lg border border-primary/20"><Crown size={20} /></div>
           </div>
         </div>
         <div className="bg-surface p-6 rounded-2xl border border-secondary shadow-lg">
-          <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Total Free</p>
+          <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Free Users</p>
           <div className="flex items-center justify-between">
             <p className="text-3xl font-bold text-white font-mono">{stats.free}</p>
             <div className="p-2 bg-gray-500/10 text-gray-500 rounded-lg border border-gray-500/20"><Users size={20} /></div>
@@ -201,10 +209,17 @@ export default function PremiumUsersManager() {
           </div>
         </div>
         <div className="bg-surface p-6 rounded-2xl border border-secondary shadow-lg">
-          <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Expired Premium</p>
+          <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Expired</p>
           <div className="flex items-center justify-between">
             <p className="text-3xl font-bold text-red-500 font-mono">{stats.expired}</p>
             <div className="p-2 bg-red-500/10 text-red-500 rounded-lg border border-red-500/20"><Trash2 size={20} /></div>
+          </div>
+        </div>
+        <div className="bg-surface p-6 rounded-2xl border border-secondary shadow-lg">
+          <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Total Bookmarks</p>
+          <div className="flex items-center justify-between">
+            <p className="text-3xl font-bold text-primary font-mono">{totalBookmarks}</p>
+            <div className="p-2 bg-primary/10 text-primary rounded-lg border border-primary/20"><Bookmark size={20} /></div>
           </div>
         </div>
       </div>
@@ -324,14 +339,53 @@ export default function PremiumUsersManager() {
                       </span>
                     </td>
                     <td className="p-4 text-right">
-                      <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button 
                           onClick={() => setSelectedUser(user)}
-                          className="p-2 bg-primary/10 text-primary hover:bg-primary hover:text-secondary rounded-lg transition-all"
-                          title="Manage Access"
+                          className="px-3 py-1.5 bg-primary/10 text-primary hover:bg-primary hover:text-secondary rounded-lg transition-all text-[10px] font-bold uppercase tracking-tight flex items-center gap-1"
                         >
-                          <Settings size={14} />
+                          <Settings size={12} />
+                          Manage
                         </button>
+                        {user.isPremium ? (
+                          <button 
+                            onClick={() => {
+                              if (confirm("Extend premium for this user?")) {
+                                setSelectedUser(user);
+                              }
+                            }}
+                            className="px-3 py-1.5 bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500 hover:text-white rounded-lg transition-all text-[10px] font-bold uppercase tracking-tight flex items-center gap-1"
+                          >
+                            <Clock size={12} />
+                            Extend
+                          </button>
+                        ) : (
+                          <button 
+                            onClick={() => setSelectedUser(user)}
+                            className="px-3 py-1.5 bg-green-500/10 text-green-500 hover:bg-green-500 hover:text-white rounded-lg transition-all text-[10px] font-bold uppercase tracking-tight flex items-center gap-1"
+                          >
+                            <Crown size={12} />
+                            Grant
+                          </button>
+                        )}
+                        {user.isPremium && (
+                          <button 
+                            onClick={() => {
+                              if (confirm("Remove premium access?")) {
+                                handleUpdatePremium(user.uid, {
+                                  isPremium: false,
+                                  premiumPlan: '',
+                                  premiumExpiry: null,
+                                  premiumStatus: 'none'
+                                });
+                              }
+                            }}
+                            className="px-3 py-1.5 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-lg transition-all text-[10px] font-bold uppercase tracking-tight flex items-center gap-1"
+                          >
+                            <Trash2 size={12} />
+                            Remove
+                          </button>
+                        )}
                       </div>
                       <div className="group-hover:hidden text-gray-600">
                         <MoreHorizontal size={16} className="ml-auto" />
@@ -393,139 +447,116 @@ export default function PremiumUsersManager() {
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-                {/* Duration Presets */}
+                {/* Duration Controls */}
                 <div className="space-y-6">
                   <div>
                     <h4 className="text-xs font-bold text-gray-500 uppercase tracking-widest px-1 mb-4 flex items-center gap-2">
                       <Clock size={14} className="text-primary" />
-                      Select Standard Duration
+                      Premium Duration Dropdown
                     </h4>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                      {plans.map((plan) => (
-                        <button
-                          key={plan}
-                          onClick={() => {
-                            const expiry = getExpiryDate(plan);
-                            handleUpdatePremium(selectedUser.uid, {
-                              isPremium: true,
-                              premiumPlan: plan,
-                              premiumExpiry: expiry ? expiry : null,
-                              premiumStart: serverTimestamp()
-                            });
+                    
+                    <div className="space-y-4">
+                      <div className="relative">
+                        <select
+                          value={selectedPlan}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setSelectedPlan(val);
+                            setShowCustomOptions(val === 'Custom');
                           }}
-                          disabled={isUpdating}
-                          className="p-4 bg-secondary border border-surface rounded-2xl hover:border-primary hover:bg-primary/5 transition-all text-xs font-bold text-white text-center shadow-lg active:scale-95 disabled:opacity-50"
+                          className="w-full bg-secondary border border-surface rounded-2xl px-4 py-4 text-white font-bold outline-none focus:border-primary transition-all appearance-none cursor-pointer"
                         >
-                          {plan}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
+                          {plans.map(plan => (
+                            <option key={plan} value={plan}>{plan}</option>
+                          ))}
+                        </select>
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
+                          <Settings size={18} />
+                        </div>
+                      </div>
 
-                {/* Custom Options & Immediate Actions */}
-                <div className="space-y-8">
-                  <div className="space-y-4">
-                    <button 
-                      onClick={() => setShowCustomOptions(!showCustomOptions)}
-                      className="w-full py-4 bg-primary text-secondary rounded-2xl text-sm font-bold hover:brightness-110 transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/20"
-                    >
-                      <Settings size={20} />
-                      {showCustomOptions ? 'Hide Custom Duration' : 'Configure Custom Duration'}
-                    </button>
-
-                    <AnimatePresence>
-                      {showCustomOptions && (
-                        <motion.div 
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: 'auto', opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          className="space-y-6 overflow-hidden bg-secondary/50 p-6 rounded-[1.5rem] border border-secondary shadow-inner"
-                        >
-                          <div className="space-y-4">
-                            <div>
-                              <label className="text-[10px] text-gray-500 font-bold uppercase tracking-widest block px-1 mb-2">Duration (Days & Hours)</label>
-                              <div className="flex gap-2">
-                                <div className="flex-1 space-y-1">
-                                  <input 
-                                    type="number" 
-                                    placeholder="Days"
-                                    value={customDays}
-                                    onChange={(e) => setCustomDays(e.target.value)}
-                                    className="w-full bg-background-main border border-secondary rounded-xl px-4 py-3 text-white outline-none focus:border-primary text-sm shadow-inner"
-                                  />
+                      <AnimatePresence>
+                        {showCustomOptions && (
+                          <motion.div 
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            className="space-y-6 overflow-hidden bg-secondary/50 p-6 rounded-[1.5rem] border border-secondary shadow-inner"
+                          >
+                            <div className="space-y-4">
+                              <div>
+                                <label className="text-[10px] text-gray-500 font-bold uppercase tracking-widest block px-1 mb-2">Duration Inputs</label>
+                                <div className="flex gap-2">
+                                  <div className="flex-1 space-y-1">
+                                    <input 
+                                      type="number" 
+                                      placeholder="Day input"
+                                      value={customDays}
+                                      onChange={(e) => setCustomDays(e.target.value)}
+                                      className="w-full bg-background-main border border-secondary rounded-xl px-4 py-3 text-white outline-none focus:border-primary text-sm shadow-inner"
+                                    />
+                                  </div>
+                                  <div className="flex-1 space-y-1">
+                                    <input 
+                                      type="number" 
+                                      placeholder="Hour input"
+                                      value={customHours}
+                                      onChange={(e) => setCustomHours(e.target.value)}
+                                      className="w-full bg-background-main border border-secondary rounded-xl px-4 py-3 text-white outline-none focus:border-primary text-sm shadow-inner"
+                                    />
+                                  </div>
                                 </div>
-                                <div className="flex-1 space-y-1">
-                                  <input 
-                                    type="number" 
-                                    placeholder="Hours"
-                                    value={customHours}
-                                    onChange={(e) => setCustomHours(e.target.value)}
-                                    className="w-full bg-background-main border border-secondary rounded-xl px-4 py-3 text-white outline-none focus:border-primary text-sm shadow-inner"
-                                  />
-                                </div>
-                                <button 
-                                  onClick={() => {
-                                    const expiry = getExpiryDate('Custom', { 
-                                      days: customDays ? Number(customDays) : 0, 
-                                      hours: customHours ? Number(customHours) : 0 
-                                    });
-                                    handleUpdatePremium(selectedUser.uid, {
-                                      isPremium: true,
-                                      premiumPlan: `${customDays || 0}D ${customHours || 0}H`,
-                                      premiumExpiry: expiry,
-                                      premiumStart: serverTimestamp()
-                                    });
-                                  }}
-                                  disabled={(!customDays && !customHours) || isUpdating}
-                                  className="bg-primary text-secondary px-6 rounded-xl font-bold text-xs shadow-lg"
-                                >
-                                  Apply
-                                </button>
                               </div>
-                            </div>
 
-                            <div className="pt-4 border-t border-secondary/50">
-                              <label className="text-[10px] text-gray-500 font-bold uppercase tracking-widest block px-1 mb-2">Manual Expiry Date</label>
-                              <div className="flex gap-2">
+                              <div>
+                                <label className="text-[10px] text-gray-500 font-bold uppercase tracking-widest block px-1 mb-2">Date Picker</label>
                                 <input 
                                   type="date" 
                                   value={customDate}
                                   onChange={(e) => setCustomDate(e.target.value)}
-                                  className="flex-1 bg-background-main border border-secondary rounded-xl px-4 py-3 text-white outline-none focus:border-primary text-sm shadow-inner"
+                                  className="w-full bg-background-main border border-secondary rounded-xl px-4 py-3 text-white outline-none focus:border-primary text-sm shadow-inner"
                                 />
-                                <button 
-                                  onClick={() => {
-                                    const expiry = getExpiryDate('Custom', { date: customDate });
-                                    handleUpdatePremium(selectedUser.uid, {
-                                      isPremium: true,
-                                      premiumPlan: `Custom Date`,
-                                      premiumExpiry: expiry,
-                                      premiumStart: serverTimestamp()
-                                    });
-                                  }}
-                                  disabled={!customDate || isUpdating}
-                                  className="bg-primary text-secondary px-6 rounded-xl font-bold text-xs shadow-lg"
-                                >
-                                  Apply
-                                </button>
                               </div>
                             </div>
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
 
-                  <div className="space-y-3">
-                    <h4 className="text-xs font-bold text-gray-500 uppercase tracking-widest px-1 flex items-center gap-2">
-                      <AlertCircle size={14} className="text-red-500" />
-                      Immediate Admin Actions
-                    </h4>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <button
                         onClick={() => {
-                          const expiry = getExpiryDate('Lifetime');
+                          const expiry = getExpiryDate(selectedPlan, {
+                            days: customDays ? Number(customDays) : 0,
+                            hours: customHours ? Number(customHours) : 0,
+                            date: customDate
+                          });
+                          handleUpdatePremium(selectedUser.uid, {
+                            isPremium: true,
+                            premiumPlan: selectedPlan === 'Custom' 
+                              ? (customDate ? 'Custom Date' : `${customDays || 0}D ${customHours || 0}H`) 
+                              : selectedPlan,
+                            premiumExpiry: expiry ? expiry : null,
+                            premiumStart: serverTimestamp()
+                          });
+                        }}
+                        disabled={isUpdating || (selectedPlan === 'Custom' && !customDays && !customHours && !customDate)}
+                        className="w-full py-4 bg-primary text-secondary rounded-2xl font-bold hover:brightness-110 transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/20"
+                      >
+                        {selectedUser.isPremium ? 'Extend Premium Access' : 'Grant Premium Access'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Immediate Actions */}
+                <div className="space-y-8">
+                  <div className="space-y-4">
+                    <h4 className="text-xs font-bold text-gray-500 uppercase tracking-widest px-1 flex items-center gap-2">
+                      <AlertCircle size={14} className="text-red-500" />
+                      Immediate Actions
+                    </h4>
+                    <div className="grid grid-cols-1 gap-3">
+                      <button
+                        onClick={() => {
                           handleUpdatePremium(selectedUser.uid, {
                             isPremium: true,
                             premiumPlan: 'Lifetime',
@@ -533,14 +564,14 @@ export default function PremiumUsersManager() {
                             premiumStart: serverTimestamp()
                           });
                         }}
-                        className="py-4 bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 font-bold rounded-2xl hover:bg-yellow-500 hover:text-secondary transition-all text-xs flex items-center justify-center gap-2 active:scale-95"
+                        className="py-4 bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 font-bold rounded-2xl hover:bg-yellow-500 hover:text-secondary transition-all text-sm flex items-center justify-center gap-2 active:scale-95"
                       >
-                        <Crown size={16} />
-                        Lifetime Access
+                        <Crown size={18} />
+                        Grant Lifetime Access
                       </button>
                       <button
                         onClick={() => {
-                          if (!confirm("Are you sure you want to revoke all premium privileges immediately?")) return;
+                          if (!confirm("Are you sure you want to revoke all premium privileges?")) return;
                           handleUpdatePremium(selectedUser.uid, {
                             isPremium: false,
                             premiumPlan: '',
@@ -549,10 +580,10 @@ export default function PremiumUsersManager() {
                             premiumStatus: 'none'
                           });
                         }}
-                        className="py-4 bg-red-500/10 text-red-500 border border-red-500/20 font-bold rounded-2xl hover:bg-red-500 hover:text-white transition-all text-xs flex items-center justify-center gap-2 active:scale-95"
+                        className="py-4 bg-red-500/10 text-red-500 border border-red-500/20 font-bold rounded-2xl hover:bg-red-500 hover:text-white transition-all text-sm flex items-center justify-center gap-2 active:scale-95"
                       >
-                        <Trash2 size={16} />
-                        Remove Access
+                        <Trash2 size={18} />
+                        Remove Premium Access
                       </button>
                     </div>
                   </div>

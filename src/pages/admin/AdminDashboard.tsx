@@ -74,7 +74,7 @@ export default function AdminDashboard() {
         <div className="p-6 border-b border-secondary flex items-center justify-between">
           <div className={`flex items-center gap-3 ${!isSidebarOpen && 'hidden'}`}>
             <div className="p-2 bg-primary/10 rounded-lg border border-primary/20">
-              <LayoutDashboard size={20} className="text-primary" />
+              <Crown size={20} className="text-primary" />
             </div>
             <span className="font-bold text-white uppercase tracking-tighter">Admin Panel</span>
           </div>
@@ -133,7 +133,15 @@ export default function AdminDashboard() {
               </div>
               <div className="flex flex-col">
                 <span className="text-xs font-bold text-white truncate max-w-[150px]">{user.displayName || 'Admin'}</span>
-                <span className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Super Administrator</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Super Administrator</span>
+                  {(userData?.isPremium || userData?.role === 'admin') && (
+                    <span className="px-1.5 py-0.5 bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 rounded text-[8px] font-bold uppercase tracking-wider flex items-center gap-1">
+                      <Crown size={8} />
+                      Premium
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           </div>
