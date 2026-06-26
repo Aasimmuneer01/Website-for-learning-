@@ -39,30 +39,22 @@ function MainLayout() {
 
   return (
     <div className="min-h-screen bg-background-main text-text-main flex flex-col">
-      <Routes>
-        <Route path="/viewer/:resourceId" element={<PDFViewer />} />
-        <Route path="/admin" element={<AdminDashboard />} />
-        <Route path="/admin/login" element={<AdminLogin />} />
-        <Route path="*" element={
-          <>
-            <Navbar />
-            <main className="flex-1 overflow-auto">
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/resources" element={<Resources />} />
-                <Route path="/bookmarks" element={<Bookmarks />} />
-                <Route path="/folders" element={<Folders />} />
-                <Route path="/offline" element={<OfflineLibrary />} />
-              </Routes>
-            </main>
-            <footer className="w-full py-6 mt-auto border-t border-secondary bg-surface text-center">
-              <p className="text-gray-400 font-medium">
-                Created with <span className="text-red-500">❤️</span> by Aasim Muneer &copy; {new Date().getFullYear()}
-              </p>
-            </footer>
-          </>
-        } />
-      </Routes>
+      <Navbar />
+      <main className="flex-1 overflow-auto">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/resources" element={<Resources />} />
+          <Route path="/bookmarks" element={<Bookmarks />} />
+          <Route path="/folders" element={<Folders />} />
+          <Route path="/offline" element={<OfflineLibrary />} />
+          <Route path="/viewer/:resourceId" element={<PDFViewer />} />
+        </Routes>
+      </main>
+      <footer className="w-full py-6 mt-auto border-t border-secondary bg-surface text-center">
+        <p className="text-gray-400 font-medium">
+          Created with <span className="text-red-500">❤️</span> by Aasim Muneer &copy; {new Date().getFullYear()}
+        </p>
+      </footer>
     </div>
   );
 }
@@ -72,7 +64,11 @@ export default function App() {
     <HelmetProvider>
       <AuthProvider>
         <Router>
-          <MainLayout />
+          <Routes>
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/admin/*" element={<AdminDashboard />} />
+            <Route path="*" element={<MainLayout />} />
+          </Routes>
         </Router>
       </AuthProvider>
     </HelmetProvider>

@@ -1,24 +1,75 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { Navigate } from 'react-router-dom';
-import { auth } from '../../firebase/config';
+import { auth, db } from '../../firebase/config';
 import { signOut } from 'firebase/auth';
+import { collection, onSnapshot, query, doc, updateDoc } from 'firebase/firestore';
+import { User } from '../../types';
 import ResourceUpload from '../../components/ResourceUpload';
 import AdminResourceList from '../../components/AdminResourceList';
 import AdminCreatorSettings from '../../components/AdminCreatorSettings';
 import AdminUsersManager from '../../components/AdminUsersManager';
 import PremiumUsersManager from '../../components/PremiumUsersManager';
-import { ShieldAlert, Users, Crown, Upload, FileText, Settings, LogOut, LayoutDashboard, Menu, X } from 'lucide-react';
+import AdminAnalytics from '../../components/AdminAnalytics';
+import AdminCategories from '../../components/AdminCategories';
+import AdminDashboardStats from '../../components/AdminDashboardStats';
+import { ShieldAlert, Users, Crown, Upload, FileText, Settings, LogOut, LayoutDashboard, Menu, X, BarChart3, Grid } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
-type AdminTab = 'users' | 'premium' | 'upload' | 'resources' | 'settings';
+type AdminTab = 'dashboard' | 'users' | 'premium' | 'upload' | 'resources' | 'categories' | 'analytics' | 'settings';
 
 export default function AdminDashboard() {
-  const { user, userData, loading } = useAuth();
-  const [activeTab, setActiveTab] = useState<AdminTab>('users');
+  const { user, userData, loading: authLoading } = useAuth();
+  const [activeTab, setActiveTab] = useState<AdminTab>('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [users, setUsers] = useState<User[]>([]);
+  const [loadingUsers, setLoadingUsers] = useState(true);
 
-  if (loading) {
+  // Sync users for auto-revocation logic
+  useEffect(() => {
+    if (!user) return;
+    const q = query(collection(db, 'users'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const fetchedUsers = snapshot.docs.map(doc => ({
+        uid: doc.id,
+        ...doc.data()
+      })) as User[];
+      setUsers(fetchedUsers);
+      setLoadingUsers(false);
+    });
+    return () => unsubscribe();
+  }, [user]);
+
+  // Global Auto-revocation logic
+  useEffect(() => {
+    if (loadingUsers || users.length === 0) return;
+
+    const checkExpirations = async () => {
+      const now = new Date();
+      const expiredUsers = users.filter(u => 
+        u.isPremium && 
+        u.premiumExpiry && 
+        u.premiumPlan !== 'Lifetime' && 
+        u.premiumExpiry.toDate() < now
+      );
+
+      for (const u of expiredUsers) {
+        try {
+          await updateDoc(doc(db, 'users', u.uid), {
+            isPremium: false,
+            premiumStatus: 'expired'
+          });
+          console.log(`System auto-revoked premium for ${u.email}`);
+        } catch (err) {
+          console.error(`System error auto-revoking for ${u.email}:`, err);
+        }
+      }
+    };
+
+    checkExpirations();
+  }, [users, loadingUsers]);
+
+  if (authLoading) {
     return <div className="p-8 text-center text-white">Loading...</div>;
   }
 
@@ -60,10 +111,13 @@ export default function AdminDashboard() {
   }
 
   const menuItems = [
-    { id: 'users', label: 'User Management', icon: Users },
+    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'users', label: 'User Manager', icon: Users },
     { id: 'premium', label: 'Premium Manager', icon: Crown },
     { id: 'upload', label: 'Upload Resources', icon: Upload },
     { id: 'resources', label: 'Manage Resources', icon: FileText },
+    { id: 'categories', label: 'Categories', icon: Grid },
+    { id: 'analytics', label: 'Analytics', icon: BarChart3 },
     { id: 'settings', label: 'Creator Settings', icon: Settings },
   ] as const;
 
@@ -152,10 +206,13 @@ export default function AdminDashboard() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
           >
+            {activeTab === 'dashboard' && <AdminDashboardStats />}
             {activeTab === 'users' && <AdminUsersManager />}
             {activeTab === 'premium' && <PremiumUsersManager />}
             {activeTab === 'upload' && <ResourceUpload />}
             {activeTab === 'resources' && <AdminResourceList />}
+            {activeTab === 'categories' && <AdminCategories />}
+            {activeTab === 'analytics' && <AdminAnalytics />}
             {activeTab === 'settings' && <AdminCreatorSettings />}
           </motion.div>
         </div>

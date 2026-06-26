@@ -42,6 +42,7 @@ export default function PremiumUsersManager() {
     return () => unsubscribe();
   }, []);
 
+  // Stats calculation
   const stats = useMemo(() => {
     const now = new Date();
     const premium = users.filter(u => u.isPremium).length;
@@ -53,7 +54,21 @@ export default function PremiumUsersManager() {
       return expiry.toDateString() === now.toDateString();
     }).length;
 
-    return { premium, free, expired, expiringToday };
+    const expiringThisWeek = users.filter(u => {
+      if (!u.isPremium || !u.premiumExpiry || u.premiumPlan === 'Lifetime') return false;
+      const expiry = u.premiumExpiry.toDate();
+      const nextWeek = new Date(now);
+      nextWeek.setDate(now.getDate() + 7);
+      return expiry > now && expiry <= nextWeek;
+    }).length;
+
+    const expiredToday = users.filter(u => {
+      if (!u.premiumExpiry || u.isPremium) return false;
+      const expiry = u.premiumExpiry.toDate();
+      return expiry.toDateString() === now.toDateString();
+    }).length;
+
+    return { premium, free, expired, expiringToday, expiringThisWeek, expiredToday };
   }, [users]);
 
   const handleUpdatePremium = async (uid: string, data: any) => {
@@ -85,16 +100,13 @@ export default function PremiumUsersManager() {
     
     switch (plan) {
       case '1 Hour': now.setHours(now.getHours() + 1); break;
-      case '6 Hours': now.setHours(now.getHours() + 6); break;
-      case '12 Hours': now.setHours(now.getHours() + 12); break;
       case '1 Day': now.setDate(now.getDate() + 1); break;
-      case '3 Days': now.setDate(now.getDate() + 3); break;
       case '7 Days': now.setDate(now.getDate() + 7); break;
-      case '15 Days': now.setDate(now.getDate() + 15); break;
       case '1 Month': now.setMonth(now.getMonth() + 1); break;
       case '3 Months': now.setMonth(now.getMonth() + 3); break;
       case '6 Months': now.setMonth(now.getMonth() + 6); break;
       case '1 Year': now.setFullYear(now.getFullYear() + 1); break;
+      case 'Lifetime': return null;
       case 'Custom': 
         if (custom?.date) return new Date(custom.date);
         if (custom?.days) now.setDate(now.getDate() + custom.days);
@@ -161,8 +173,8 @@ export default function PremiumUsersManager() {
   };
 
   const plans = [
-    '1 Hour', '6 Hours', '12 Hours',
-    '1 Day', '3 Days', '7 Days', '15 Days',
+    '1 Hour', 
+    '1 Day', '7 Days', 
     '1 Month', '3 Months', '6 Months', '1 Year',
     'Lifetime', 'Custom'
   ];
@@ -186,40 +198,47 @@ export default function PremiumUsersManager() {
   return (
     <div className="space-y-8">
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-surface p-6 rounded-2xl border border-secondary shadow-lg">
+      <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+        <div className="bg-surface p-6 rounded-2xl border border-secondary shadow-lg text-center lg:text-left">
           <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Premium Users</p>
           <div className="flex items-center justify-between">
             <p className="text-3xl font-bold text-white font-mono">{stats.premium}</p>
             <div className="p-2 bg-primary/10 text-primary rounded-lg border border-primary/20"><Crown size={20} /></div>
           </div>
         </div>
-        <div className="bg-surface p-6 rounded-2xl border border-secondary shadow-lg">
+        <div className="bg-surface p-6 rounded-2xl border border-secondary shadow-lg text-center lg:text-left">
           <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Free Users</p>
           <div className="flex items-center justify-between">
             <p className="text-3xl font-bold text-white font-mono">{stats.free}</p>
             <div className="p-2 bg-gray-500/10 text-gray-500 rounded-lg border border-gray-500/20"><Users size={20} /></div>
           </div>
         </div>
-        <div className="bg-surface p-6 rounded-2xl border border-secondary shadow-lg">
+        <div className="bg-surface p-6 rounded-2xl border border-secondary shadow-lg text-center lg:text-left">
           <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Expiring Today</p>
           <div className="flex items-center justify-between">
             <p className="text-3xl font-bold text-yellow-500 font-mono">{stats.expiringToday}</p>
-            <div className="p-2 bg-yellow-500/10 text-yellow-500 rounded-lg border border-yellow-500/20"><AlertCircle size={20} /></div>
+            <div className="p-2 bg-yellow-500/10 text-yellow-500 rounded-lg border border-yellow-500/20"><Clock size={20} /></div>
           </div>
         </div>
-        <div className="bg-surface p-6 rounded-2xl border border-secondary shadow-lg">
-          <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Expired</p>
+        <div className="bg-surface p-6 rounded-2xl border border-secondary shadow-lg text-center lg:text-left">
+          <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Expiring This Week</p>
+          <div className="flex items-center justify-between">
+            <p className="text-3xl font-bold text-blue-500 font-mono">{stats.expiringThisWeek}</p>
+            <div className="p-2 bg-blue-500/10 text-blue-500 rounded-lg border border-blue-500/20"><AlertCircle size={20} /></div>
+          </div>
+        </div>
+        <div className="bg-surface p-6 rounded-2xl border border-secondary shadow-lg text-center lg:text-left">
+          <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Expired Today</p>
+          <div className="flex items-center justify-between">
+            <p className="text-3xl font-bold text-orange-500 font-mono">{stats.expiredToday}</p>
+            <div className="p-2 bg-orange-500/10 text-orange-500 rounded-lg border border-orange-500/20"><Trash2 size={20} /></div>
+          </div>
+        </div>
+        <div className="bg-surface p-6 rounded-2xl border border-secondary shadow-lg text-center lg:text-left">
+          <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Total Expired</p>
           <div className="flex items-center justify-between">
             <p className="text-3xl font-bold text-red-500 font-mono">{stats.expired}</p>
             <div className="p-2 bg-red-500/10 text-red-500 rounded-lg border border-red-500/20"><Trash2 size={20} /></div>
-          </div>
-        </div>
-        <div className="bg-surface p-6 rounded-2xl border border-secondary shadow-lg">
-          <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Total Bookmarks</p>
-          <div className="flex items-center justify-between">
-            <p className="text-3xl font-bold text-primary font-mono">{totalBookmarks}</p>
-            <div className="p-2 bg-primary/10 text-primary rounded-lg border border-primary/20"><Bookmark size={20} /></div>
           </div>
         </div>
       </div>

@@ -27,8 +27,8 @@ export default function AdminUsersManager() {
   const [showCustomOptions, setShowCustomOptions] = useState(false);
 
   const plans = [
-    '1 Hour', '6 Hours', '12 Hours',
-    '1 Day', '3 Days', '7 Days', '15 Days',
+    '1 Hour', 
+    '1 Day', '7 Days', 
     '1 Month', '3 Months', '6 Months', '1 Year',
     'Lifetime'
   ];
@@ -39,12 +39,8 @@ export default function AdminUsersManager() {
     
     switch (plan) {
       case '1 Hour': now.setHours(now.getHours() + 1); break;
-      case '6 Hours': now.setHours(now.getHours() + 6); break;
-      case '12 Hours': now.setHours(now.getHours() + 12); break;
       case '1 Day': now.setDate(now.getDate() + 1); break;
-      case '3 Days': now.setDate(now.getDate() + 3); break;
       case '7 Days': now.setDate(now.getDate() + 7); break;
-      case '15 Days': now.setDate(now.getDate() + 15); break;
       case '1 Month': now.setMonth(now.getMonth() + 1); break;
       case '3 Months': now.setMonth(now.getMonth() + 3); break;
       case '6 Months': now.setMonth(now.getMonth() + 6); break;
@@ -123,18 +119,30 @@ export default function AdminUsersManager() {
       totalDownloads += (r.downloadCount || 0);
     });
 
-    const totalUsers = users.length;
-    const activeUsers = users.filter(u => !u.isBanned && u.accountStatus !== 'banned').length;
-    const bannedUsers = users.filter(u => u.isBanned || u.accountStatus === 'banned').length;
-    const unverifiedUsers = users.filter(u => !u.emailVerified).length;
-    
-    // Recent signups (last 7 days)
-    const now = Date.now();
-    const recentSignups = users.filter(u => {
-      if (!u.createdAt) return false;
-      const ts = u.createdAt.toMillis ? u.createdAt.toMillis() : new Date(u.createdAt).getTime();
-      return now - ts < 7 * 24 * 60 * 60 * 1000;
+    const expiringToday = users.filter(u => {
+      if (!u.isPremium || !u.premiumExpiry || u.premiumPlan === 'Lifetime') return false;
+      const expiry = u.premiumExpiry.toDate ? u.premiumExpiry.toDate() : new Date(u.premiumExpiry);
+      return expiry.toDateString() === new Date().toDateString();
     }).length;
+
+    const expiringThisWeek = users.filter(u => {
+      if (!u.isPremium || !u.premiumExpiry || u.premiumPlan === 'Lifetime') return false;
+      const expiry = u.premiumExpiry.toDate ? u.premiumExpiry.toDate() : new Date(u.premiumExpiry);
+      const now = new Date();
+      const nextWeek = new Date(now);
+      nextWeek.setDate(now.getDate() + 7);
+      return expiry > now && expiry <= nextWeek;
+    }).length;
+
+    const expiredToday = users.filter(u => {
+      if (!u.premiumExpiry || u.isPremium) return false;
+      const expiry = u.premiumExpiry.toDate ? u.premiumExpiry.toDate() : new Date(u.premiumExpiry);
+      return expiry.toDateString() === new Date().toDateString();
+    }).length;
+
+    const expiredTotal = users.filter(u => u.premiumStatus === 'expired').length;
+    const premiumUsers = users.filter(u => u.isPremium).length;
+    const freeUsers = users.filter(u => !u.isPremium && u.premiumStatus !== 'expired').length;
 
     const mostViewed = [...resources].sort((a, b) => (b.viewCount || 0) - (a.viewCount || 0)).slice(0, 5);
     const mostDownloaded = [...resources].sort((a, b) => (b.downloadCount || 0) - (a.downloadCount || 0)).slice(0, 5);
@@ -155,7 +163,13 @@ export default function AdminUsersManager() {
       recentSignups,
       mostViewed,
       mostDownloaded,
-      recentUploads
+      recentUploads,
+      expiringToday,
+      expiringThisWeek,
+      expiredToday,
+      expiredTotal,
+      premiumUsers,
+      freeUsers
     };
   }, [users, resources]);
 
@@ -261,6 +275,51 @@ export default function AdminUsersManager() {
           <Shield className="w-6 h-6 text-primary" />
           <span>Real-time Analytics Dashboard</span>
         </h2>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          <div className="bg-surface p-5 rounded-xl border border-secondary shadow-lg">
+            <div className="flex items-center justify-between text-gray-400 text-[10px] font-bold uppercase tracking-widest">
+              <span>Premium</span>
+              <Crown className="w-4 h-4 text-yellow-500" />
+            </div>
+            <p className="text-2xl font-bold text-white mt-1 font-mono">{stats.premiumUsers}</p>
+          </div>
+          <div className="bg-surface p-5 rounded-xl border border-secondary shadow-lg">
+            <div className="flex items-center justify-between text-gray-400 text-[10px] font-bold uppercase tracking-widest">
+              <span>Free</span>
+              <Users className="w-4 h-4 text-primary" />
+            </div>
+            <p className="text-2xl font-bold text-white mt-1 font-mono">{stats.freeUsers}</p>
+          </div>
+          <div className="bg-surface p-5 rounded-xl border border-secondary shadow-lg">
+            <div className="flex items-center justify-between text-gray-400 text-[10px] font-bold uppercase tracking-widest">
+              <span>Today</span>
+              <Clock className="w-4 h-4 text-yellow-500" />
+            </div>
+            <p className="text-2xl font-bold text-yellow-500 mt-1 font-mono">{stats.expiringToday}</p>
+          </div>
+          <div className="bg-surface p-5 rounded-xl border border-secondary shadow-lg">
+            <div className="flex items-center justify-between text-gray-400 text-[10px] font-bold uppercase tracking-widest">
+              <span>This Week</span>
+              <AlertTriangle className="w-4 h-4 text-blue-500" />
+            </div>
+            <p className="text-2xl font-bold text-blue-500 mt-1 font-mono">{stats.expiringThisWeek}</p>
+          </div>
+          <div className="bg-surface p-5 rounded-xl border border-secondary shadow-lg">
+            <div className="flex items-center justify-between text-gray-400 text-[10px] font-bold uppercase tracking-widest">
+              <span>Expired (Today)</span>
+              <Trash2 className="w-4 h-4 text-orange-500" />
+            </div>
+            <p className="text-2xl font-bold text-orange-500 mt-1 font-mono">{stats.expiredToday}</p>
+          </div>
+          <div className="bg-surface p-5 rounded-xl border border-secondary shadow-lg">
+            <div className="flex items-center justify-between text-gray-400 text-[10px] font-bold uppercase tracking-widest">
+              <span>Expired (Total)</span>
+              <XCircle className="w-4 h-4 text-red-500" />
+            </div>
+            <p className="text-2xl font-bold text-red-500 mt-1 font-mono">{stats.expiredTotal}</p>
+          </div>
+        </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="bg-surface p-5 rounded-xl border border-secondary">
@@ -432,11 +491,12 @@ export default function AdminUsersManager() {
                 <tr className="bg-background-main border-b border-secondary text-xs font-bold text-gray-400 uppercase tracking-wider">
                   <th className="p-4">User</th>
                   <th className="p-4">Premium</th>
+                  <th className="p-4">Remaining</th>
                   <th className="p-4">Role</th>
                   <th className="p-4">Status</th>
                   <th className="p-4">Verification</th>
-                  <th className="p-4">Join Date / Last Login</th>
-                  <th className="p-4">Fingerprint</th>
+                  <th className="p-4">Tracking</th>
+                  <th className="p-4">Device</th>
                   <th className="p-4 text-right">Actions</th>
                 </tr>
               </thead>
@@ -466,9 +526,29 @@ export default function AdminUsersManager() {
                               <Crown size={10} /> Active
                             </span>
                             <span className="text-[10px] text-gray-500 mt-0.5 font-mono">{u.premiumPlan}</span>
+                            {u.premiumExpiry && (
+                              <span className="text-[8px] text-gray-600 mt-0.5 uppercase">Exp: {formatDate(u.premiumExpiry)}</span>
+                            )}
                           </div>
                         ) : (
-                          <span className="text-[10px] text-gray-500 font-bold uppercase">No Plan</span>
+                          <span className="text-[10px] text-gray-500 font-bold uppercase">{u.premiumStatus === 'expired' ? '🔴 Expired' : '⚪ Free'}</span>
+                        )}
+                      </td>
+                      <td className="p-4">
+                        {u.isPremium ? (
+                          <span className="text-[10px] font-bold text-primary font-mono">
+                            {(() => {
+                              if (u.premiumPlan === 'Lifetime') return 'Infinity';
+                              if (!u.premiumExpiry) return 'N/A';
+                              const diff = u.premiumExpiry.toDate().getTime() - Date.now();
+                              if (diff <= 0) return 'Expired';
+                              const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                              const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                              return `${days}d ${hours}h`;
+                            })()}
+                          </span>
+                        ) : (
+                          <span className="text-gray-600 text-[10px] font-mono">---</span>
                         )}
                       </td>
                       <td className="p-4">
@@ -643,7 +723,7 @@ export default function AdminUsersManager() {
                       <Clock size={14} className="text-primary" />
                       Duration Presets
                     </h4>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                       {plans.map((plan) => (
                         <button
                           key={plan}
@@ -747,7 +827,7 @@ export default function AdminUsersManager() {
                     </AnimatePresence>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 gap-3">
                     <button
                       onClick={() => {
                         handleUpdatePremium(premiumModalUser.uid, {
@@ -757,24 +837,25 @@ export default function AdminUsersManager() {
                           premiumStart: serverTimestamp()
                         });
                       }}
-                      className="py-3 bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 font-bold rounded-xl hover:bg-yellow-500 hover:text-secondary transition-all text-[10px]"
+                      className="py-3 bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 font-bold rounded-xl hover:bg-yellow-500 hover:text-secondary transition-all text-xs flex items-center justify-center gap-2"
                     >
-                      Lifetime
+                      <Crown size={16} />
+                      Grant Lifetime Access
                     </button>
                     <button
                       onClick={() => {
-                        if (!confirm("Revoke premium?")) return;
+                        if (!confirm("Remove all premium privileges?")) return;
                         handleUpdatePremium(premiumModalUser.uid, {
                           isPremium: false,
                           premiumPlan: '',
                           premiumExpiry: null,
-                          premiumStart: null,
-                          premiumStatus: 'none'
+                          premiumStatus: 'expired'
                         });
                       }}
-                      className="py-3 bg-red-500/10 text-red-500 border border-red-500/20 font-bold rounded-xl hover:bg-red-500 hover:text-white transition-all text-[10px]"
+                      className="py-3 bg-red-500/10 text-red-500 border border-red-500/20 font-bold rounded-xl hover:bg-red-500 hover:text-white transition-all text-xs flex items-center justify-center gap-2"
                     >
-                      Revoke
+                      <Trash2 size={16} />
+                      Remove Premium Access
                     </button>
                   </div>
                 </div>
