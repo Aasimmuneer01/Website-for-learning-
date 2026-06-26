@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, X, LogOut, Sun, Moon } from 'lucide-react';
+import { Menu, X, LogOut, Sun, Moon, Shield } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useAuth } from '../hooks/useAuth';
 
@@ -48,6 +48,12 @@ export default function Navbar() {
               <Link to="/bookmarks" className="px-4 py-2 bg-surface text-text-main rounded-lg font-bold hover:translate-y-[-2px] transition-all flex items-center gap-2">Bookmarks</Link>
               <Link to="/folders" className="px-4 py-2 bg-surface text-text-main rounded-lg font-bold hover:translate-y-[-2px] transition-all flex items-center gap-2">Folders</Link>
             </>
+          )}
+          {(userData?.role === 'admin' || userData?.role === 'superadmin' || user?.email === 'aasimmuneer349@gmail.com') && (
+            <Link to="/admin" className="px-4 py-2 bg-purple-500/10 text-purple-400 border border-purple-500/20 rounded-lg font-bold hover:bg-purple-500 hover:text-white transition-all flex items-center gap-2">
+              <Shield size={18} />
+              Admin
+            </Link>
           )}
         </div>
 

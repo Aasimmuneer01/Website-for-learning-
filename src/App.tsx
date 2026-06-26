@@ -41,6 +41,8 @@ function MainLayout() {
     <div className="min-h-screen bg-background-main text-text-main flex flex-col">
       <Routes>
         <Route path="/viewer/:resourceId" element={<PDFViewer />} />
+        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="*" element={
           <>
             <Navbar />
@@ -51,8 +53,6 @@ function MainLayout() {
                 <Route path="/bookmarks" element={<Bookmarks />} />
                 <Route path="/folders" element={<Folders />} />
                 <Route path="/offline" element={<OfflineLibrary />} />
-                <Route path="/admin" element={<AdminDashboard />} />
-                <Route path="/admin/login" element={<AdminLogin />} />
               </Routes>
             </main>
             <footer className="w-full py-6 mt-auto border-t border-secondary bg-surface text-center">

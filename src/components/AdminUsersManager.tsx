@@ -4,7 +4,7 @@ import { db } from '../firebase/config';
 import { User as UserType, Resource } from '../types';
 import { 
   Users, Eye, Download, FileText, ShieldAlert, CheckCircle2, XCircle, 
-  Search, Filter, Ban, CheckCircle, Mail, Trash2, Info, AlertTriangle, UserCheck, Shield, Crown
+  Search, Filter, Ban, CheckCircle, Mail, Trash2, Info, AlertTriangle, UserCheck, Shield, Crown, Clock, Settings
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -14,9 +14,71 @@ export default function AdminUsersManager() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<'all' | 'active' | 'banned' | 'verified' | 'unverified' | 'suspicious'>('all');
   const [selectedUser, setSelectedUser] = useState<UserType | null>(null);
+  const [premiumModalUser, setPremiumModalUser] = useState<UserType | null>(null);
   const [banModalUser, setBanModalUser] = useState<UserType | null>(null);
   const [banReasonInput, setBanReasonInput] = useState('');
   const [loading, setLoading] = useState(true);
+  const [isUpdatingPremium, setIsUpdatingPremium] = useState(false);
+  const [customDays, setCustomDays] = useState('');
+  const [customHours, setCustomHours] = useState('');
+  const [customDate, setCustomDate] = useState('');
+  const [showCustomOptions, setShowCustomOptions] = useState(false);
+
+  const plans = [
+    '1 Hour', '6 Hours', '12 Hours',
+    '1 Day', '3 Days', '7 Days', '15 Days',
+    '1 Month', '3 Months', '6 Months', '1 Year',
+    'Lifetime'
+  ];
+
+  const getExpiryDate = (plan: string, custom?: { days?: number, hours?: number, date?: string }) => {
+    if (plan === 'Lifetime') return null;
+    const now = new Date();
+    
+    switch (plan) {
+      case '1 Hour': now.setHours(now.getHours() + 1); break;
+      case '6 Hours': now.setHours(now.getHours() + 6); break;
+      case '12 Hours': now.setHours(now.getHours() + 12); break;
+      case '1 Day': now.setDate(now.getDate() + 1); break;
+      case '3 Days': now.setDate(now.getDate() + 3); break;
+      case '7 Days': now.setDate(now.getDate() + 7); break;
+      case '15 Days': now.setDate(now.getDate() + 15); break;
+      case '1 Month': now.setMonth(now.getMonth() + 1); break;
+      case '3 Months': now.setMonth(now.getMonth() + 3); break;
+      case '6 Months': now.setMonth(now.getMonth() + 6); break;
+      case '1 Year': now.setFullYear(now.getFullYear() + 1); break;
+      case 'Custom': 
+        if (custom?.date) return new Date(custom.date);
+        if (custom?.days) now.setDate(now.getDate() + custom.days);
+        if (custom?.hours) now.setHours(now.getHours() + custom.hours);
+        break;
+    }
+    return now;
+  };
+
+  const handleUpdatePremium = async (uid: string, data: any) => {
+    setIsUpdatingPremium(true);
+    try {
+      const userRef = doc(db, 'users', uid);
+      const updateData = {
+        ...data,
+        premiumGrantedAt: serverTimestamp(),
+        premiumGrantedBy: 'aasimmuneer349@gmail.com',
+        premiumStatus: data.isPremium ? 'active' : data.premiumStatus || 'none'
+      };
+      await updateDoc(userRef, updateData);
+      setPremiumModalUser(null);
+      setShowCustomOptions(false);
+      setCustomDays('');
+      setCustomHours('');
+      setCustomDate('');
+    } catch (err) {
+      console.error("Error updating premium:", err);
+      alert("Failed to update premium: " + err);
+    } finally {
+      setIsUpdatingPremium(false);
+    }
+  };
 
   // Realtime listeners for users and resources
   useEffect(() => {
@@ -450,17 +512,8 @@ export default function AdminUsersManager() {
                         </button>
 
                         <button
-                          onClick={async () => {
-                            if (!confirm(`Toggle premium status for ${u.email}?`)) return;
-                            try {
-                              await updateDoc(doc(db, 'users', u.uid), {
-                                isPremium: !u.isPremium
-                              });
-                            } catch (err) {
-                              alert("Failed to toggle premium: " + err);
-                            }
-                          }}
-                          title="Toggle Premium Status"
+                          onClick={() => setPremiumModalUser(u)}
+                          title="Manage Premium Access"
                           className={`p-1.5 ${u.isPremium ? 'bg-yellow-500/20 text-yellow-500 border-yellow-500/40' : 'bg-gray-500/10 text-gray-500 border-gray-500/20'} hover:opacity-80 rounded-lg transition-colors border inline-block`}
                         >
                           <Crown className="w-4 h-4" />
@@ -482,6 +535,203 @@ export default function AdminUsersManager() {
           </div>
         </div>
       </div>
+
+      {/* Premium Management Modal */}
+      <AnimatePresence>
+        {premiumModalUser && (
+          <div className="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 z-[100]">
+            <motion.div 
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-surface border border-secondary p-8 rounded-[2rem] max-w-4xl w-full shadow-2xl relative max-h-[95vh] overflow-y-auto"
+            >
+              <button 
+                onClick={() => {
+                  setPremiumModalUser(null);
+                  setShowCustomOptions(false);
+                }}
+                className="absolute top-6 right-6 text-gray-500 hover:text-white transition-colors"
+              >
+                <XCircle size={28} />
+              </button>
+
+              <div className="flex flex-col md:flex-row gap-8 items-start mb-10 border-b border-secondary pb-8">
+                <div className="w-20 h-20 bg-primary/10 text-primary rounded-2xl flex items-center justify-center border border-primary/20 shrink-0 shadow-xl">
+                  <Crown size={40} />
+                </div>
+                <div className="space-y-1">
+                  <h3 className="text-2xl font-bold text-white uppercase tracking-tight">Premium Access Control</h3>
+                  <div className="flex flex-wrap gap-4 text-sm">
+                    <div className="flex items-center gap-2 text-gray-400">
+                      <Mail size={14} />
+                      <span className="font-mono">{premiumModalUser.email}</span>
+                    </div>
+                  </div>
+                  <div className="pt-2 flex gap-2">
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase border ${
+                      premiumModalUser.isPremium 
+                        ? 'bg-green-500/10 text-green-500 border-green-500/20' 
+                        : 'bg-gray-500/10 text-gray-500 border-gray-500/20'
+                    }`}>
+                      {premiumModalUser.isPremium ? '🟢 Premium' : '⚪ Free'}
+                    </span>
+                    {premiumModalUser.premiumPlan && (
+                      <span className="px-2 py-0.5 bg-secondary text-gray-300 border border-surface rounded text-[10px] font-bold uppercase">
+                        {premiumModalUser.premiumPlan}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                <div className="space-y-6">
+                  <div>
+                    <h4 className="text-xs font-bold text-gray-500 uppercase tracking-widest px-1 mb-4 flex items-center gap-2">
+                      <Clock size={14} className="text-primary" />
+                      Duration Presets
+                    </h4>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                      {plans.map((plan) => (
+                        <button
+                          key={plan}
+                          onClick={() => {
+                            const expiry = getExpiryDate(plan);
+                            handleUpdatePremium(premiumModalUser.uid, {
+                              isPremium: true,
+                              premiumPlan: plan,
+                              premiumExpiry: expiry ? expiry : null,
+                              premiumStart: serverTimestamp()
+                            });
+                          }}
+                          disabled={isUpdatingPremium}
+                          className="p-3 bg-secondary border border-surface rounded-xl hover:border-primary hover:bg-primary/5 transition-all text-[10px] font-bold text-white text-center disabled:opacity-50"
+                        >
+                          {plan}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-8">
+                  <div className="space-y-4">
+                    <button 
+                      onClick={() => setShowCustomOptions(!showCustomOptions)}
+                      className="w-full py-3 bg-primary text-secondary rounded-xl text-xs font-bold hover:brightness-110 transition-all flex items-center justify-center gap-2"
+                    >
+                      <Settings size={16} />
+                      {showCustomOptions ? 'Hide Custom' : 'Custom Duration'}
+                    </button>
+
+                    <AnimatePresence>
+                      {showCustomOptions && (
+                        <motion.div 
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          className="space-y-4 overflow-hidden bg-secondary/50 p-4 rounded-xl border border-secondary"
+                        >
+                          <div className="flex gap-2">
+                            <input 
+                              type="number" 
+                              placeholder="Days"
+                              value={customDays}
+                              onChange={(e) => setCustomDays(e.target.value)}
+                              className="flex-1 bg-background-main border border-secondary rounded-lg px-3 py-2 text-white outline-none focus:border-primary text-xs"
+                            />
+                            <input 
+                              type="number" 
+                              placeholder="Hours"
+                              value={customHours}
+                              onChange={(e) => setCustomHours(e.target.value)}
+                              className="flex-1 bg-background-main border border-secondary rounded-lg px-3 py-2 text-white outline-none focus:border-primary text-xs"
+                            />
+                            <button 
+                              onClick={() => {
+                                const expiry = getExpiryDate('Custom', { 
+                                  days: customDays ? Number(customDays) : 0, 
+                                  hours: customHours ? Number(customHours) : 0 
+                                });
+                                handleUpdatePremium(premiumModalUser.uid, {
+                                  isPremium: true,
+                                  premiumPlan: `${customDays || 0}D ${customHours || 0}H`,
+                                  premiumExpiry: expiry,
+                                  premiumStart: serverTimestamp()
+                                });
+                              }}
+                              disabled={(!customDays && !customHours) || isUpdatingPremium}
+                              className="bg-primary text-secondary px-4 rounded-lg font-bold text-[10px]"
+                            >
+                              Apply
+                            </button>
+                          </div>
+                          
+                          <div className="pt-2 border-t border-secondary/50 flex gap-2">
+                            <input 
+                              type="date" 
+                              value={customDate}
+                              onChange={(e) => setCustomDate(e.target.value)}
+                              className="flex-1 bg-background-main border border-secondary rounded-lg px-3 py-2 text-white outline-none focus:border-primary text-xs"
+                            />
+                            <button 
+                              onClick={() => {
+                                const expiry = getExpiryDate('Custom', { date: customDate });
+                                handleUpdatePremium(premiumModalUser.uid, {
+                                  isPremium: true,
+                                  premiumPlan: `Custom Date`,
+                                  premiumExpiry: expiry,
+                                  premiumStart: serverTimestamp()
+                                });
+                              }}
+                              disabled={!customDate || isUpdatingPremium}
+                              className="bg-primary text-secondary px-4 rounded-lg font-bold text-[10px]"
+                            >
+                              Apply
+                            </button>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      onClick={() => {
+                        handleUpdatePremium(premiumModalUser.uid, {
+                          isPremium: true,
+                          premiumPlan: 'Lifetime',
+                          premiumExpiry: null,
+                          premiumStart: serverTimestamp()
+                        });
+                      }}
+                      className="py-3 bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 font-bold rounded-xl hover:bg-yellow-500 hover:text-secondary transition-all text-[10px]"
+                    >
+                      Lifetime
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (!confirm("Revoke premium?")) return;
+                        handleUpdatePremium(premiumModalUser.uid, {
+                          isPremium: false,
+                          premiumPlan: '',
+                          premiumExpiry: null,
+                          premiumStart: null,
+                          premiumStatus: 'none'
+                        });
+                      }}
+                      className="py-3 bg-red-500/10 text-red-500 border border-red-500/20 font-bold rounded-xl hover:bg-red-500 hover:text-white transition-all text-[10px]"
+                    >
+                      Revoke
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* Ban Reason Modal */}
       <AnimatePresence>
