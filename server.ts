@@ -57,6 +57,15 @@ app.post('/api/send-otp', async (req, res) => {
   }
 });
 
+// Serve standalone admin portal
+app.get('/admin', (req, res) => {
+  res.sendFile(path.join(process.cwd(), 'public', 'admin.html'));
+});
+
+app.get('/admin.html', (req, res) => {
+  res.redirect('/admin');
+});
+
 async function startServer() {
   // Vite middleware for development
   if (process.env.NODE_ENV !== 'production') {

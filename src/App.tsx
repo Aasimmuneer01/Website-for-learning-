@@ -8,8 +8,6 @@ import { HelmetProvider } from 'react-helmet-async';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Resources from './pages/Resources';
-import AdminDashboard from './pages/admin/AdminDashboard';
-import AdminLogin from './pages/admin/AdminLogin';
 import PDFViewer from './components/PDFViewer';
 import Bookmarks from './pages/Bookmarks';
 import Folders from './pages/Folders';
@@ -65,8 +63,6 @@ export default function App() {
       <AuthProvider>
         <Router>
           <Routes>
-            <Route path="/admin/login" element={<AdminLogin />} />
-            <Route path="/admin/*" element={<AdminDashboard />} />
             <Route path="*" element={<MainLayout />} />
           </Routes>
         </Router>
