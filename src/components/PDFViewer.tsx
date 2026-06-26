@@ -186,8 +186,6 @@ export default function PDFViewer() {
       try {
         const loadingTask = pdfjsLib.getDocument({
           url: resource.pdfUrl,
-          cMapUrl: `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/cmaps/`,
-          cMapPacked: true,
         });
         const pdf = await loadingTask.promise;
         setPdfDoc(pdf);

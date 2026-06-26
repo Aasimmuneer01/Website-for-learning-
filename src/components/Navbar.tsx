@@ -182,6 +182,12 @@ export default function Navbar() {
             <div className="flex flex-col gap-2 p-4">
               <Link to="/" onClick={() => setIsOpen(false)} className="text-center p-3 text-text-main border-2 border-surface rounded-lg font-bold">Home</Link>
               <Link to="/resources" onClick={() => setIsOpen(false)} className="text-center p-3 text-text-main border-2 border-surface rounded-lg font-bold">Resources</Link>
+              {isPremium && (
+                <>
+                  <Link to="/bookmarks" onClick={() => setIsOpen(false)} className="text-center p-3 text-text-main border-2 border-surface rounded-lg font-bold">Bookmarks</Link>
+                  <Link to="/folders" onClick={() => setIsOpen(false)} className="text-center p-3 text-text-main border-2 border-surface rounded-lg font-bold">Folders</Link>
+                </>
+              )}
               {(userData?.role === 'admin' || userData?.role === 'superadmin' || user?.email === 'aasimmuneer349@gmail.com') && (
                 <a href="/admin" onClick={() => setIsOpen(false)} className="text-center p-3 text-purple-400 border-2 border-purple-500/20 bg-purple-500/5 rounded-lg font-bold flex items-center justify-center gap-2">
                   <Shield size={18} /> Admin Panel
