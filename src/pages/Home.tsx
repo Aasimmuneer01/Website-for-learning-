@@ -1,13 +1,23 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { BookOpen, Download, User, MonitorPlay } from 'lucide-react';
+import { BookOpen, Download, User as UserIcon, MonitorPlay, Clock, Bookmark, Layers, CheckCircle2, History } from 'lucide-react';
 import { db } from '../firebase/config';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
+import { useAuth } from '../hooks/useAuth';
+import { ReadingHistory } from '../types';
 import CreatorSection from '../components/CreatorSection';
 
 export default function Home() {
+  const { user, userData } = useAuth();
   const [showSubjects, setShowSubjects] = useState(false);
+  const [history, setHistory] = useState<ReadingHistory[]>([]);
+  const [stats, setStats] = useState({
+    resourcesRead: 0,
+    pagesRead: 0,
+    bookmarks: 0,
+    studyTime: 0
+  });
   const [homepageSettings, setHomepageSettings] = useState({
     title: 'Educational\nResources',
     subtitle: 'Discover and share premium study materials, notes, previous year papers, and assignments designed to help you excel.',
@@ -31,8 +41,42 @@ export default function Home() {
         console.warn("Could not fetch homepage settings:", err);
       }
     };
+
+    const fetchPremiumData = async () => {
+      if (!user) return;
+      try {
+        // Fetch History
+        const historyQuery = query(
+          collection(db, 'users', user.uid, 'history'),
+          orderBy('updatedAt', 'desc'),
+          limit(5)
+        );
+        const historySnap = await getDocs(historyQuery);
+        const historyList = historySnap.docs.map(doc => doc.data() as ReadingHistory);
+        setHistory(historyList);
+
+        // Fetch Stats
+        const bookmarksSnap = await getDocs(collection(db, 'users', user.uid, 'bookmarks'));
+        const resourcesRead = historySnap.size;
+        let pagesRead = 0;
+        historySnap.docs.forEach(doc => pagesRead += doc.data().lastPage || 0);
+
+        setStats({
+          resourcesRead,
+          pagesRead,
+          bookmarks: bookmarksSnap.size,
+          studyTime: resourcesRead * 15 // Mock study time calculation
+        });
+      } catch (err) {
+        console.error("Error fetching premium home data:", err);
+      }
+    };
+
     fetchHomepageSettings();
-  }, []);
+    fetchPremiumData();
+  }, [user]);
+
+  const isPremium = userData?.isPremium || ['admin', 'superadmin', 'moderator'].includes(userData?.role || '');
 
   return (
     <div className="flex flex-col gap-16 pb-20">
@@ -109,6 +153,123 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Premium Plan Info for Users */}
+      {isPremium && (
+        <section className="px-6 -mt-12 relative z-30">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="max-w-7xl mx-auto bg-primary/10 border border-primary/20 p-6 rounded-3xl backdrop-blur-md flex flex-wrap items-center justify-between gap-6"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-primary/20 rounded-2xl flex items-center justify-center text-primary border border-primary/30">
+                <Crown size={24} />
+              </div>
+              <div>
+                <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Premium Status</p>
+                <h3 className="text-xl font-bold text-white uppercase tracking-tight">Active Plan: {userData?.premiumPlan}</h3>
+              </div>
+            </div>
+
+            <div className="flex gap-8">
+              <div className="text-center sm:text-left">
+                <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Expires</p>
+                <p className="text-white font-bold">
+                  {userData?.premiumPlan === 'Lifetime' ? 'Never' : userData?.premiumExpiry?.toDate().toLocaleDateString() || 'N/A'}
+                </p>
+              </div>
+              {userData?.premiumPlan !== 'Lifetime' && userData?.premiumExpiry && (
+                <div className="text-center sm:text-left">
+                  <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Remaining</p>
+                  <p className="text-primary font-bold">
+                    {Math.max(0, Math.ceil((userData.premiumExpiry.toDate().getTime() - Date.now()) / (1000 * 60 * 60 * 24)))} Days
+                  </p>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        </section>
+      )}
+
+      {/* Continue Reading & Stats Section for Premium Users */}
+      {isPremium && user && (
+        <section className="px-6 -mt-8 relative z-20">
+          <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Reading Stats */}
+            <div className="lg:col-span-1 bg-surface border border-primary/20 rounded-3xl p-6 shadow-2xl space-y-6">
+              <h3 className="text-xl font-bold text-white uppercase tracking-tight flex items-center gap-2">
+                <CheckCircle2 className="text-primary w-5 h-5" />
+                Your Progress
+              </h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-secondary/30 p-4 rounded-2xl border border-secondary">
+                  <BookOpen className="text-primary w-5 h-5 mb-2" />
+                  <p className="text-2xl font-bold text-white">{stats.resourcesRead}</p>
+                  <p className="text-[10px] text-gray-500 uppercase font-bold">Resources</p>
+                </div>
+                <div className="bg-secondary/30 p-4 rounded-2xl border border-secondary">
+                  <Layers className="text-primary w-5 h-5 mb-2" />
+                  <p className="text-2xl font-bold text-white">{stats.pagesRead}</p>
+                  <p className="text-[10px] text-gray-500 uppercase font-bold">Pages Read</p>
+                </div>
+                <div className="bg-secondary/30 p-4 rounded-2xl border border-secondary">
+                  <Bookmark className="text-primary w-5 h-5 mb-2" />
+                  <p className="text-2xl font-bold text-white">{stats.bookmarks}</p>
+                  <p className="text-[10px] text-gray-500 uppercase font-bold">Bookmarks</p>
+                </div>
+                <div className="bg-secondary/30 p-4 rounded-2xl border border-secondary">
+                  <Clock className="text-primary w-5 h-5 mb-2" />
+                  <p className="text-2xl font-bold text-white">{stats.studyTime}m</p>
+                  <p className="text-[10px] text-gray-500 uppercase font-bold">Study Time</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Continue Reading */}
+            <div className="lg:col-span-2 bg-surface border border-secondary rounded-3xl p-6 shadow-2xl">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-bold text-white uppercase tracking-tight flex items-center gap-2">
+                  <History className="text-primary w-5 h-5" />
+                  Continue Reading
+                </h3>
+              </div>
+              
+              <div className="space-y-4">
+                {history.length === 0 ? (
+                  <div className="text-center py-12 bg-secondary/20 rounded-2xl border border-dashed border-secondary">
+                    <p className="text-gray-500 text-sm">No recent history. Start reading to see your progress!</p>
+                  </div>
+                ) : (
+                  history.map((item) => (
+                    <Link 
+                      key={item.resourceId} 
+                      to={`/viewer/${item.resourceId}`}
+                      className="flex items-center gap-4 p-3 bg-secondary/30 hover:bg-secondary/50 rounded-2xl border border-secondary transition-all group"
+                    >
+                      <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center text-primary border border-primary/20 group-hover:scale-110 transition-transform">
+                        <BookOpen size={20} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-white font-bold text-sm truncate">{item.resourceTitle}</h4>
+                        <div className="flex items-center gap-3 mt-1">
+                          <div className="flex-1 h-1 bg-secondary rounded-full overflow-hidden">
+                            <div className="h-full bg-primary" style={{ width: `${item.percentage}%` }} />
+                          </div>
+                          <span className="text-[10px] text-gray-500 font-bold uppercase whitespace-nowrap">{item.percentage}% Done</span>
+                        </div>
+                      </div>
+                      <div className="px-3 py-1 bg-primary text-secondary rounded-lg font-bold text-[10px] uppercase tracking-wider group-hover:translate-x-1 transition-transform">
+                        Resume
+                      </div>
+                    </Link>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Feature Section */}
       <section className="px-6 relative">

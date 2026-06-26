@@ -16,8 +16,25 @@ service cloud.firestore {
     match /users/{userId} {
       allow read: if (request.auth != null && request.auth.uid == userId) || isAdmin();
       allow create: if (request.auth != null && request.auth.uid == userId && (request.resource.data.role in ['user', 'student'] || request.auth.token.email in ['admin@example.com', 'aasimmuneer349@gmail.com', 'admin@eduplatform.com'])) || isAdmin();
-      allow update: if isAdmin() || (request.auth != null && request.auth.uid == userId && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'isBanned', 'banReason', 'accountStatus', 'isPremium']));
+      allow update: if isAdmin() || (request.auth != null && request.auth.uid == userId && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'isBanned', 'banReason', 'accountStatus', 'isPremium', 'premiumPlan', 'premiumExpiry', 'premiumGrantedBy', 'premiumGrantedAt', 'premiumStatus']));
       allow delete: if isAdmin();
+
+      // Premium sub-collections
+      match /bookmarks/{bookmarkId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+      match /history/{historyId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+      match /notes/{noteId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+      match /highlights/{highlightId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+      match /folders/{folderId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
     }
 
     match /bannedFingerprints/{fp} {

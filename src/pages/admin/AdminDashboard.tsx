@@ -6,6 +6,7 @@ import ResourceUpload from '../../components/ResourceUpload';
 import AdminResourceList from '../../components/AdminResourceList';
 import AdminCreatorSettings from '../../components/AdminCreatorSettings';
 import AdminUsersManager from '../../components/AdminUsersManager';
+import PremiumUsersManager from '../../components/PremiumUsersManager';
 import { ShieldAlert } from 'lucide-react';
 
 export default function AdminDashboard() {
@@ -69,6 +70,9 @@ export default function AdminDashboard() {
       
       {/* Realtime Analytics & User Management Section */}
       <AdminUsersManager />
+
+      {/* Premium Management Section */}
+      <PremiumUsersManager />
 
       {/* Upload Section */}
       <ResourceUpload />

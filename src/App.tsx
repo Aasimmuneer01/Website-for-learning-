@@ -11,6 +11,9 @@ import Resources from './pages/Resources';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminLogin from './pages/admin/AdminLogin';
 import PDFViewer from './components/PDFViewer';
+import Bookmarks from './pages/Bookmarks';
+import Folders from './pages/Folders';
+import OfflineLibrary from './pages/OfflineLibrary';
 import { AuthProvider, useAuth } from './hooks/useAuth';
 import AuthScreen from './components/AuthScreen';
 import VerificationScreen from './components/VerificationScreen';
@@ -45,6 +48,9 @@ function MainLayout() {
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/resources" element={<Resources />} />
+                <Route path="/bookmarks" element={<Bookmarks />} />
+                <Route path="/folders" element={<Folders />} />
+                <Route path="/offline" element={<OfflineLibrary />} />
                 <Route path="/admin" element={<AdminDashboard />} />
                 <Route path="/admin/login" element={<AdminLogin />} />
               </Routes>

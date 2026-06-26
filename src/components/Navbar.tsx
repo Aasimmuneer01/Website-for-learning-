@@ -7,7 +7,7 @@ import { useAuth } from '../hooks/useAuth';
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isDark, setIsDark] = useState(true);
-  const { logout } = useAuth();
+  const { logout, userData, user } = useAuth();
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
@@ -32,6 +32,8 @@ export default function Navbar() {
     }
   };
 
+  const isPremium = userData?.isPremium || ['admin', 'superadmin', 'moderator'].includes(userData?.role || '');
+
   return (
     <nav className="bg-background-main border-b border-surface p-4 shadow-md z-50">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -41,9 +43,55 @@ export default function Navbar() {
         <div className="hidden md:flex items-center gap-4">
           <Link to="/" className="px-4 py-2 bg-surface text-text-main rounded-lg font-bold shadow-[0_3px_0_0_rgba(0,0,0,0.1)] dark:shadow-[0_3px_0_0_#000] hover:shadow-none hover:translate-y-[3px] transition-all">Home</Link>
           <Link to="/resources" className="px-4 py-2 bg-primary text-slate-950 rounded-lg font-bold shadow-[0_3px_0_0_#0ea5e9] hover:shadow-none hover:translate-y-[3px] transition-all">Resources</Link>
+          {isPremium && (
+            <>
+              <Link to="/bookmarks" className="px-4 py-2 bg-surface text-text-main rounded-lg font-bold hover:translate-y-[-2px] transition-all flex items-center gap-2">Bookmarks</Link>
+              <Link to="/folders" className="px-4 py-2 bg-surface text-text-main rounded-lg font-bold hover:translate-y-[-2px] transition-all flex items-center gap-2">Folders</Link>
+            </>
+          )}
         </div>
 
         <div className="flex items-center gap-2">
+          {/* Premium Badge */}
+          {userData && (
+            <div className="relative group">
+              <div className={`hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border cursor-help ${
+                isPremium 
+                  ? 'bg-primary/10 text-primary border-primary/30 shadow-[0_0_10px_rgba(14,165,233,0.2)]' 
+                  : 'bg-surface text-gray-500 border-secondary'
+              }`}>
+                <div className={`w-1.5 h-1.5 rounded-full ${isPremium ? 'bg-primary animate-pulse' : 'bg-gray-500'}`} />
+                {isPremium ? (userData.premiumPlan === 'Lifetime' ? 'Lifetime' : 'Premium') : 'Free'}
+              </div>
+
+              {/* Premium Details Tooltip */}
+              {isPremium && (
+                <div className="absolute top-full right-0 mt-2 w-48 bg-surface border border-secondary p-4 rounded-2xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-[100] transform translate-y-2 group-hover:translate-y-0">
+                  <div className="space-y-3">
+                    <div>
+                      <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Premium Plan</p>
+                      <p className="text-white font-bold">{userData.premiumPlan}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Expires</p>
+                      <p className="text-white font-bold">
+                        {userData.premiumPlan === 'Lifetime' ? 'Never Expires' : userData.premiumExpiry?.toDate().toLocaleDateString() || 'N/A'}
+                      </p>
+                    </div>
+                    {userData.premiumPlan !== 'Lifetime' && userData.premiumExpiry && (
+                      <div>
+                        <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Remaining</p>
+                        <p className="text-primary font-bold">
+                          {Math.ceil((userData.premiumExpiry.toDate().getTime() - Date.now()) / (1000 * 60 * 60 * 24))} Days
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           <button 
             onClick={toggleTheme}
             className="p-2 text-text-main hover:bg-surface rounded-lg transition-colors"

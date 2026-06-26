@@ -13,6 +13,64 @@ export interface User {
   accountStatus?: 'active' | 'banned' | 'suspicious' | string;
   isPremium?: boolean;
   isEmailVerified?: boolean;
+  // Premium details
+  premiumPlan?: string;
+  premiumStart?: any;
+  premiumExpiry?: any;
+  premiumGrantedBy?: string;
+  premiumGrantedAt?: any;
+  premiumStatus?: 'active' | 'expired' | 'none';
+}
+
+export interface Bookmark {
+  id: string;
+  userId: string;
+  resourceId: string;
+  resourceTitle: string;
+  resourceThumbnail?: string;
+  createdAt: any;
+}
+
+export interface ReadingHistory {
+  userId: string;
+  resourceId: string;
+  resourceTitle: string;
+  lastPage: number;
+  totalPages: number;
+  percentage: number;
+  zoom: number;
+  scrollPosition: { x: number; y: number };
+  updatedAt: any;
+}
+
+export interface Note {
+  id: string;
+  userId: string;
+  resourceId: string;
+  page: number;
+  content: string;
+  isSavedPage?: boolean;
+  createdAt: any;
+  updatedAt: any;
+}
+
+export interface Highlight {
+  id: string;
+  userId: string;
+  resourceId: string;
+  page: number;
+  type: 'text' | 'area';
+  data: any; // PDF.js specific data
+  color: string;
+  createdAt: any;
+}
+
+export interface Folder {
+  id: string;
+  userId: string;
+  name: string;
+  resourceIds: string[];
+  createdAt: any;
 }
 
 export interface Resource {

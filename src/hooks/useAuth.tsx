@@ -141,6 +141,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             return;
           }
 
+          // Automatic Premium Expiry Check
+          if (data.isPremium && data.premiumExpiry && data.premiumPlan !== 'Lifetime') {
+            const expiry = data.premiumExpiry.toDate();
+            if (new Date() >= expiry) {
+              console.log("Premium expired for user:", authUser.uid);
+              await updateDoc(doc(db, 'users', authUser.uid), {
+                isPremium: false,
+                premiumStatus: 'expired',
+                premiumPlan: '',
+                premiumExpiry: null
+              });
+              // Local update happens automatically via onSnapshot
+            }
+          }
+
           // Verification check (Support both Firebase and Custom OTP)
           if (data.verificationRequired && !authUser.emailVerified && !data.emailVerified && !data.isEmailVerified) {
             setVerificationBlocked(true);

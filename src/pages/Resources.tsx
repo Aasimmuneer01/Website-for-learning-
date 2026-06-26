@@ -1,11 +1,13 @@
 import { useEffect, useState, useMemo, MouseEvent } from 'react';
-import { collection, getDocs, query, orderBy, doc, updateDoc, increment } from 'firebase/firestore';
+import { collection, getDocs, query, orderBy, doc, updateDoc, increment, arrayUnion } from 'firebase/firestore';
 import { db, auth } from '../firebase/config';
 import { Resource } from '../types';
-import { FileText, Download, Eye, Search, Filter, Lock, Crown } from 'lucide-react';
-import { motion } from 'motion/react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { FileText, Download, Eye, Search, Filter, Lock, Crown, Bookmark, FolderPlus, MoreHorizontal, CheckCircle2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { setDoc, serverTimestamp, deleteDoc } from 'firebase/firestore';
+import { Folder } from '../types';
 
 const SUBJECTS = ['All', 'Maths', 'English', 'Biology', 'Chemistry', 'Physics', 'Geography', 'History', 'Civics', 'Computer', 'Islamic Studies', 'Urdu'];
 
@@ -15,7 +17,11 @@ export default function Resources() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
-  const { userData } = useAuth();
+  const { userData, user } = useAuth();
+
+  const [folders, setFolders] = useState<Folder[]>([]);
+  const [userBookmarks, setUserBookmarks] = useState<string[]>([]);
+  const [activeFolderMenu, setActiveFolderMenu] = useState<string | null>(null);
 
   const isPremium = userData?.isPremium || ['admin', 'superadmin', 'moderator'].includes(userData?.role || '');
 
@@ -38,8 +44,60 @@ export default function Resources() {
       }
     };
 
+    const fetchPremiumData = async () => {
+      if (!user || !isPremium) return;
+      try {
+        const foldersSnap = await getDocs(collection(db, 'users', user.uid, 'folders'));
+        setFolders(foldersSnap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Folder)));
+        
+        const bookmarksSnap = await getDocs(collection(db, 'users', user.uid, 'bookmarks'));
+        setUserBookmarks(bookmarksSnap.docs.map(doc => doc.data().resourceId));
+      } catch (err) {
+        console.error("Error fetching premium data in resources:", err);
+      }
+    };
+
     fetchResources();
-  }, []);
+    fetchPremiumData();
+  }, [user, isPremium]);
+
+  const toggleBookmark = async (resource: Resource) => {
+    if (!user || !isPremium) return;
+    try {
+      const isBookmarked = userBookmarks.includes(resource.id);
+      if (isBookmarked) {
+        await deleteDoc(doc(db, 'users', user.uid, 'bookmarks', resource.id));
+        setUserBookmarks(prev => prev.filter(id => id !== resource.id));
+      } else {
+        await setDoc(doc(db, 'users', user.uid, 'bookmarks', resource.id), {
+          resourceId: resource.id,
+          resourceTitle: resource.title,
+          resourceThumbnail: resource.thumbnailUrl || '',
+          createdAt: serverTimestamp()
+        });
+        setUserBookmarks(prev => [...prev, resource.id]);
+      }
+    } catch (err) {
+      console.error("Error toggling bookmark:", err);
+    }
+  };
+
+  const addToFolder = async (folderId: string, resource: Resource) => {
+    if (!user || !isPremium) return;
+    try {
+      const folderRef = doc(db, 'users', user.uid, 'folders', folderId);
+      const folder = folders.find(f => f.id === folderId);
+      if (folder?.resourceIds.includes(resource.id)) return;
+      
+      await updateDoc(folderRef, {
+        resourceIds: arrayUnion(resource.id)
+      });
+      setFolders(prev => prev.map(f => f.id === folderId ? { ...f, resourceIds: [...f.resourceIds, resource.id] } : f));
+      setActiveFolderMenu(null);
+    } catch (err) {
+      console.error("Error adding to folder:", err);
+    }
+  };
 
   const handleView = (e: MouseEvent, resource: Resource) => {
     e.preventDefault();
@@ -190,12 +248,68 @@ export default function Resources() {
                   )}
                   <div className="p-6 flex flex-col flex-1">
                     <div className="flex justify-between items-start mb-2">
-                      <span className="text-xs font-bold px-2 py-1 bg-primary/20 text-primary uppercase rounded">
-                        {resource.category || 'General'}
-                      </span>
-                      <span className="text-xs font-bold text-gray-500 bg-secondary px-2 py-1 rounded">
-                        {resource.classLevel}
-                      </span>
+                      <div className="flex gap-2">
+                        <span className="text-xs font-bold px-2 py-1 bg-primary/20 text-primary uppercase rounded">
+                          {resource.category || 'General'}
+                        </span>
+                        <span className="text-xs font-bold text-gray-500 bg-secondary px-2 py-1 rounded">
+                          {resource.classLevel}
+                        </span>
+                      </div>
+                      
+                      {isPremium && (
+                        <div className="flex gap-1 relative">
+                          <button 
+                            onClick={() => toggleBookmark(resource)}
+                            className={`p-1.5 rounded-lg transition-all ${userBookmarks.includes(resource.id) ? 'bg-primary text-secondary' : 'bg-secondary text-gray-400 hover:text-white'}`}
+                          >
+                            <Bookmark size={14} fill={userBookmarks.includes(resource.id) ? "currentColor" : "none"} />
+                          </button>
+                          
+                          <div className="relative">
+                            <button 
+                              onClick={() => setActiveFolderMenu(activeFolderMenu === resource.id ? null : resource.id)}
+                              className={`p-1.5 rounded-lg bg-secondary text-gray-400 hover:text-white transition-all ${activeFolderMenu === resource.id ? 'bg-primary/20 text-primary' : ''}`}
+                            >
+                              <FolderPlus size={14} />
+                            </button>
+
+                            <AnimatePresence>
+                              {activeFolderMenu === resource.id && (
+                                <motion.div 
+                                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                                  exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                  className="absolute right-0 top-full mt-2 w-48 bg-surface border border-secondary rounded-xl shadow-2xl z-50 p-2 overflow-hidden"
+                                >
+                                  <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest p-2 mb-1 border-b border-secondary">Add to Folder</p>
+                                  <div className="max-h-40 overflow-auto py-1">
+                                    {folders.length === 0 ? (
+                                      <Link to="/folders" className="block p-2 text-xs text-primary hover:underline">Create a folder first</Link>
+                                    ) : (
+                                      folders.map(folder => (
+                                        <button
+                                          key={folder.id}
+                                          onClick={() => addToFolder(folder.id, resource)}
+                                          disabled={folder.resourceIds.includes(resource.id)}
+                                          className={`w-full text-left p-2 rounded-lg text-xs font-medium flex items-center justify-between transition-colors ${
+                                            folder.resourceIds.includes(resource.id) 
+                                              ? 'text-gray-600 cursor-default' 
+                                              : 'text-gray-300 hover:bg-secondary hover:text-white'
+                                          }`}
+                                        >
+                                          {folder.name}
+                                          {folder.resourceIds.includes(resource.id) && <CheckCircle2 size={12} className="text-primary" />}
+                                        </button>
+                                      ))
+                                    )}
+                                  </div>
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
+                        </div>
+                      )}
                     </div>
                     <h3 className="text-xl font-bold text-text-main mb-2 line-clamp-2 leading-tight">{resource.title}</h3>
                     <p className="text-gray-400 text-sm mb-4 line-clamp-3 flex-1">{resource.description}</p>
