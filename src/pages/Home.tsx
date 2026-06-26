@@ -90,6 +90,40 @@ export default function Home() {
 
   const isPremium = userData?.isPremium || ['admin', 'superadmin', 'moderator'].includes(userData?.role || '');
 
+  const [remainingTime, setRemainingTime] = useState<string>('');
+
+  useEffect(() => {
+    if (!isPremium || !userData?.premiumExpiry || userData.premiumPlan === 'Lifetime') {
+      setRemainingTime('');
+      return;
+    }
+
+    const updateTimer = () => {
+      const now = new Date().getTime();
+      const expiry = userData.premiumExpiry.toDate().getTime();
+      const diff = expiry - now;
+
+      if (diff <= 0) {
+        setRemainingTime('Expired');
+        return;
+      }
+
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+      if (days > 0) setRemainingTime(`${days}d ${hours}h left`);
+      else if (hours > 0) setRemainingTime(`${hours}h ${minutes}m left`);
+      else if (minutes > 0) setRemainingTime(`${minutes}m ${seconds}s left`);
+      else setRemainingTime(`${seconds}s left`);
+    };
+
+    updateTimer();
+    const interval = setInterval(updateTimer, 1000);
+    return () => clearInterval(interval);
+  }, [isPremium, userData?.premiumExpiry, userData?.premiumPlan]);
+
   return (
     <div className="flex flex-col gap-16 pb-20">
       {/* Hero Section */}
@@ -194,8 +228,8 @@ export default function Home() {
               {userData?.premiumPlan !== 'Lifetime' && userData?.premiumExpiry && (
                 <div className="text-center sm:text-left">
                   <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Remaining</p>
-                  <p className="text-primary font-bold">
-                    {Math.max(0, Math.ceil((userData.premiumExpiry.toDate().getTime() - Date.now()) / (1000 * 60 * 60 * 24)))} Days
+                  <p className="text-primary font-bold font-mono">
+                    {remainingTime}
                   </p>
                 </div>
               )}

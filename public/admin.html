@@ -1141,6 +1141,12 @@
             const u = usersData.find(x => x.uid === uid);
             if (!u) return;
 
+            // Reset state
+            selectedExpiry = null;
+            document.querySelectorAll('.prem-preset').forEach(b => b.classList.remove('bg-yellow-500', 'text-secondary'));
+            document.getElementById('prem-custom-date').value = '';
+            document.getElementById('prem-custom-time').value = '';
+
             document.getElementById('p-md-name').textContent = u.displayName || 'Unset';
             document.getElementById('p-md-email').textContent = u.email;
 
@@ -1310,6 +1316,10 @@
                 document.querySelectorAll('.prem-preset').forEach(b => b.classList.remove('bg-yellow-500', 'text-secondary'));
                 btn.classList.add('bg-yellow-500', 'text-secondary');
                 
+                // Clear custom inputs when preset selected
+                document.getElementById('prem-custom-date').value = '';
+                document.getElementById('prem-custom-time').value = '';
+
                 const dur = btn.getAttribute('data-duration');
                 const now = new Date();
                 
@@ -1320,10 +1330,27 @@
                 else if (dur === '3mo') now.setMonth(now.getMonth() + 3);
                 else if (dur === '6mo') now.setMonth(now.getMonth() + 6);
                 else if (dur === '1y') now.setFullYear(now.getFullYear() + 1);
-                else if (dur === 'inf') { selectedExpiry = 'lifetime'; return; }
+                else if (dur === 'inf') { 
+                    selectedExpiry = 'lifetime'; 
+                    document.getElementById('prem-custom-date').value = '';
+                    document.getElementById('prem-custom-time').value = '';
+                    return; 
+                }
                 
                 selectedExpiry = now;
+
+                // Also update custom inputs to show what was selected
+                const dateStr = now.toISOString().split('T')[0];
+                const timeStr = now.toTimeString().split(' ')[0].substring(0, 5);
+                document.getElementById('prem-custom-date').value = dateStr;
+                document.getElementById('prem-custom-time').value = timeStr;
             });
+        });
+
+        // Clear presets when typing in custom date
+        document.getElementById('prem-custom-date').addEventListener('change', () => {
+            document.querySelectorAll('.prem-preset').forEach(b => b.classList.remove('bg-yellow-500', 'text-secondary'));
+            selectedExpiry = null;
         });
 
         document.getElementById('btn-grant-premium').addEventListener('click', async () => {
@@ -1337,6 +1364,10 @@
 
             if (customDate) {
                 expiry = new Date(`${customDate}T${customTime || '00:00'}`);
+                if (isNaN(expiry.getTime())) {
+                    toast("Invalid custom date/time", "error");
+                    return;
+                }
             }
 
             if (expiry === 'lifetime') {
