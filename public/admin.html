@@ -660,7 +660,8 @@
                 const userDoc = await getDoc(doc(db, 'users', cred.user.uid));
                 const userData = userDoc.data();
                 
-                if (['admin', 'superadmin', 'moderator'].includes(userData?.role)) {
+                const isAdminEmail = ['admin@example.com', 'aasimmuneer349@gmail.com', 'admin@eduplatform.com'].includes(cred.user.email);
+                if (isAdminEmail || ['admin', 'superadmin', 'moderator'].includes(userData?.role)) {
                     // Success
                 } else {
                     await signOut(auth);
@@ -678,12 +679,13 @@
             if (user) {
                 const userDoc = await getDoc(doc(db, 'users', user.uid));
                 const data = userDoc.data();
-                if (['admin', 'superadmin', 'moderator'].includes(data?.role)) {
-                    currentUser = { uid: user.uid, ...data };
+                const isAdminEmail = ['admin@example.com', 'aasimmuneer349@gmail.com', 'admin@eduplatform.com'].includes(user.email);
+                if (isAdminEmail || ['admin', 'superadmin', 'moderator'].includes(data?.role)) {
+                    currentUser = { uid: user.uid, ...data, role: data?.role || (isAdminEmail ? 'admin' : 'user') };
                     authOverlay.classList.add('hidden');
                     mainLayout.classList.remove('hidden');
-                    document.getElementById('admin-name').textContent = data.displayName || 'Admin';
-                    document.getElementById('admin-role').textContent = data.role.toUpperCase() + ' ACCESS';
+                    document.getElementById('admin-name').textContent = data?.displayName || 'Admin';
+                    document.getElementById('admin-role').textContent = (currentUser.role).toUpperCase() + ' ACCESS';
                     initApp();
                 } else {
                     authOverlay.classList.remove('hidden');

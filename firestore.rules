@@ -8,7 +8,7 @@ service cloud.firestore {
     function isAdmin() {
       return request.auth != null && (
         request.auth.token.email in ['admin@example.com', 'aasimmuneer349@gmail.com', 'admin@eduplatform.com'] ||
-        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'superadmin', 'moderator'])
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'superadmin', 'moderator'])
       );
     }
 
