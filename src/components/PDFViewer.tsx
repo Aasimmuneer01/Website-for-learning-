@@ -798,7 +798,7 @@ export default function PDFViewer() {
           >
             <Maximize2 size={24} />
           </button>
-          <div className="hidden sm:flex items-center gap-2">
+          <div className="flex items-center gap-2">
             <button onClick={() => setScale(prev => Math.max(0.5, prev - 0.2))} className="px-2 text-text-main hover:bg-surface rounded">-</button>
             <span className="text-text-main text-sm">{(scale * 100).toFixed(0)}%</span>
             <button onClick={() => setScale(prev => Math.min(3, prev + 0.2))} className="px-2 text-text-main hover:bg-surface rounded">+</button>

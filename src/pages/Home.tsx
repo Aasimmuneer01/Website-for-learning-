@@ -161,6 +161,18 @@ export default function Home() {
                 </motion.div>
               )}
             </div>
+            
+            {/* Mobile Quick Navigation */}
+            <div className="flex flex-wrap justify-center lg:justify-start gap-3 mt-8 lg:hidden">
+              <Link to="/" className="px-4 py-2 bg-surface text-text-main rounded-lg font-bold text-xs uppercase tracking-widest">Home</Link>
+              <Link to="/resources" className="px-4 py-2 bg-surface text-text-main rounded-lg font-bold text-xs uppercase tracking-widest">Resources</Link>
+              {isPremium && (
+                <>
+                  <Link to="/bookmarks" className="px-4 py-2 bg-surface text-text-main rounded-lg font-bold text-xs uppercase tracking-widest">Bookmarks</Link>
+                  <Link to="/folders" className="px-4 py-2 bg-surface text-text-main rounded-lg font-bold text-xs uppercase tracking-widest">Folders</Link>
+                </>
+              )}
+            </div>
           </div>
           
           <div className="flex-1 relative flex justify-center items-center h-[500px] w-full mt-10 lg:mt-0">
