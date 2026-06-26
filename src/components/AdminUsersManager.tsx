@@ -143,6 +143,18 @@ export default function AdminUsersManager() {
     const expiredTotal = users.filter(u => u.premiumStatus === 'expired').length;
     const premiumUsers = users.filter(u => u.isPremium).length;
     const freeUsers = users.filter(u => !u.isPremium && u.premiumStatus !== 'expired').length;
+    
+    const totalUsers = users.length;
+    const bannedUsers = users.filter(u => u.isBanned).length;
+    const unverifiedUsers = users.filter(u => !u.emailVerified).length;
+    const activeUsers = totalUsers - bannedUsers;
+    
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    const recentSignups = users.filter(u => {
+      const created = u.createdAt?.toDate ? u.createdAt.toDate() : new Date(u.createdAt);
+      return created > sevenDaysAgo;
+    }).length;
 
     const mostViewed = [...resources].sort((a, b) => (b.viewCount || 0) - (a.viewCount || 0)).slice(0, 5);
     const mostDownloaded = [...resources].sort((a, b) => (b.downloadCount || 0) - (a.downloadCount || 0)).slice(0, 5);
@@ -540,11 +552,16 @@ export default function AdminUsersManager() {
                             {(() => {
                               if (u.premiumPlan === 'Lifetime') return 'Infinity';
                               if (!u.premiumExpiry) return 'N/A';
-                              const diff = u.premiumExpiry.toDate().getTime() - Date.now();
+                              const expiry = u.premiumExpiry.toDate ? u.premiumExpiry.toDate() : new Date(u.premiumExpiry);
+                              const diff = expiry.getTime() - Date.now();
                               if (diff <= 0) return 'Expired';
                               const days = Math.floor(diff / (1000 * 60 * 60 * 24));
                               const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                              return `${days}d ${hours}h`;
+                              const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                              
+                              if (days > 0) return `${days}d ${hours}h`;
+                              if (hours > 0) return `${hours}h ${minutes}m`;
+                              return `${minutes}m`;
                             })()}
                           </span>
                         ) : (

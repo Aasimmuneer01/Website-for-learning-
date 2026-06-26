@@ -16,7 +16,7 @@ import AdminDashboardStats from '../../components/AdminDashboardStats';
 import { ShieldAlert, Users, Crown, Upload, FileText, Settings, LogOut, LayoutDashboard, Menu, X, BarChart3, Grid } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
-type AdminTab = 'dashboard' | 'users' | 'premium' | 'upload' | 'resources' | 'categories' | 'analytics' | 'settings';
+type AdminTab = 'dashboard' | 'users' | 'premium' | 'upload' | 'resources' | 'categories' | 'analytics' | 'creator-settings' | 'settings';
 
 export default function AdminDashboard() {
   const { user, userData, loading: authLoading } = useAuth();
@@ -114,11 +114,12 @@ export default function AdminDashboard() {
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'users', label: 'User Manager', icon: Users },
     { id: 'premium', label: 'Premium Manager', icon: Crown },
+    { id: 'resources', label: 'Resource Manager', icon: FileText },
     { id: 'upload', label: 'Upload Resources', icon: Upload },
-    { id: 'resources', label: 'Manage Resources', icon: FileText },
     { id: 'categories', label: 'Categories', icon: Grid },
     { id: 'analytics', label: 'Analytics', icon: BarChart3 },
-    { id: 'settings', label: 'Creator Settings', icon: Settings },
+    { id: 'creator-settings', label: 'Creator Settings', icon: Settings },
+    { id: 'settings', label: 'Settings', icon: ShieldAlert },
   ] as const;
 
   return (
@@ -213,7 +214,14 @@ export default function AdminDashboard() {
             {activeTab === 'resources' && <AdminResourceList />}
             {activeTab === 'categories' && <AdminCategories />}
             {activeTab === 'analytics' && <AdminAnalytics />}
-            {activeTab === 'settings' && <AdminCreatorSettings />}
+            {activeTab === 'creator-settings' && <AdminCreatorSettings />}
+            {activeTab === 'settings' && (
+              <div className="bg-surface p-12 rounded-[2.5rem] border border-secondary text-center space-y-4">
+                <ShieldAlert size={60} className="text-primary mx-auto opacity-20" />
+                <h3 className="text-2xl font-bold text-white uppercase tracking-tight">System Settings</h3>
+                <p className="text-gray-400 max-w-md mx-auto">General platform configuration, security policies, and maintenance mode controls are coming soon in a future update.</p>
+              </div>
+            )}
           </motion.div>
         </div>
       </main>

@@ -62,10 +62,20 @@ export default function AdminDashboardStats() {
       return u.premiumExpiry.toDate().toDateString() === todayStr;
     }).length;
 
+    const expiringThisWeek = users.filter(u => {
+      if (!u.isPremium || !u.premiumExpiry || u.premiumPlan === 'Lifetime') return false;
+      const expiry = u.premiumExpiry.toDate();
+      const nextWeek = new Date(now);
+      nextWeek.setDate(now.getDate() + 7);
+      return expiry > now && expiry <= nextWeek;
+    }).length;
+
     const expiredToday = users.filter(u => {
       if (!u.premiumExpiry || u.isPremium) return false;
       return u.premiumExpiry.toDate().toDateString() === todayStr;
     }).length;
+
+    const expiredTotal = users.filter(u => u.premiumStatus === 'expired').length;
 
     return {
       totalUsers: users.length,
@@ -76,7 +86,9 @@ export default function AdminDashboardStats() {
       banned,
       unverified,
       expiringToday,
-      expiredToday
+      expiringThisWeek,
+      expiredToday,
+      expiredTotal
     };
   }, [users, resources]);
 
@@ -86,11 +98,11 @@ export default function AdminDashboardStats() {
     { label: 'Total Users', value: stats.totalUsers, icon: Users, color: 'text-blue-500', bg: 'bg-blue-500/10' },
     { label: 'Premium Accounts', value: stats.premium, icon: Crown, color: 'text-yellow-500', bg: 'bg-yellow-500/10' },
     { label: 'Platform Content', value: stats.totalResources, icon: FileText, color: 'text-primary', bg: 'bg-primary/10' },
-    { label: 'Total Views', value: stats.totalViews, icon: Eye, color: 'text-purple-500', bg: 'bg-purple-500/10' },
     { label: 'Expiring Today', value: stats.expiringToday, icon: Clock, color: 'text-orange-500', bg: 'bg-orange-500/10' },
+    { label: 'Expiring This Week', value: stats.expiringThisWeek, icon: Activity, color: 'text-blue-500', bg: 'bg-blue-500/10' },
     { label: 'Expired Today', value: stats.expiredToday, icon: Trash2, color: 'text-red-500', bg: 'bg-red-500/10' },
+    { label: 'Total Expired', value: stats.expiredTotal, icon: Trash2, color: 'text-red-400', bg: 'bg-red-400/10' },
     { label: 'Bookmarks', value: totalBookmarks, icon: Bookmark, color: 'text-primary', bg: 'bg-primary/10' },
-    { label: 'Notes Created', value: totalNotes, icon: Highlighter, color: 'text-primary', bg: 'bg-primary/10' },
   ];
 
   return (

@@ -34,6 +34,40 @@ export default function Navbar() {
 
   const isPremium = userData?.isPremium || ['admin', 'superadmin', 'moderator'].includes(userData?.role || '');
 
+  const [remainingTime, setRemainingTime] = useState<string>('');
+
+  useEffect(() => {
+    if (!isPremium || !userData?.premiumExpiry || userData.premiumPlan === 'Lifetime') {
+      setRemainingTime('');
+      return;
+    }
+
+    const updateTimer = () => {
+      const now = new Date().getTime();
+      const expiry = userData.premiumExpiry.toDate().getTime();
+      const diff = expiry - now;
+
+      if (diff <= 0) {
+        setRemainingTime('Expired');
+        return;
+      }
+
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+      if (days > 0) setRemainingTime(`${days}d ${hours}h left`);
+      else if (hours > 0) setRemainingTime(`${hours}h ${minutes}m left`);
+      else if (minutes > 0) setRemainingTime(`${minutes}m ${seconds}s left`);
+      else setRemainingTime(`${seconds}s left`);
+    };
+
+    updateTimer();
+    const interval = setInterval(updateTimer, 1000);
+    return () => clearInterval(interval);
+  }, [isPremium, userData?.premiumExpiry, userData?.premiumPlan]);
+
   return (
     <nav className="bg-background-main border-b border-surface p-4 shadow-md z-50">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -64,37 +98,54 @@ export default function Navbar() {
               <div className={`hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border cursor-help ${
                 isPremium 
                   ? 'bg-primary/10 text-primary border-primary/30 shadow-[0_0_10px_rgba(14,165,233,0.2)]' 
-                  : 'bg-surface text-gray-500 border-secondary'
+                  : (userData.premiumStatus === 'expired' ? 'bg-red-500/10 text-red-500 border-red-500/30' : 'bg-surface text-gray-500 border-secondary')
               }`}>
-                <div className={`w-1.5 h-1.5 rounded-full ${isPremium ? 'bg-primary animate-pulse' : 'bg-gray-500'}`} />
-                {isPremium ? (userData.premiumPlan === 'Lifetime' ? 'Lifetime' : 'Premium') : 'Free'}
+                <div className={`w-1.5 h-1.5 rounded-full ${isPremium ? 'bg-primary animate-pulse' : (userData.premiumStatus === 'expired' ? 'bg-red-500' : 'bg-gray-500')}`} />
+                {isPremium ? (userData.premiumPlan === 'Lifetime' ? 'Lifetime' : 'Premium') : (userData.premiumStatus === 'expired' ? 'Expired' : 'Free')}
+                {remainingTime && isPremium && remainingTime !== 'Expired' && (
+                  <span className="ml-1 pl-1 border-l border-primary/20 text-[8px] opacity-70">
+                    {remainingTime}
+                  </span>
+                )}
               </div>
 
               {/* Premium Details Tooltip */}
-              {isPremium && (
-                <div className="absolute top-full right-0 mt-2 w-48 bg-surface border border-secondary p-4 rounded-2xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-[100] transform translate-y-2 group-hover:translate-y-0">
-                  <div className="space-y-3">
-                    <div>
-                      <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Premium Plan</p>
-                      <p className="text-white font-bold">{userData.premiumPlan}</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Expires</p>
-                      <p className="text-white font-bold">
-                        {userData.premiumPlan === 'Lifetime' ? 'Never Expires' : userData.premiumExpiry?.toDate().toLocaleDateString() || 'N/A'}
-                      </p>
-                    </div>
-                    {userData.premiumPlan !== 'Lifetime' && userData.premiumExpiry && (
+              <div className="absolute top-full right-0 mt-2 w-56 bg-surface border border-secondary p-4 rounded-2xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-[100] transform translate-y-2 group-hover:translate-y-0">
+                <div className="space-y-3">
+                  {isPremium ? (
+                    <>
                       <div>
-                        <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Remaining</p>
-                        <p className="text-primary font-bold">
-                          {Math.ceil((userData.premiumExpiry.toDate().getTime() - Date.now()) / (1000 * 60 * 60 * 24))} Days
+                        <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Premium Plan</p>
+                        <p className="text-white font-bold">{userData.premiumPlan}</p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Expires</p>
+                        <p className="text-white font-bold">
+                          {userData.premiumPlan === 'Lifetime' ? 'Never Expires' : userData.premiumExpiry?.toDate().toLocaleDateString() || 'N/A'}
                         </p>
                       </div>
-                    )}
-                  </div>
+                      {userData.premiumPlan !== 'Lifetime' && userData.premiumExpiry && (
+                        <div>
+                          <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Remaining</p>
+                          <p className="text-primary font-bold font-mono">
+                            {remainingTime}
+                          </p>
+                        </div>
+                      )}
+                    </>
+                  ) : userData.premiumStatus === 'expired' ? (
+                    <div className="text-center space-y-2">
+                      <p className="text-red-500 font-bold text-sm uppercase tracking-tight">Access Expired</p>
+                      <p className="text-gray-400 text-[10px]">Your premium privileges have been automatically revoked. Contact admin to renew.</p>
+                    </div>
+                  ) : (
+                    <div className="text-center space-y-1">
+                      <p className="text-white font-bold text-sm uppercase tracking-tight">Free Account</p>
+                      <p className="text-gray-400 text-[10px]">Upgrade to Premium for full access to all resources and features.</p>
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
             </div>
           )}
 
