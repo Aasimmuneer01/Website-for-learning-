@@ -142,8 +142,24 @@ export default function Home() {
             >
               {homepageSettings.subtitle}
             </motion.p>
-            <div className="flex flex-col items-center lg:items-start">
-              {/* Browse Materials button and toggle logic removed from here */}
+            <div className="flex flex-col items-center lg:items-start gap-4">
+              {user && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  onClick={() => document.getElementById('pricing-section')?.scrollIntoView({ behavior: 'smooth' })}
+                  className={`flex items-center gap-3 px-6 py-3 rounded-2xl border font-bold text-sm uppercase tracking-widest cursor-pointer transition-all hover:scale-105 active:scale-95 ${
+                    isPremium 
+                      ? 'bg-primary/10 text-primary border-primary/30 shadow-[0_0_20px_rgba(14,165,233,0.15)]' 
+                      : (userData?.premiumStatus === 'expired' ? 'bg-red-500/10 text-red-500 border-red-500/30 shadow-[0_0_20px_rgba(239,68,68,0.1)]' : 'bg-surface text-gray-400 border-secondary shadow-lg')
+                  }`}
+                >
+                  <div className={`w-2 h-2 rounded-full ${isPremium ? 'bg-primary animate-pulse' : (userData?.premiumStatus === 'expired' ? 'bg-red-500' : 'bg-gray-500')}`} />
+                  <Crown size={18} className={isPremium ? 'text-primary' : 'text-gray-500'} />
+                  {isPremium ? 'Premium Active' : (userData?.premiumStatus === 'expired' ? 'Premium Expired' : 'Free Status')}
+                </motion.div>
+              )}
             </div>
           </div>
           
@@ -310,7 +326,7 @@ export default function Home() {
       </section>
       
       {/* Comparison Section */}
-      <section className="px-6 py-12">
+      <section id="pricing-section" className="px-6 py-12">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl lg:text-4xl font-bold text-text-main uppercase tracking-tighter mb-4">
