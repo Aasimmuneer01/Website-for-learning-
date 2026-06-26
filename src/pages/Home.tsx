@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { BookOpen, Download, User as UserIcon, MonitorPlay, Clock, Bookmark, Layers, CheckCircle2, History, Crown } from 'lucide-react';
+import { BookOpen, Download, User as UserIcon, MonitorPlay, Clock, Bookmark, Layers, CheckCircle2, History, Crown, Check, X } from 'lucide-react';
 import { db } from '../firebase/config';
 import { doc, getDoc, collection, query, orderBy, limit, getDocs, onSnapshot } from 'firebase/firestore';
 import { useAuth } from '../hooks/useAuth';
@@ -347,8 +347,69 @@ export default function Home() {
           </div>
         </div>
       </section>
+      
+      {/* Comparison Section */}
+      <section className="px-6 py-12">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl lg:text-4xl font-bold text-text-main uppercase tracking-tighter mb-4">
+              Unlock Your <span className="text-primary">Full Potential</span>
+            </h2>
+            <p className="text-gray-400">Choose the plan that fits your study needs. Upgrade for a limitless experience.</p>
+          </div>
 
-      {/* Meet Functionality Section */}
+          <div className="bg-surface border border-secondary rounded-[2.5rem] overflow-hidden shadow-2xl">
+            <div className="grid grid-cols-3 border-b border-secondary/50">
+              <div className="p-6 md:p-8 font-bold text-gray-500 uppercase tracking-widest text-xs">Features</div>
+              <div className="p-6 md:p-8 font-bold text-center text-text-main uppercase tracking-widest text-xs">Free</div>
+              <div className="p-6 md:p-8 font-bold text-center text-primary bg-primary/5 uppercase tracking-widest text-xs border-l border-secondary/50 flex items-center justify-center gap-2">
+                <Crown size={14} /> Premium
+              </div>
+            </div>
+
+            {[
+              { name: 'Resource Access', free: true, pro: true },
+              { name: 'PDF View', free: true, pro: true },
+              { name: 'PDF Download', free: false, pro: true },
+              { name: 'Progress Tracking', free: false, pro: true },
+              { name: 'Bookmarks', free: false, pro: true },
+              { name: 'AI Support', free: false, pro: true },
+              { name: 'Priority Updates', free: false, pro: true },
+            ].map((feature, idx) => (
+              <div key={feature.name} className={`grid grid-cols-3 ${idx !== 6 ? 'border-b border-secondary/30' : ''} hover:bg-white/5 transition-colors group`}>
+                <div className="p-5 md:p-6 text-sm font-medium text-gray-400 group-hover:text-white transition-colors flex items-center">
+                  {feature.name}
+                </div>
+                <div className="p-5 md:p-6 flex justify-center items-center">
+                  {feature.free ? (
+                    <div className="flex items-center gap-2 px-4 py-2 bg-green-500 rounded-full text-secondary font-black text-[10px] uppercase tracking-widest shadow-[0_0_15px_rgba(34,197,94,0.3)]">
+                      <Check size={12} strokeWidth={4} /> YES!
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2 px-4 py-2 bg-red-500 rounded-full text-white font-black text-[10px] uppercase tracking-widest shadow-[0_0_15px_rgba(239,68,68,0.3)]">
+                      <X size={12} strokeWidth={4} /> NO!
+                    </div>
+                  )}
+                </div>
+                <div className="p-5 md:p-6 flex justify-center items-center bg-primary/5 border-l border-secondary/50">
+                  <div className="flex items-center gap-2 px-5 py-2.5 bg-green-500 rounded-full text-secondary font-black text-[10px] uppercase tracking-widest shadow-[0_0_20px_rgba(34,197,94,0.5)] scale-110">
+                    <Check size={14} strokeWidth={4} /> YES!
+                  </div>
+                </div>
+              </div>
+            ))}
+            
+            {!isPremium && (
+              <div className="p-8 bg-primary/5 border-t border-secondary/50 flex flex-col items-center gap-4">
+                <p className="text-sm text-gray-400 font-medium">Join thousands of students achieving more with Premium</p>
+                <Link to="/resources" className="px-10 py-4 bg-primary text-secondary rounded-xl font-black uppercase tracking-widest hover:scale-105 transition-all shadow-xl shadow-primary/20">
+                  Get Started for Free
+                </Link>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
       <section className="px-6 py-12">
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-12 items-center">
            <div className="flex-1 space-y-6">
