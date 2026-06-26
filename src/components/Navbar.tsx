@@ -7,7 +7,7 @@ import { useAuth } from '../hooks/useAuth';
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isDark, setIsDark] = useState(true);
-  const { logout, userData, user } = useAuth();
+  const { logout, userData, user, isPremium } = useAuth();
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
@@ -31,8 +31,6 @@ export default function Navbar() {
       localStorage.setItem('theme', 'light');
     }
   };
-
-  const isPremium = userData?.isPremium || ['admin', 'superadmin', 'moderator'].includes(userData?.role || '');
 
   const [remainingTime, setRemainingTime] = useState<string>('');
 

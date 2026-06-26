@@ -8,7 +8,7 @@ import { Link, Navigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 
 export default function Bookmarks() {
-  const { user, userData, loading: authLoading } = useAuth();
+  const { user, userData, isPremium, loading: authLoading } = useAuth();
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -44,8 +44,6 @@ export default function Bookmarks() {
       console.error("Error removing bookmark:", err);
     }
   };
-
-  const isPremium = userData?.isPremium || ['admin', 'superadmin', 'moderator'].includes(userData?.role || '');
 
   if (authLoading) return <div className="p-8 text-center text-white">Loading Auth...</div>;
   if (!user || !isPremium) return <Navigate to="/" replace />;

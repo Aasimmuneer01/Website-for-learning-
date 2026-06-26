@@ -18,13 +18,11 @@ export default function Resources() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
-  const { userData, user } = useAuth();
+  const { userData, user, isPremium } = useAuth();
 
   const [folders, setFolders] = useState<Folder[]>([]);
   const [userBookmarks, setUserBookmarks] = useState<string[]>([]);
   const [activeFolderMenu, setActiveFolderMenu] = useState<string | null>(null);
-
-  const isPremium = userData?.isPremium || ['admin', 'superadmin', 'moderator'].includes(userData?.role || '');
 
   const currentSubject = searchParams.get('subject') || 'All';
 

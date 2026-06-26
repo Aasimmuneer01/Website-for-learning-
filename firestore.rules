@@ -8,15 +8,17 @@ service cloud.firestore {
     function isAdmin() {
       return request.auth != null && (
         request.auth.token.email in ['admin@example.com', 'aasimmuneer349@gmail.com', 'admin@eduplatform.com'] ||
-        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'superadmin', 'moderator'])
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'superadmin', 'moderator'])
       );
     }
 
     match /users/{userId} {
       allow read: if (request.auth != null && request.auth.uid == userId) || isAdmin();
-      allow create: if (request.auth != null && request.auth.uid == userId && (request.resource.data.role in ['user', 'student'] || request.auth.token.email in ['admin@example.com', 'aasimmuneer349@gmail.com', 'admin@eduplatform.com'])) || isAdmin();
-      allow update: if isAdmin() || (request.auth != null && request.auth.uid == userId && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'isBanned', 'banReason', 'accountStatus', 'isPremium', 'premiumPlan', 'premiumExpiry', 'premiumGrantedBy', 'premiumGrantedAt', 'premiumStatus']));
+      allow create: if request.auth != null && request.auth.uid == userId;
+      allow update: if request.auth != null && request.auth.uid == userId && (
+        isAdmin() || 
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'isBanned', 'banReason', 'accountStatus', 'isPremium', 'premiumPlan', 'premiumExpiry', 'premiumGrantedBy', 'premiumGrantedAt', 'premiumStatus'])
+      );
       allow delete: if isAdmin();
 
       // Premium sub-collections

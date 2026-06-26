@@ -34,6 +34,7 @@ export function getDeviceFingerprint(): string {
 interface AuthContextType {
   user: FirebaseUser | null;
   userData: UserType | null;
+  isPremium: boolean;
   loading: boolean;
   bannedMessage: string | null;
   verificationBlocked: boolean;
@@ -49,6 +50,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType>({
   user: null,
   userData: null,
+  isPremium: false,
   loading: true,
   bannedMessage: null,
   verificationBlocked: false,
@@ -67,6 +69,64 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [bannedMessage, setBannedMessage] = useState<string | null>(null);
   const [verificationBlocked, setVerificationBlocked] = useState(false);
+  const [isPremium, setIsPremium] = useState(false);
+
+  // Derive isPremium
+  useEffect(() => {
+    const checkPremium = () => {
+      if (!userData) {
+        setIsPremium(false);
+        return;
+      }
+
+      // Admins/mods are always premium
+      const isAdmin = ['admin', 'superadmin', 'moderator'].includes(userData.role || '');
+      if (isAdmin) {
+        setIsPremium(true);
+        return;
+      }
+
+      if (!userData.isPremium) {
+        setIsPremium(false);
+        return;
+      }
+
+      if (userData.premiumPlan === 'Lifetime') {
+        setIsPremium(true);
+        return;
+      }
+
+      if (userData.premiumExpiry) {
+        const expiry = userData.premiumExpiry.toDate();
+        const active = new Date() < expiry;
+        setIsPremium(active);
+        return;
+      }
+
+      setIsPremium(false);
+    };
+
+    checkPremium();
+    
+    // Set up a timer if it's premium and has an expiry
+    let timer: NodeJS.Timeout;
+    if (userData?.isPremium && userData.premiumExpiry && userData.premiumPlan !== 'Lifetime') {
+      const expiry = userData.premiumExpiry.toDate().getTime();
+      const now = new Date().getTime();
+      const diff = expiry - now;
+
+      if (diff > 0) {
+        // Schedule a check when it expires
+        timer = setTimeout(() => {
+          checkPremium();
+        }, diff + 1000); // 1s buffer
+      }
+    }
+
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [userData, user]);
 
   useEffect(() => {
     let unsubscribeDoc: (() => void) | undefined;
@@ -146,13 +206,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             const expiry = data.premiumExpiry.toDate();
             if (new Date() >= expiry) {
               console.log("Premium expired for user:", authUser.uid);
-              await updateDoc(doc(db, 'users', authUser.uid), {
-                isPremium: false,
-                premiumStatus: 'expired',
-                premiumPlan: '',
-                premiumExpiry: null
-              });
-              // Local update happens automatically via onSnapshot
+              // Local update happens automatically via checkPremium derived state
             }
           }
 
@@ -253,6 +307,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <AuthContext.Provider value={{
       user,
       userData,
+      isPremium,
       loading,
       bannedMessage,
       verificationBlocked,

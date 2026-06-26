@@ -8,7 +8,7 @@ import { Link, Navigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 
 export default function Folders() {
-  const { user, userData, loading: authLoading } = useAuth();
+  const { user, userData, isPremium, loading: authLoading } = useAuth();
   const [folders, setFolders] = useState<Folder[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
@@ -71,8 +71,6 @@ export default function Folders() {
       console.error("Error deleting folder:", err);
     }
   };
-
-  const isPremium = userData?.isPremium || ['admin', 'superadmin', 'moderator'].includes(userData?.role || '');
 
   if (authLoading) return <div className="p-8 text-center text-white">Loading Auth...</div>;
   if (!user || !isPremium) return <Navigate to="/" replace />;

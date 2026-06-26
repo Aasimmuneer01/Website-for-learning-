@@ -19,7 +19,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLi
 
 export default function PDFViewer() {
   const { resourceId } = useParams();
-  const { userData, user } = useAuth();
+  const { userData, user, isPremium } = useAuth();
   const navigate = useNavigate();
   const [resource, setResource] = useState<Resource | null>(null);
   const [loading, setLoading] = useState(true);
@@ -49,7 +49,10 @@ export default function PDFViewer() {
   const [secondsSpent, setSecondsSpent] = useState(0);
 
   const displayEmail = userData?.email || user?.email || 'Unauthorized';
-  const isPremium = userData?.isPremium || ['admin', 'superadmin', 'moderator'].includes(userData?.role || '');
+
+  const lastSavedRef = useRef<{ page: number, scale: number }>({ page: currentPage, scale: scale });
+  const hasIncrementedViewCount = useRef(false);
+  const secondsAccRef = useRef(0);
 
   // Study Time Tracker
   useEffect(() => {
@@ -57,16 +60,22 @@ export default function PDFViewer() {
 
     const interval = setInterval(() => {
       setSecondsSpent(prev => prev + 1);
+      secondsAccRef.current += 1;
     }, 1000);
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+    };
   }, [isPremium, user, resourceId]);
 
-  // Periodic Save (Every 30 seconds or on page/scale change)
+  // Periodic Save & On Close
   useEffect(() => {
-    if (!isPremium || !user || !resource || !numPages || secondsSpent === 0) return;
+    if (!isPremium || !user || !resource || !numPages) return;
 
-    const saveStats = async () => {
+    const saveStats = async (isClosing = false) => {
+      const timeToSave = secondsAccRef.current;
+      if (timeToSave === 0 && !isClosing) return;
+      
       const path = `users/${user.uid}/history/${resource.id}`;
       try {
         const historyRef = doc(db, 'users', user.uid, 'history', resource.id);
@@ -77,26 +86,50 @@ export default function PDFViewer() {
           totalPages: numPages,
           percentage: Math.round((currentPage / numPages) * 100),
           zoom: scale,
-          timeSpent: increment(secondsSpent),
+          timeSpent: increment(timeToSave),
           updatedAt: serverTimestamp()
         }, { merge: true });
         
-        // Reset session seconds after saving to prevent double counting
-        setSecondsSpent(0);
+        // Only increment viewCount once per session (when time is first recorded)
+        if (!hasIncrementedViewCount.current && timeToSave > 0) {
+           updateDoc(doc(db, 'resources', resource.id), {
+             viewCount: increment(1)
+           }).catch(err => {
+             handleFirestoreError(err, OperationType.UPDATE, `resources/${resource.id}`);
+           });
+           hasIncrementedViewCount.current = true;
+        }
+
+        secondsAccRef.current = 0;
+        lastSavedRef.current = { page: currentPage, scale: scale };
       } catch (err) {
         handleFirestoreError(err, OperationType.WRITE, path);
       }
     };
 
-    // Save every 30 seconds of activity
-    if (secondsSpent >= 30) {
-      saveStats();
-    }
+    // Auto-save every 30 seconds
+    const autoSaveTimer = setInterval(() => {
+      if (secondsAccRef.current >= 30) {
+        saveStats();
+      }
+    }, 10000);
 
-    // Also handle regular updates for page/scale
-    const timeout = setTimeout(saveStats, 5000);
-    return () => clearTimeout(timeout);
-  }, [secondsSpent, currentPage, scale, isPremium, user, resource, numPages]);
+    // Save on significant changes (page or scale) after a short delay
+    const timeout = setTimeout(() => {
+      if (currentPage !== lastSavedRef.current.page || Math.abs(scale - lastSavedRef.current.scale) > 0.1) {
+        saveStats();
+      }
+    }, 5000);
+
+    return () => {
+      clearInterval(autoSaveTimer);
+      clearTimeout(timeout);
+      // Final save on unmount if there's significant activity
+      if (secondsAccRef.current > 5) {
+        saveStats(true);
+      }
+    };
+  }, [currentPage, scale, isPremium, user, resource, numPages]);
 
   useEffect(() => {
     const handleFullscreenChange = () => {

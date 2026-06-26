@@ -9,8 +9,7 @@ import { ReadingHistory, User } from '../types';
 import CreatorSection from '../components/CreatorSection';
 
 export default function Home() {
-  const { user, userData } = useAuth();
-  const [showSubjects, setShowSubjects] = useState(false);
+  const { user, userData, isPremium } = useAuth();
   const [history, setHistory] = useState<ReadingHistory[]>([]);
   const [stats, setStats] = useState({
     resourcesRead: 0,
@@ -88,8 +87,6 @@ export default function Home() {
     };
   }, [user]);
 
-  const isPremium = userData?.isPremium || ['admin', 'superadmin', 'moderator'].includes(userData?.role || '');
-
   const [remainingTime, setRemainingTime] = useState<string>('');
 
   useEffect(() => {
@@ -146,43 +143,7 @@ export default function Home() {
               {homepageSettings.subtitle}
             </motion.p>
             <div className="flex flex-col items-center lg:items-start">
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="flex flex-col gap-4 w-full"
-              >
-                {!showSubjects ? (
-                  <button 
-                    onClick={() => setShowSubjects(true)}
-                    className="self-center lg:self-start px-8 py-4 bg-primary text-secondary rounded-lg font-bold shadow-[0_4px_0_0_#0ea5e9] hover:shadow-none hover:translate-y-[4px] transition-all uppercase tracking-wide"
-                  >
-                    Browse Materials
-                  </button>
-                ) : (
-                  <motion.div 
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    className="flex flex-wrap gap-3 justify-center lg:justify-start"
-                  >
-                    {['Maths', 'English', 'Biology', 'Chemistry', 'Physics', 'Geography', 'History', 'Civics', 'Computer', 'Islamic Studies', 'Urdu'].map(subject => (
-                      <Link 
-                        key={subject}
-                        to={`/resources?subject=${encodeURIComponent(subject)}`} 
-                        className="px-4 py-2 bg-surface border border-secondary text-text-main rounded-full text-sm font-medium hover:bg-secondary hover:text-primary transition-colors"
-                      >
-                        {subject}
-                      </Link>
-                    ))}
-                    <Link 
-                      to="/resources" 
-                      className="px-4 py-2 bg-primary/20 text-primary border border-primary/50 rounded-full text-sm font-bold hover:bg-primary hover:text-secondary transition-colors"
-                    >
-                      View All
-                    </Link>
-                  </motion.div>
-                )}
-              </motion.div>
+              {/* Browse Materials button and toggle logic removed from here */}
             </div>
           </div>
           
@@ -407,6 +368,27 @@ export default function Home() {
                 </Link>
               </div>
             )}
+
+            <div className="p-8 border-t border-secondary/30 bg-secondary/10">
+              <p className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em] mb-4 text-center">Browse by Subject</p>
+              <div className="flex flex-wrap gap-2 justify-center">
+                {['Maths', 'English', 'Biology', 'Chemistry', 'Physics', 'Geography', 'History', 'Civics', 'Computer', 'Islamic Studies', 'Urdu'].map(subject => (
+                  <Link 
+                    key={subject}
+                    to={`/resources?subject=${encodeURIComponent(subject)}`} 
+                    className="px-4 py-2 bg-surface border border-secondary text-text-main rounded-full text-xs font-bold hover:bg-secondary hover:text-primary transition-all hover:scale-105"
+                  >
+                    {subject}
+                  </Link>
+                ))}
+                <Link 
+                  to="/resources" 
+                  className="px-4 py-2 bg-primary text-secondary rounded-full text-xs font-black uppercase tracking-widest hover:bg-primary/80 transition-all hover:scale-105"
+                >
+                  All Materials
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </section>
