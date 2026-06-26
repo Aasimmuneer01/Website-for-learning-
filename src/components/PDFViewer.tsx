@@ -4,13 +4,14 @@ import { useAuth } from '../hooks/useAuth';
 import { useParams, useNavigate } from 'react-router-dom';
 import { doc, getDoc, updateDoc, increment, setDoc, serverTimestamp, collection, query, where, getDocs, deleteDoc } from 'firebase/firestore';
 import { db, auth } from '../firebase/config';
-import { Resource, Bookmark, ReadingHistory, Note } from '../types';
+import { Resource, Bookmark, ReadingHistory, Note, AppHighlight } from '../types';
 import { 
   Download, Printer, X, ChevronLeft, ChevronRight, Loader2, 
   AlertCircle, Maximize2, Lock, Bookmark as BookmarkIcon, 
   FileText, Highlighter, Save, Search, Settings, 
-  List, MessageSquare, Plus, Trash2, Edit2
+  List, MessageSquare, Plus, Trash2, Edit2, Crown
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 
 // Set up the worker using a reliable CDN
 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
@@ -41,7 +42,7 @@ export default function PDFViewer() {
   const [newNote, setNewNote] = useState('');
   const [isSavingNote, setIsSavingNote] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [highlights, setHighlights] = useState<Highlight[]>([]);
+  const [highlights, setHighlights] = useState<AppHighlight[]>([]);
   const [isAddingHighlight, setIsAddingHighlight] = useState(false);
   const [isPageSaved, setIsPageSaved] = useState(false);
 
@@ -160,7 +161,7 @@ export default function PDFViewer() {
           where('resourceId', '==', resourceId)
         );
         const highlightsSnap = await getDocs(highlightsQuery);
-        setHighlights(highlightsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Highlight)));
+        setHighlights(highlightsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() } as AppHighlight)));
       } catch (err) {
         console.error("Error loading premium data:", err);
       }
@@ -273,7 +274,7 @@ export default function PDFViewer() {
     if (!isPremium || !user || !resource) return;
     try {
       const highlightRef = doc(collection(db, 'users', user.uid, 'highlights'));
-      const highlightData: Omit<Highlight, 'id'> = {
+      const highlightData: Omit<AppHighlight, 'id'> = {
         userId: user.uid,
         resourceId: resource.id,
         page: currentPage,
@@ -283,7 +284,7 @@ export default function PDFViewer() {
         createdAt: serverTimestamp()
       };
       await setDoc(highlightRef, highlightData);
-      setHighlights(prev => [...prev, { id: highlightRef.id, ...highlightData } as Highlight]);
+      setHighlights(prev => [...prev, { id: highlightRef.id, ...highlightData } as AppHighlight]);
     } catch (err) {
       console.error("Error adding highlight:", err);
     }

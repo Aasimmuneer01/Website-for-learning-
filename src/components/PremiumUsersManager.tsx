@@ -10,6 +10,8 @@ export default function PremiumUsersManager() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState<'all' | 'premium' | 'free'>('all');
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [isUpdating, setIsUpdating] = useState(false);
   const [customDays, setCustomDays] = useState('');
   const [customDate, setCustomDate] = useState('');
   const [showCustomOptions, setShowCustomOptions] = useState(false);

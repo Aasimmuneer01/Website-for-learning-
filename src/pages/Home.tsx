@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { BookOpen, Download, User as UserIcon, MonitorPlay, Clock, Bookmark, Layers, CheckCircle2, History } from 'lucide-react';
+import { BookOpen, Download, User as UserIcon, MonitorPlay, Clock, Bookmark, Layers, CheckCircle2, History, Crown } from 'lucide-react';
 import { db } from '../firebase/config';
 import { doc, getDoc, collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
 import { useAuth } from '../hooks/useAuth';
-import { ReadingHistory } from '../types';
+import { ReadingHistory, User } from '../types';
 import CreatorSection from '../components/CreatorSection';
 
 export default function Home() {
@@ -285,7 +285,7 @@ export default function Home() {
             <p className="text-gray-400 text-sm leading-relaxed">Download resources instantly or read them online with our built-in PDF viewer.</p>
           </div>
           <div className="bg-surface p-8 rounded-2xl border border-secondary/50 shadow-lg hover:-translate-y-2 transition-transform">
-            <User className="w-10 h-10 text-primary mb-4" />
+            <UserIcon className="w-10 h-10 text-primary mb-4" />
             <h3 className="text-xl font-bold text-text-main mb-2 uppercase tracking-wide">Community</h3>
             <p className="text-gray-400 text-sm leading-relaxed">Join thousands of students. Share your notes and contribute to the growing educational hub.</p>
           </div>

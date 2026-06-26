@@ -54,7 +54,7 @@ export interface Note {
   updatedAt: any;
 }
 
-export interface Highlight {
+export interface AppHighlight {
   id: string;
   userId: string;
   resourceId: string;

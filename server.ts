@@ -12,8 +12,14 @@ const PORT = 3000;
 app.use(express.json());
 
 // Initialize Gemini
-const genAI = new GoogleGenAI(process.env.GEMINI_API_KEY || '');
-const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+const ai = new GoogleGenAI({
+  apiKey: process.env.GEMINI_API_KEY,
+  httpOptions: {
+    headers: {
+      'User-Agent': 'aistudio-build',
+    }
+  }
+});
 
 // API route to "send" OTP via Gemini-generated email content
 app.post('/api/send-otp', async (req, res) => {
@@ -30,8 +36,11 @@ app.post('/api/send-otp', async (req, res) => {
     Keep it concise. Format it as a simple text-based email.
     Recipient: ${email}`;
 
-    const result = await model.generateContent(prompt);
-    const emailContent = result.response.text();
+    const result = await ai.models.generateContent({
+      model: 'gemini-3.5-flash',
+      contents: prompt
+    });
+    const emailContent = result.text;
 
     // In a real app, you'd use a service like SendGrid here.
     // For this environment, we'll log it to the console so the user can "see" their code.

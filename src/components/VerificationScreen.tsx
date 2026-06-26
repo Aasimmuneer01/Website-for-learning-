@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { Mail, RefreshCw, LogOut, CheckCircle, ShieldCheck, AlertCircle } from 'lucide-react';
 import { motion } from 'motion/react';
