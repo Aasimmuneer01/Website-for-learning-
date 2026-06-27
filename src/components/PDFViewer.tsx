@@ -15,7 +15,7 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 
 // Set up the worker using a reliable CDN
-pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`;
 
 export default function PDFViewer() {
   const { resourceId } = useParams();
