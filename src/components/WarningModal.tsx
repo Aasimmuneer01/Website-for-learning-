@@ -1,20 +1,21 @@
 import { useState } from 'react';
 import { Warning } from '../types';
+import TermsContent from './TermsContent';
 
 interface WarningModalProps {
   warnings: Warning[];
   onUnderstand: () => void;
-  onViewTerms: () => void;
 }
 
-export default function WarningModal({ warnings, onUnderstand, onViewTerms }: WarningModalProps) {
+export default function WarningModal({ warnings, onUnderstand }: WarningModalProps) {
   const latestWarning = warnings[warnings.length - 1];
+  const [showTerms, setShowTerms] = useState(false);
 
   return (
     <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
       <div className="bg-white border border-gray-200 p-8 rounded-2xl w-full max-w-lg shadow-2xl">
         <h2 className="text-2xl font-bold mb-4 text-red-600 flex items-center gap-2">
-          ⚠️ Warning from Administrator
+          ⚠️ Warning
         </h2>
         <div className="space-y-4">
           <div>
@@ -33,13 +34,28 @@ export default function WarningModal({ warnings, onUnderstand, onViewTerms }: Wa
             I Understand
           </button>
           <button 
-            onClick={onViewTerms}
+            onClick={() => setShowTerms(true)}
             className="flex-1 bg-gray-200 text-black py-3 rounded-xl font-bold hover:bg-gray-300"
           >
             View Terms of Use
           </button>
         </div>
       </div>
+
+      {showTerms && (
+        <div className="fixed inset-0 z-[3000] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white border border-gray-200 p-8 rounded-2xl w-full max-w-2xl max-h-[80vh] overflow-y-auto shadow-2xl relative">
+            <button
+              onClick={() => setShowTerms(false)}
+              className="absolute top-4 right-4 bg-gray-200 text-black p-2 rounded-full hover:bg-gray-300"
+            >
+              Close
+            </button>
+            <h2 className="text-2xl font-bold mb-4">Terms of Use</h2>
+            <TermsContent />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
