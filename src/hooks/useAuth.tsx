@@ -198,6 +198,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               const banUntilDate = new Date(data.banUntil);
               if (new Date() > banUntilDate) {
                 isStillBanned = false;
+                // Automatically unban
+                await updateDoc(userDocRef, {
+                    isBanned: false,
+                    banReason: '',
+                    banUntil: null
+                });
               }
             }
 
@@ -214,6 +220,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                   msg += ` Ban ends in ${hours}h ${minutes}m.`;
                 }
               }
+              msg += `\n\nBanned email: ${data.email}\nStudent name: ${data.displayName}`;
               setBannedMessage(msg);
               await signOut(auth);
               setUser(null);

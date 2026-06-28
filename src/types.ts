@@ -7,6 +7,7 @@ export interface User {
   role: 'user' | 'moderator' | 'admin' | 'superadmin' | string;
   isBanned?: boolean;
   banReason?: string;
+  banUntil?: string; // Add this
   emailVerified?: boolean;
   verificationRequired?: boolean;
   deviceFingerprint?: string;
