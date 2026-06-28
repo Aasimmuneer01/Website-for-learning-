@@ -54,7 +54,7 @@ function MainLayout() {
     return <TermsAcceptanceDialog onAccept={acceptTerms} onDecline={logout} />;
   }
 
-  if (userData?.accountStatus === 'warning' && !userData.warningAcknowledged && userData.warnings && userData.warnings.length > 0) {
+  if (userData?.accountStatus === 'warning' && userData.warningAcknowledged !== true && userData.warnings && userData.warnings.length > 0 && location.pathname !== '/terms') {
     return <WarningModal warnings={userData.warnings} onUnderstand={acknowledgeWarning} onViewTerms={() => {
       window.open(window.location.origin + '/terms', '_blank');
     }} />;

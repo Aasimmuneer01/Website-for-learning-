@@ -17,7 +17,18 @@ service cloud.firestore {
       allow create: if request.auth != null && request.auth.uid == userId;
       allow update: if request.auth != null && (
         isAdmin() || 
-        (request.auth.uid == userId && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'isBanned', 'banReason', 'accountStatus', 'isPremium', 'premiumPlan', 'premiumExpiry', 'premiumGrantedBy', 'premiumGrantedAt', 'premiumStatus']))
+        (
+          request.auth.uid == userId && 
+          !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'isBanned', 'banReason', 'isPremium', 'premiumPlan', 'premiumExpiry', 'premiumGrantedBy', 'premiumGrantedAt', 'premiumStatus']) &&
+          (
+            !request.resource.data.diff(resource.data).affectedKeys().hasAny(['accountStatus']) ||
+            (
+              request.resource.data.accountStatus == 'active' && 
+              resource.data.accountStatus == 'warning' && 
+              request.resource.data.warningAcknowledged == true
+            )
+          )
+        )
       );
       allow delete: if isAdmin();
 
