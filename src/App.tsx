@@ -56,7 +56,7 @@ function MainLayout() {
 
   if (userData?.accountStatus === 'warning' && !userData.warningAcknowledged && userData.warnings && userData.warnings.length > 0) {
     return <WarningModal warnings={userData.warnings} onUnderstand={acknowledgeWarning} onViewTerms={() => {
-      window.open('/terms', '_blank');
+      window.open(window.location.origin + '/terms', '_blank');
     }} />;
   }
 
