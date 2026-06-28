@@ -36,10 +36,23 @@ app.post('/api/send-otp', async (req, res) => {
     Keep it concise. Format it as a simple text-based email.
     Recipient: ${email}`;
 
-    const result = await ai.models.generateContent({
-      model: 'gemini-3.5-flash',
-      contents: prompt
-    });
+    const generateEmailWithRetry = async (prompt: string, retries = 3): Promise<any> => {
+      try {
+        return await ai.models.generateContent({
+          model: 'gemini-3.5-flash',
+          contents: prompt
+        });
+      } catch (error: any) {
+        if (retries > 0 && error.status === 503) {
+          console.warn(`Gemini API 503, retrying in 1s... (${retries} retries left)`);
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          return generateEmailWithRetry(prompt, retries - 1);
+        }
+        throw error;
+      }
+    };
+
+    const result = await generateEmailWithRetry(prompt);
     const emailContent = result.text;
 
     // In a real app, you'd use a service like SendGrid here.

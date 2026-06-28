@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
@@ -15,9 +15,24 @@ import OfflineLibrary from './pages/OfflineLibrary';
 import { AuthProvider, useAuth } from './hooks/useAuth';
 import AuthScreen from './components/AuthScreen';
 import VerificationScreen from './components/VerificationScreen';
+import TermsOfUse from './pages/legal/TermsOfUse';
+import PrivacyPolicy from './pages/legal/PrivacyPolicy';
+import RefundPolicy from './pages/legal/RefundPolicy';
+import Copyright from './pages/legal/Copyright';
+import CommunityGuidelines from './pages/legal/CommunityGuidelines';
+import Contact from './pages/legal/Contact';
+import BanPolicy from './pages/legal/BanPolicy';
+import PremiumAgreement from './pages/legal/PremiumAgreement';
+import Footer from './components/Footer';
+import TermsAcceptanceDialog from './components/TermsAcceptanceDialog';
+import WarningModal from './components/WarningModal';
 
 function MainLayout() {
-  const { user, loading, verificationBlocked } = useAuth();
+  const { user, loading, verificationBlocked, userData, acceptTerms, acknowledgeWarning, logout } = useAuth();
+  const location = useLocation();
+  
+  // Terms check
+  const termsAccepted = !!userData?.termsAccepted;
 
   if (loading) {
     return (
@@ -35,6 +50,16 @@ function MainLayout() {
     return <VerificationScreen />;
   }
 
+  if (user && !termsAccepted && location.pathname !== '/terms') {
+    return <TermsAcceptanceDialog onAccept={acceptTerms} onDecline={logout} />;
+  }
+
+  if (userData?.accountStatus === 'warning' && !userData.warningAcknowledged && userData.warnings && userData.warnings.length > 0) {
+    return <WarningModal warnings={userData.warnings} onUnderstand={acknowledgeWarning} onViewTerms={() => {
+      window.open('/terms', '_blank');
+    }} />;
+  }
+
   return (
     <div className="min-h-screen bg-background-main text-text-main flex flex-col">
       <Navbar />
@@ -46,13 +71,17 @@ function MainLayout() {
           <Route path="/folders" element={<Folders />} />
           <Route path="/offline" element={<OfflineLibrary />} />
           <Route path="/viewer/:resourceId" element={<PDFViewer />} />
+          <Route path="/terms" element={<TermsOfUse />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/refund" element={<RefundPolicy />} />
+          <Route path="/copyright" element={<Copyright />} />
+          <Route path="/guidelines" element={<CommunityGuidelines />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/ban-policy" element={<BanPolicy />} />
+          <Route path="/premium-agreement" element={<PremiumAgreement />} />
         </Routes>
       </main>
-      <footer className="w-full py-6 mt-auto border-t border-secondary bg-surface text-center">
-        <p className="text-gray-400 font-medium">
-          Created with <span className="text-red-500">❤️</span> by Aasim Muneer &copy; {new Date().getFullYear()}
-        </p>
-      </footer>
+      <Footer />
     </div>
   );
 }

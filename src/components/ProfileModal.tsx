@@ -8,11 +8,20 @@ interface ProfileModalProps {
 }
 
 export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
-  const { user, changePassword } = useAuth();
+  const { user, changePassword, userData } = useAuth();
   const [newPassword, setNewPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
+
+  const getStatusColor = (status?: string) => {
+    switch (status) {
+      case 'active': return 'text-green-500';
+      case 'warning': return 'text-yellow-500';
+      case 'banned': return 'text-red-500';
+      default: return 'text-gray-500';
+    }
+  };
 
   const handlePasswordChange = async () => {
     if (newPassword.length < 6) {
@@ -46,6 +55,10 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
           <div>
             <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Email</p>
             <p className="text-text-main font-mono">{user?.email}</p>
+          </div>
+          <div>
+            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Account Status</p>
+            <p className={`font-bold ${getStatusColor(userData?.accountStatus)}`}>{userData?.accountStatus?.toUpperCase() || 'ACTIVE'}</p>
           </div>
           <div className="border-t border-secondary pt-4">
             <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Change Password</p>

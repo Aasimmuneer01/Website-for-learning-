@@ -1,3 +1,17 @@
+export interface Warning {
+  reason: string;
+  date: any;
+  adminName: string;
+  notes?: string;
+}
+
+export interface BanInfo {
+  enabled: boolean;
+  reason: string;
+  expiry?: any;
+  type: 'temporary' | 'permanent';
+}
+
 export interface User {
   uid: string;
   email: string;
@@ -7,11 +21,12 @@ export interface User {
   role: 'user' | 'moderator' | 'admin' | 'superadmin' | string;
   isBanned?: boolean;
   banReason?: string;
-  banUntil?: string; // Add this
+  banUntil?: string; 
+  banInfo?: BanInfo;
   emailVerified?: boolean;
   verificationRequired?: boolean;
   deviceFingerprint?: string;
-  accountStatus?: 'active' | 'banned' | 'suspicious' | string;
+  accountStatus?: 'active' | 'banned' | 'suspicious' | 'warning' | string;
   isPremium?: boolean;
   isEmailVerified?: boolean;
   // Premium details
@@ -21,6 +36,12 @@ export interface User {
   premiumGrantedBy?: string;
   premiumGrantedAt?: any;
   premiumStatus?: 'active' | 'expired' | 'none';
+  // Legal/User protection
+  termsAccepted?: boolean;
+  termsAcceptedAt?: any;
+  warnings?: Warning[];
+  warningCount: number;
+  warningAcknowledged?: boolean;
 }
 
 export interface Bookmark {

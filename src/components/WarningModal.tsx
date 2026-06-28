@@ -1,0 +1,45 @@
+import { useState } from 'react';
+import { Warning } from '../types';
+
+interface WarningModalProps {
+  warnings: Warning[];
+  onUnderstand: () => void;
+  onViewTerms: () => void;
+}
+
+export default function WarningModal({ warnings, onUnderstand, onViewTerms }: WarningModalProps) {
+  const latestWarning = warnings[warnings.length - 1];
+
+  return (
+    <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+      <div className="bg-white border border-gray-200 p-8 rounded-2xl w-full max-w-lg shadow-2xl">
+        <h2 className="text-2xl font-bold mb-4 text-red-600 flex items-center gap-2">
+          ⚠️ Warning from Administrator
+        </h2>
+        <div className="space-y-4">
+          <div>
+            <p className="font-bold text-black">Reason:</p>
+            <p className="text-gray-700">{latestWarning.reason}</p>
+          </div>
+          <p className="text-gray-700 text-sm">
+            You have violated one or more Terms of Use. Please correct your behavior immediately. Repeated violations may result in temporary or permanent suspension of your account.
+          </p>
+        </div>
+        <div className="flex gap-4 mt-8">
+          <button 
+            onClick={onUnderstand}
+            className="flex-1 bg-black text-white py-3 rounded-xl font-bold hover:bg-gray-800"
+          >
+            I Understand
+          </button>
+          <button 
+            onClick={onViewTerms}
+            className="flex-1 bg-gray-200 text-black py-3 rounded-xl font-bold hover:bg-gray-300"
+          >
+            View Terms of Use
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}

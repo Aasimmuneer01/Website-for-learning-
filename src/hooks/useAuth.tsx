@@ -47,6 +47,8 @@ interface AuthContextType {
   verifyOTP: (code: string) => Promise<boolean>;
   clearBannedMessage: () => void;
   changePassword: (newPass: string) => Promise<void>;
+  acceptTerms: () => Promise<void>;
+  acknowledgeWarning: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -64,6 +66,8 @@ const AuthContext = createContext<AuthContextType>({
   verifyOTP: async () => false,
   clearBannedMessage: () => {},
   changePassword: async () => {},
+  acceptTerms: async () => {},
+  acknowledgeWarning: async () => {},
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -339,6 +343,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await updatePassword(auth.currentUser, newPass);
   };
 
+  const acceptTerms = async () => {
+    if (!auth.currentUser) throw new Error("No user logged in");
+    await updateDoc(doc(db, 'users', auth.currentUser.uid), {
+      termsAccepted: true,
+      termsAcceptedAt: serverTimestamp(),
+    });
+  };
+
+  const acknowledgeWarning = async () => {
+    if (!auth.currentUser) throw new Error("No user logged in");
+    await updateDoc(doc(db, 'users', auth.currentUser.uid), {
+      warningAcknowledged: true,
+      accountStatus: 'active',
+    });
+  };
+
   const clearBannedMessage = () => setBannedMessage(null);
 
   return (
@@ -357,6 +377,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       verifyOTP,
       clearBannedMessage,
       changePassword,
+      acceptTerms,
+      acknowledgeWarning,
     }}>
       {children}
     </AuthContext.Provider>

@@ -579,7 +579,25 @@
                         <button id="md-btn-ban" class="py-3 bg-red-500/10 text-red-500 border border-red-500/20 rounded-xl font-bold hover:bg-red-500 hover:text-white transition-all text-xs">Restrict Account</button>
                         <button id="md-btn-verify" class="py-3 bg-primary/10 text-primary border border-primary/20 rounded-xl font-bold hover:bg-primary hover:text-secondary transition-all text-xs">Force Validation</button>
                     </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <button id="md-btn-warning" class="py-3 bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 rounded-xl font-bold hover:bg-yellow-500 hover:text-white transition-all text-xs">Send Warning</button>
+                        <button id="md-btn-reset-warnings" class="py-3 bg-gray-500/10 text-gray-300 border border-gray-500/20 rounded-xl font-bold hover:bg-gray-500 hover:text-white transition-all text-xs">Reset Warnings</button>
+                    </div>
                     <button id="md-btn-delete" class="w-full py-3 bg-surface border border-red-500/20 text-red-400 rounded-xl font-bold hover:bg-red-900 transition-all text-xs">Terminate All Data</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Warning Modal -->
+        <div id="modal-warning" class="fixed inset-0 z-[1000] glass hidden flex items-center justify-center p-4">
+            <div class="bg-surface w-full max-w-sm rounded-[2.5rem] border border-white/10 shadow-2xl p-8">
+                <h3 class="text-xl font-bold uppercase tracking-tight mb-4 text-yellow-500">Issue Warning</h3>
+                <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest block mb-2">Warning Reason</label>
+                <textarea id="warning-reason-input" class="w-full bg-black border border-white/5 rounded-xl p-4 mb-4 outline-none focus:border-yellow-500 text-white" rows="3" placeholder="Enter reason for warning..."></textarea>
+                
+                <div class="flex gap-3">
+                    <button class="btn-cancel-modal flex-1 py-3 bg-white/5 rounded-xl text-sm font-bold hover:bg-white/10">Abort</button>
+                    <button id="confirm-warning-btn" class="flex-1 py-3 bg-yellow-500 text-secondary rounded-xl text-sm font-bold hover:bg-yellow-600">Issue Warning</button>
                 </div>
             </div>
         </div>
@@ -1296,7 +1314,7 @@
             } catch (err) { toast(err.message, "error"); }
         });
 
-        // ACTIONS
+        // BAN ACTIONS
         document.getElementById('md-btn-ban').addEventListener('click', async () => {
             if (!selectedUserId) return;
             const u = usersData.find(x => x.uid === selectedUserId);
@@ -1320,6 +1338,53 @@
             }
         });
 
+        // WARNING ACTIONS
+        document.getElementById('md-btn-warning').addEventListener('click', () => {
+            document.getElementById('modal-warning').classList.remove('hidden');
+        });
+
+        document.getElementById('confirm-warning-btn').addEventListener('click', async () => {
+            if (!selectedUserId) return;
+            const u = usersData.find(x => x.uid === selectedUserId);
+            const reason = document.getElementById('warning-reason-input').value.trim() || 'No reason provided.';
+            
+            try {
+                const currentWarnings = u.warnings || [];
+                const newWarning = {
+                    date: new Date(),
+                    reason: reason,
+                    adminName: 'Administrator'
+                };
+                
+                const updateData = {
+                    warnings: arrayUnion(newWarning),
+                    warningCount: (u.warningCount || 0) + 1,
+                    accountStatus: 'warning',
+                    warningAcknowledged: false
+                };
+                
+                await updateDoc(doc(db, 'users', selectedUserId), updateData);
+                toast('Warning issued successfully', 'success');
+                document.getElementById('modal-warning').classList.add('hidden');
+                document.getElementById('warning-reason-input').value = '';
+                closeModal();
+            } catch (err) { toast(err.message, 'error'); }
+        });
+
+        document.getElementById('md-btn-reset-warnings').addEventListener('click', async () => {
+            if (!selectedUserId || !confirm("Reset all warnings for this user?")) return;
+            try {
+                await updateDoc(doc(db, 'users', selectedUserId), {
+                    warnings: [],
+                    warningCount: 0,
+                    accountStatus: 'active',
+                    warningAcknowledged: true
+                });
+                toast('Warnings reset successfully', 'success');
+                closeModal();
+            } catch (err) { toast(err.message, 'error'); }
+        });
+
         document.getElementById('confirm-ban-btn').addEventListener('click', async () => {
             if (!selectedUserId) return;
             const reason = document.getElementById('ban-reason-input').value.trim() || 'Violation of service terms.';
@@ -1338,6 +1403,13 @@
             } catch (err) { toast(err.message, 'error'); }
         });
 
+        // Other modal cancel handlers
+        document.querySelectorAll('.btn-cancel-modal').forEach(btn => {
+            btn.addEventListener('click', () => {
+                btn.closest('.fixed').classList.add('hidden');
+            });
+        });
+
         document.getElementById('md-btn-verify').addEventListener('click', async () => {
              if (!selectedUserId) return;
              try {
@@ -1350,7 +1422,16 @@
         document.getElementById('md-btn-delete').addEventListener('click', async () => {
             if (!confirm("CRITICAL: This will purge all user data from Firestore. Proceed?")) return;
             try {
+                // Delete user document
                 await deleteDoc(doc(db, 'users', selectedUserId));
+                
+                // Delete bookmarks
+                const bookmarksQuery = query(collection(db, 'bookmarks'), where('userId', '==', selectedUserId));
+                const bookmarksSnapshot = await getDocs(bookmarksQuery);
+                for (const docSnapshot of bookmarksSnapshot.docs) {
+                    await deleteDoc(docSnapshot.ref);
+                }
+
                 toast("Data terminated", "success");
                 closeModal();
             } catch (err) { toast(err.message, "error"); }
