@@ -192,8 +192,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUserData(data);
 
           // Ban check
-          if (data.isBanned) {
-            setBannedMessage("You have been banned from using any material on this website by the administrator." + (data.banReason ? ` Reason: ${data.banReason}` : ""));
+            if (data.isBanned) {
+            setBannedMessage(data.banReason || "You have been banned from using any material on this website.");
             await signOut(auth);
             setUser(null);
             setUserData(null);
