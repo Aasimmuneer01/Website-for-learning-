@@ -195,8 +195,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           if (data.isBanned) {
             let isStillBanned = true;
             if (data.banUntil) {
-              const banUntilDate = new Date(data.banUntil);
-              if (new Date() > banUntilDate) {
+              const banUntilTime = Date.parse(data.banUntil);
+              if (Date.now() > banUntilTime) {
                 isStillBanned = false;
                 // Automatically unban
                 await updateDoc(userDocRef, {
@@ -210,9 +210,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             if (isStillBanned) {
               let msg = data.banReason || "You have been banned from using any material on this website.";
               if (data.banUntil) {
-                const banUntilDate = new Date(data.banUntil);
-                const now = new Date();
-                const diff = banUntilDate.getTime() - now.getTime();
+                const banUntilTime = Date.parse(data.banUntil);
+                const now = Date.now();
+                const diff = banUntilTime - now;
+                console.log("DEBUG BAN:", { banUntil: data.banUntil, banUntilTime, now, diff });
 
                 if (diff > 0) {
                   const hours = Math.floor(diff / (1000 * 60 * 60));

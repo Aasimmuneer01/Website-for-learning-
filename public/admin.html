@@ -1299,8 +1299,25 @@
         // ACTIONS
         document.getElementById('md-btn-ban').addEventListener('click', async () => {
             if (!selectedUserId) return;
-            const modalBan = document.getElementById('modal-ban');
-            modalBan.classList.remove('hidden');
+            const u = usersData.find(x => x.uid === selectedUserId);
+            
+            if (u.isBanned) {
+                // Perform Unban
+                try {
+                    await updateDoc(doc(db, 'users', selectedUserId), {
+                        isBanned: false,
+                        accountStatus: 'active',
+                        banReason: '',
+                        banUntil: null
+                    });
+                    toast('Account authorized successfully', 'success');
+                    closeModal();
+                } catch (err) { toast(err.message, 'error'); }
+            } else {
+                // Open Ban Modal
+                const modalBan = document.getElementById('modal-ban');
+                modalBan.classList.remove('hidden');
+            }
         });
 
         document.getElementById('confirm-ban-btn').addEventListener('click', async () => {
