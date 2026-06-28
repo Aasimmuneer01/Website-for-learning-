@@ -7,7 +7,8 @@ import {
   signOut,
   sendPasswordResetEmail,
   sendEmailVerification,
-  updateProfile
+  updateProfile,
+  updatePassword
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc, serverTimestamp, onSnapshot, deleteDoc } from 'firebase/firestore';
 import { auth, db } from '../firebase/config';
@@ -45,6 +46,7 @@ interface AuthContextType {
   resendVerification: () => Promise<void>;
   verifyOTP: (code: string) => Promise<boolean>;
   clearBannedMessage: () => void;
+  changePassword: (newPass: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -61,6 +63,7 @@ const AuthContext = createContext<AuthContextType>({
   resendVerification: async () => {},
   verifyOTP: async () => false,
   clearBannedMessage: () => {},
+  changePassword: async () => {},
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -331,6 +334,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return false;
   };
 
+  const changePassword = async (newPass: string) => {
+    if (!auth.currentUser) throw new Error("No user logged in");
+    await updatePassword(auth.currentUser, newPass);
+  };
+
   const clearBannedMessage = () => setBannedMessage(null);
 
   return (
@@ -348,6 +356,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       resendVerification,
       verifyOTP,
       clearBannedMessage,
+      changePassword,
     }}>
       {children}
     </AuthContext.Provider>

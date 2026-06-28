@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, X, LogOut, Sun, Moon, Shield } from 'lucide-react';
+import { Menu, X, LogOut, Sun, Moon, Shield, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useAuth } from '../hooks/useAuth';
+import ProfileModal from './ProfileModal';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isDark, setIsDark] = useState(true);
+  const [showProfile, setShowProfile] = useState(false);
   const { logout, userData, user, isPremium } = useAuth();
 
   useEffect(() => {
@@ -68,6 +70,7 @@ export default function Navbar() {
 
   return (
     <nav className="bg-background-main border-b border-surface p-4 shadow-md z-50">
+      <ProfileModal isOpen={showProfile} onClose={() => setShowProfile(false)} />
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         <Link to="/" className="text-2xl font-bold font-sans text-text-main tracking-tighter">EduPlatform</Link>
         
@@ -154,6 +157,14 @@ export default function Navbar() {
           >
             {isDark ? <Sun size={20} /> : <Moon size={20} className="text-primary" />}
           </button>
+          
+          <button
+            onClick={() => setShowProfile(true)}
+            className="p-2 text-text-main hover:bg-surface rounded-lg transition-colors"
+            title="Profile"
+          >
+            <User size={20} />
+          </button>
 
           <button 
             onClick={() => logout()}
@@ -182,6 +193,7 @@ export default function Navbar() {
             <div className="flex flex-col gap-2 p-4">
               <Link to="/" onClick={() => setIsOpen(false)} className="text-center p-3 text-text-main border-2 border-surface rounded-lg font-bold">Home</Link>
               <Link to="/resources" onClick={() => setIsOpen(false)} className="text-center p-3 text-text-main border-2 border-surface rounded-lg font-bold">Resources</Link>
+              <button onClick={() => { setIsOpen(false); setShowProfile(true); }} className="text-center p-3 text-text-main border-2 border-surface rounded-lg font-bold">Profile</button>
               {isPremium && (
                 <>
                   <Link to="/bookmarks" onClick={() => setIsOpen(false)} className="text-center p-3 text-text-main border-2 border-surface rounded-lg font-bold">Bookmarks</Link>
