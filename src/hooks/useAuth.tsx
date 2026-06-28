@@ -192,13 +192,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUserData(data);
 
           // Ban check
-            if (data.isBanned) {
-            setBannedMessage(data.banReason || "You have been banned from using any material on this website.");
-            await signOut(auth);
-            setUser(null);
-            setUserData(null);
-            setLoading(false);
-            return;
+          if (data.isBanned) {
+            let isStillBanned = true;
+            if (data.banUntil) {
+              const banUntilDate = new Date(data.banUntil);
+              if (new Date() > banUntilDate) {
+                isStillBanned = false;
+              }
+            }
+
+            if (isStillBanned) {
+              let msg = data.banReason || "You have been banned from using any material on this website.";
+              if (data.banUntil) {
+                const banUntilDate = new Date(data.banUntil);
+                const now = new Date();
+                const diff = banUntilDate.getTime() - now.getTime();
+
+                if (diff > 0) {
+                  const hours = Math.floor(diff / (1000 * 60 * 60));
+                  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                  msg += ` Ban ends in ${hours}h ${minutes}m.`;
+                }
+              }
+              setBannedMessage(msg);
+              await signOut(auth);
+              setUser(null);
+              setUserData(null);
+              setLoading(false);
+              return;
+            }
           }
 
           // Automatic Premium Expiry Check

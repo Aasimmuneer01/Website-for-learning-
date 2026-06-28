@@ -757,6 +757,9 @@
                 
                 <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest block mb-2">Reason for Suspension</label>
                 <textarea id="ban-reason-input" class="v-input" rows="3" placeholder="Explain why this account is being restricted..."></textarea>
+                
+                <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest block mt-4 mb-2">Ban Until (Optional)</label>
+                <input type="datetime-local" id="ban-until-input" class="v-input w-full">
             </div>
             <div class="p-6 border-t border-[#222] bg-[#050505] flex justify-end gap-3">
                 <button class="btn-cancel-modal v-btn-secondary">Abort</button>
@@ -1396,6 +1399,7 @@
                     <div>
                         <p class="text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-1">Status</p>
                         <p class="text-sm ${u.isBanned ? 'text-red-500' : 'text-green-500'} font-bold">${u.isBanned ? 'BANNED ACCOUNT' : 'ACTIVE ACCOUNT'}</p>
+                        ${u.isBanned && u.banUntil ? `<p class="text-xs text-red-400 mt-1">Until: ${new Date(u.banUntil).toLocaleString()}</p>` : ''}
                     </div>
                     <div>
                         <p class="text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-1">Email Verification</p>
@@ -1427,18 +1431,22 @@
             pendingBanUid = uid;
             document.getElementById('ban-user-email').textContent = email;
             document.getElementById('ban-reason-input').value = '';
+            document.getElementById('ban-until-input').value = '';
             modalBan.classList.remove('hidden');
         };
 
         document.getElementById('confirm-ban-btn').addEventListener('click', async () => {
             if (!pendingBanUid) return;
             const reason = document.getElementById('ban-reason-input').value.trim() || 'Violation of service terms.';
+            const banUntil = document.getElementById('ban-until-input').value;
             try {
-                await updateDoc(doc(db, 'users', pendingBanUid), {
+                const updateData = {
                     isBanned: true,
                     accountStatus: 'banned',
                     banReason: reason
-                });
+                };
+                if (banUntil) updateData.banUntil = banUntil;
+                await updateDoc(doc(db, 'users', pendingBanUid), updateData);
                 
                 // Add to blacklisted fingerprints if exists
                 const u = state.users.find(usr => usr.uid === pendingBanUid);
