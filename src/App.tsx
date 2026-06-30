@@ -26,7 +26,7 @@ import PremiumAgreement from './pages/legal/PremiumAgreement';
 import Footer from './components/Footer';
 import TermsAcceptanceDialog from './components/TermsAcceptanceDialog';
 import WarningModal from './components/WarningModal';
-import ChatInterface from './components/Chat/ChatInterface';
+import AI from './pages/AI';
 import FeatureUpdateModal from './components/FeatureUpdateModal';
 
 function MainLayout() {
@@ -66,12 +66,9 @@ function MainLayout() {
       {user && !aiSeen && <FeatureUpdateModal onClose={acknowledgeAiUpdate} />}
       <Navbar />
       <main className="flex-1 overflow-auto">
-        {/* Added Chat Interface */}
-        <div className="fixed bottom-4 right-4 z-[100]">
-           <ChatInterface isPremium={!!userData?.isPremium} />
-        </div>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/ai" element={<AI />} />
           <Route path="/resources" element={<Resources />} />
           <Route path="/bookmarks" element={<Bookmarks />} />
           <Route path="/folders" element={<Folders />} />
