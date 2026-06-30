@@ -4,6 +4,7 @@ import { createServer as createViteServer } from 'vite';
 import { GoogleGenAI } from '@google/genai';
 import dotenv from 'dotenv';
 import { chat as groqChat } from './src/ai/groq';
+import * as admin from 'firebase-admin';
 
 dotenv.config();
 
@@ -27,115 +28,105 @@ const ai = new GoogleGenAI({
   }
 });
 
-// API route to "send" OTP via Gemini-generated email content
-app.post('/api/send-otp', async (req, res) => {
-  const { email, code } = req.body;
-
-  if (!email || !code) {
-    return res.status(400).json({ error: 'Email and code are required' });
-  }
-
-  try {
-    const prompt = `Generate a professional and friendly email for a user of "Educational Study Material Platform". 
-    The email should contain a 6-digit verification code: ${code}.
-    The user is trying to verify their account.
-    Keep it concise. Format it as a simple text-based email.
-    Recipient: ${email}`;
-
-    const generateEmailWithRetry = async (prompt: string, retries = 3): Promise<any> => {
-      try {
-        return await ai.models.generateContent({
-          model: 'gemini-3.5-flash',
-          contents: prompt
-        });
-      } catch (error: any) {
-        if (retries > 0 && error.status === 503) {
-          console.warn(`Gemini API 503, retrying in 1s... (${retries} retries left)`);
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          return generateEmailWithRetry(prompt, retries - 1);
-        }
-        throw error;
-      }
-    };
-
-    const result = await generateEmailWithRetry(prompt);
-    const emailContent = result.text;
-
-    // In a real app, you'd use a service like SendGrid here.
-    // For this environment, we'll log it to the console so the user can "see" their code.
-    console.log('------------------------------------------');
-    console.log('📧 SIMULATED EMAIL SENT TO:', email);
-    console.log('CONTENT:\n', emailContent);
-    console.log('OTP CODE:', code);
-    console.log('------------------------------------------');
-
-    res.json({ success: true, message: 'OTP sent successfully (Simulated)' });
-  } catch (error) {
-    console.error('Error generating OTP email:', error);
-    res.status(500).json({ error: 'Failed to send OTP' });
-  }
-});
-
-import * as admin from 'firebase-admin';
-
 // Initialize Firebase Admin (assuming default credentials)
 admin.initializeApp();
 const db = admin.firestore();
 
-app.post('/api/chat', async (req, res) => {
-  const { prompt, history, provider, idToken } = req.body;
-  console.log('Received chat request:', { prompt, provider, hasIdToken: !!idToken });
-  
-  try {
-     if (!idToken) return res.status(401).json({ error: 'Unauthorized' });
-     const decodedToken = await admin.auth().verifyIdToken(idToken);
-     const userId = decodedToken.uid;
-     console.log('User ID:', userId);
-     
-     // Check premium status
-     const userDoc = await db.collection('users').doc(userId).get();
-     if (!userDoc.exists || !userDoc.data()?.isPremium) {
-       return res.status(403).json({ error: 'Premium required' });
-     }
-     
-     // Check usage limits
-     const usageRef = db.collection('ai_usage').doc(userId);
-     const usageDoc = await usageRef.get();
-     const now = new Date();
-     
-     let count = 1;
-     if (usageDoc.exists) {
-         const data = usageDoc.data();
-         const lastReset = data?.lastReset.toDate();
-         if (now.getTime() - lastReset.getTime() < 24 * 60 * 60 * 1000) {
-             if (data?.count >= 100) return res.status(429).json({ error: 'Limit reached' });
-             count = data.count + 1;
-         } else {
-             count = 1; // Reset
-         }
-     }
-     
-     // Update usage
-     await usageRef.set({ count, lastReset: admin.firestore.Timestamp.fromDate(now) });
-     
-     let response = '';
-     if (provider === 'groq') {
-       response = await groqChat(prompt, history);
-     } else {
-       return res.status(400).json({ error: 'Unsupported provider' });
-     }
-     res.json({ response });
-  } catch (error) {
-    console.error('AI chat error:', error);
-    res.status(500).json({ error: 'Failed to get AI response' });
-  }
-});
-
-app.get('/admin.html', (req, res) => {
-  res.redirect('/admin');
-});
-
 async function startServer() {
+  // API routes
+  app.post('/api/send-otp', async (req, res) => {
+    const { email, code } = req.body;
+    if (!email || !code) {
+      return res.status(400).json({ error: 'Email and code are required' });
+    }
+    try {
+      const prompt = `Generate a professional and friendly email for a user of "Educational Study Material Platform". 
+      The email should contain a 6-digit verification code: ${code}.
+      The user is trying to verify their account.
+      Keep it concise. Format it as a simple text-based email.
+      Recipient: ${email}`;
+  
+      const generateEmailWithRetry = async (prompt: string, retries = 3): Promise<any> => {
+        try {
+          return await ai.models.generateContent({
+            model: 'gemini-3.5-flash',
+            contents: prompt
+          });
+        } catch (error: any) {
+          if (retries > 0 && error.status === 503) {
+            console.warn(`Gemini API 503, retrying in 1s... (${retries} retries left)`);
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            return generateEmailWithRetry(prompt, retries - 1);
+          }
+          throw error;
+        }
+      };
+  
+      const result = await generateEmailWithRetry(prompt);
+      const emailContent = result.text;
+  
+      console.log('------------------------------------------');
+      console.log('📧 SIMULATED EMAIL SENT TO:', email);
+      console.log('CONTENT:\n', emailContent);
+      console.log('OTP CODE:', code);
+      console.log('------------------------------------------');
+  
+      res.json({ success: true, message: 'OTP sent successfully (Simulated)' });
+    } catch (error) {
+      console.error('Error generating OTP email:', error);
+      res.status(500).json({ error: 'Failed to send OTP' });
+    }
+  });
+  
+  app.post('/api/chat', async (req, res) => {
+    const { prompt, history, provider, idToken } = req.body;
+    console.log('Received chat request:', { prompt, provider, hasIdToken: !!idToken });
+    
+    try {
+       if (!idToken) return res.status(401).json({ error: 'Unauthorized' });
+       const decodedToken = await admin.auth().verifyIdToken(idToken);
+       const userId = decodedToken.uid;
+       console.log('User ID:', userId);
+       
+       // Check premium status
+       const userDoc = await db.collection('users').doc(userId).get();
+       if (!userDoc.exists || !userDoc.data()?.isPremium) {
+         return res.status(403).json({ error: 'Premium required' });
+       }
+       
+       // Check usage limits
+       const usageRef = db.collection('ai_usage').doc(userId);
+       const usageDoc = await usageRef.get();
+       const now = new Date();
+       
+       let count = 1;
+       if (usageDoc.exists) {
+           const data = usageDoc.data();
+           const lastReset = data?.lastReset.toDate();
+           if (now.getTime() - lastReset.getTime() < 24 * 60 * 60 * 1000) {
+               if (data?.count >= 100) return res.status(429).json({ error: 'Limit reached' });
+               count = data.count + 1;
+           } else {
+               count = 1; // Reset
+           }
+       }
+       
+       // Update usage
+       await usageRef.set({ count, lastReset: admin.firestore.Timestamp.fromDate(now) });
+       
+       let response = '';
+       if (provider === 'groq') {
+         response = await groqChat(prompt, history);
+       } else {
+         return res.status(400).json({ error: 'Unsupported provider' });
+       }
+       res.json({ response });
+    } catch (error) {
+      console.error('AI chat error:', error);
+      res.status(500).json({ error: 'Failed to get AI response' });
+    }
+  });
+
   // Vite middleware for development
   if (process.env.NODE_ENV !== 'production') {
     const vite = await createViteServer({
