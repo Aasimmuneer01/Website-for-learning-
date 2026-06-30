@@ -26,13 +26,16 @@ import PremiumAgreement from './pages/legal/PremiumAgreement';
 import Footer from './components/Footer';
 import TermsAcceptanceDialog from './components/TermsAcceptanceDialog';
 import WarningModal from './components/WarningModal';
+import ChatInterface from './components/Chat/ChatInterface';
+import FeatureUpdateModal from './components/FeatureUpdateModal';
 
 function MainLayout() {
-  const { user, loading, verificationBlocked, userData, acceptTerms, acknowledgeWarning, logout } = useAuth();
+  const { user, loading, verificationBlocked, userData, acceptTerms, acknowledgeWarning, acknowledgeAiUpdate, logout } = useAuth();
   const location = useLocation();
   
   // Terms check
   const termsAccepted = !!userData?.termsAccepted;
+  const aiSeen = !!userData?.aiFeatureSeen;
 
   if (loading) {
     return (
@@ -60,8 +63,13 @@ function MainLayout() {
 
   return (
     <div className="min-h-screen bg-background-main text-text-main flex flex-col">
+      {user && !aiSeen && <FeatureUpdateModal onClose={acknowledgeAiUpdate} />}
       <Navbar />
       <main className="flex-1 overflow-auto">
+        {/* Added Chat Interface */}
+        <div className="fixed bottom-4 right-4 z-[100]">
+           <ChatInterface isPremium={!!userData?.isPremium} />
+        </div>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/resources" element={<Resources />} />

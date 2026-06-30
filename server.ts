@@ -3,6 +3,7 @@ import path from 'path';
 import { createServer as createViteServer } from 'vite';
 import { GoogleGenAI } from '@google/genai';
 import dotenv from 'dotenv';
+import { chat as groqChat } from './src/ai/groq';
 
 dotenv.config();
 
@@ -70,9 +71,56 @@ app.post('/api/send-otp', async (req, res) => {
   }
 });
 
-// Serve standalone admin portal
-app.get('/admin', (req, res) => {
-  res.sendFile(path.join(process.cwd(), 'public', 'admin.html'));
+import * as admin from 'firebase-admin';
+
+// Initialize Firebase Admin (assuming default credentials)
+admin.initializeApp();
+const db = admin.firestore();
+
+app.post('/api/chat', async (req, res) => {
+  const { prompt, history, provider, idToken } = req.body;
+  
+  try {
+     const decodedToken = await admin.auth().verifyIdToken(idToken);
+     const userId = decodedToken.uid;
+     
+     // Check premium status
+     const userDoc = await db.collection('users').doc(userId).get();
+     if (!userDoc.exists || !userDoc.data()?.isPremium) {
+       return res.status(403).json({ error: 'Premium required' });
+     }
+     
+     // Check usage limits
+     const usageRef = db.collection('ai_usage').doc(userId);
+     const usageDoc = await usageRef.get();
+     const now = new Date();
+     
+     let count = 1;
+     if (usageDoc.exists) {
+         const data = usageDoc.data();
+         const lastReset = data?.lastReset.toDate();
+         if (now.getTime() - lastReset.getTime() < 24 * 60 * 60 * 1000) {
+             if (data?.count >= 100) return res.status(429).json({ error: 'Limit reached' });
+             count = data.count + 1;
+         } else {
+             count = 1; // Reset
+         }
+     }
+     
+     // Update usage
+     await usageRef.set({ count, lastReset: admin.firestore.Timestamp.fromDate(now) });
+     
+     let response = '';
+     if (provider === 'groq') {
+       response = await groqChat(prompt, history);
+     } else {
+       return res.status(400).json({ error: 'Unsupported provider' });
+     }
+     res.json({ response });
+  } catch (error) {
+    console.error('AI chat error:', error);
+    res.status(500).json({ error: 'Failed to get AI response' });
+  }
 });
 
 app.get('/admin.html', (req, res) => {

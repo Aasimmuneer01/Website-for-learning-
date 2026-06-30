@@ -49,6 +49,7 @@ interface AuthContextType {
   changePassword: (newPass: string) => Promise<void>;
   acceptTerms: () => Promise<void>;
   acknowledgeWarning: () => Promise<void>;
+  acknowledgeAiUpdate: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -68,6 +69,7 @@ const AuthContext = createContext<AuthContextType>({
   changePassword: async () => {},
   acceptTerms: async () => {},
   acknowledgeWarning: async () => {},
+  acknowledgeAiUpdate: async () => {},
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -359,6 +361,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
   };
 
+  const acknowledgeAiUpdate = async () => {
+    if (!auth.currentUser) throw new Error("No user logged in");
+    await updateDoc(doc(db, 'users', auth.currentUser.uid), {
+      aiFeatureSeen: true,
+    });
+  };
+
   const clearBannedMessage = () => setBannedMessage(null);
 
   return (
@@ -379,6 +388,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       changePassword,
       acceptTerms,
       acknowledgeWarning,
+      acknowledgeAiUpdate,
     }}>
       {children}
     </AuthContext.Provider>

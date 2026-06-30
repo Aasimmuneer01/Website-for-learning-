@@ -42,6 +42,7 @@ export interface User {
   warnings?: Warning[];
   warningCount: number;
   warningAcknowledged?: boolean;
+  aiFeatureSeen?: boolean;
 }
 
 export interface Bookmark {
