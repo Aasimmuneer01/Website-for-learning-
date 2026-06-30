@@ -3,16 +3,22 @@ import { Timestamp } from 'firebase-admin/firestore';
 import { chat as groqChat } from '../src/ai/groq';
 
 export default async function handler(req: any, res: any) {
+  console.log('API Chat Request:', req.method, req.url);
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
   const { prompt, history, provider, idToken } = req.body;
 
   try {
-    if (!idToken) return res.status(401).json({ error: 'Unauthorized: No token' });
+    if (!idToken) {
+      console.warn('Unauthorized: No token provided');
+      return res.status(401).json({ error: 'Unauthorized: No token' });
+    }
     const decodedToken = await auth.verifyIdToken(idToken);
     const userId = decodedToken.uid;
+    console.log('User identified:', userId);
 
     const userDoc = await db.collection('users').doc(userId).get();
     if (!userDoc.exists || !userDoc.data()?.isPremium) {
+      console.warn('Premium check failed for user:', userId);
       return res.status(403).json({ error: 'Premium required' });
     }
 
