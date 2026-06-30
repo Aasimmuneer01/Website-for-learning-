@@ -5,6 +5,8 @@ import { GoogleGenAI } from '@google/genai';
 import dotenv from 'dotenv';
 import { chat as groqChat } from './src/ai/groq';
 import * as admin from 'firebase-admin';
+import { getFirestore } from 'firebase-admin/firestore';
+import { getAuth } from 'firebase-admin/auth';
 
 dotenv.config();
 
@@ -30,8 +32,9 @@ const ai = new GoogleGenAI({
 });
 
 // Initialize Firebase Admin (assuming default credentials)
-admin.initializeApp();
-const db = admin.firestore();
+const app = admin.initializeApp({ projectId: 'ais-asia-east1-6f1f14a5394847f' });
+const db = getFirestore(app);
+const auth = getAuth(app);
 
 async function startServer() {
   app.get('/api/test', (req, res) => {
@@ -94,7 +97,7 @@ async function startServer() {
        }
        
        console.log('Verifying token...');
-       const decodedToken = await admin.auth().verifyIdToken(idToken);
+       const decodedToken = await auth.verifyIdToken(idToken);
        const userId = decodedToken.uid;
        console.log('Token verified for User ID:', userId);
        
