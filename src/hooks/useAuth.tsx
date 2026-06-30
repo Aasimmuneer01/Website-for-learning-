@@ -179,6 +179,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             verificationRequired: false,
             deviceFingerprint: fp,
             accountStatus: initialStatus,
+            warningCount: 0,
+            warnings: [],
           };
 
           await setDoc(userDocRef, newUserData);

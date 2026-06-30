@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { getFirestore, enableIndexedDbPersistence } from 'firebase/firestore';
+import { initializeFirestore, getFirestore, enableIndexedDbPersistence } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 import rawConfig from '../../firebase-applet-config.json';
 
@@ -16,9 +16,12 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 export const auth = getAuth(app);
-export const db = getFirestore(app, rawConfig.firestoreDatabaseId);
+export const db = initializeFirestore(app, {
+  experimentalForceLongPolling: true,
+}, rawConfig.firestoreDatabaseId);
 export const storage = getStorage(app);
 
+/*
 try {
   enableIndexedDbPersistence(db);
 } catch (err: any) {
@@ -30,6 +33,7 @@ try {
     console.warn('Persistence failed: Not supported in this browser.');
   }
 }
+*/
 
 storage.maxUploadRetryTime = 10000;
 storage.maxOperationRetryTime = 10000;

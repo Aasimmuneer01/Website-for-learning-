@@ -4,9 +4,8 @@ import { createServer as createViteServer } from 'vite';
 import { GoogleGenAI } from '@google/genai';
 import dotenv from 'dotenv';
 import { chat as groqChat } from './src/ai/groq';
-import * as admin from 'firebase-admin';
-import { getFirestore } from 'firebase-admin/firestore';
-import { getAuth } from 'firebase-admin/auth';
+import { adminDb as db, adminAuth as auth } from './src/lib/firebase-admin';
+import { Timestamp } from 'firebase-admin/firestore';
 
 dotenv.config();
 
@@ -20,7 +19,6 @@ app.use((req, res, next) => {
     next();
 });
 
-
 // Initialize Gemini
 const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
@@ -30,11 +28,6 @@ const ai = new GoogleGenAI({
     }
   }
 });
-
-// Initialize Firebase Admin (assuming default credentials)
-const app = admin.initializeApp({ projectId: 'ais-asia-east1-6f1f14a5394847f' });
-const db = getFirestore(app);
-const auth = getAuth(app);
 
 async function startServer() {
   app.get('/api/test', (req, res) => {
@@ -129,7 +122,7 @@ async function startServer() {
        }
        
        // Update usage
-       await usageRef.set({ count, lastReset: admin.firestore.Timestamp.fromDate(now) });
+       await usageRef.set({ count, lastReset: Timestamp.fromDate(now) });
        console.log('Usage updated for user:', userId, 'Count:', count);
        
        let response = '';
