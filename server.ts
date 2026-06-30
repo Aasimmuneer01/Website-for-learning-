@@ -12,6 +12,11 @@ const PORT = 3000;
 
 app.use(express.json());
 
+app.use((req, res, next) => {
+    console.log(`${req.method} ${req.url}`);
+    next();
+});
+
 // Initialize Gemini
 const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
@@ -79,10 +84,13 @@ const db = admin.firestore();
 
 app.post('/api/chat', async (req, res) => {
   const { prompt, history, provider, idToken } = req.body;
+  console.log('Received chat request:', { prompt, provider, hasIdToken: !!idToken });
   
   try {
+     if (!idToken) return res.status(401).json({ error: 'Unauthorized' });
      const decodedToken = await admin.auth().verifyIdToken(idToken);
      const userId = decodedToken.uid;
+     console.log('User ID:', userId);
      
      // Check premium status
      const userDoc = await db.collection('users').doc(userId).get();

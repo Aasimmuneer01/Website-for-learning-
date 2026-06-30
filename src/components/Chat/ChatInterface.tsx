@@ -35,8 +35,16 @@ export default function ChatInterface({ isPremium }: { isPremium: boolean }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt: input, history: messages, provider: 'groq', idToken }),
       });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error);
+      
+      const text = await response.text();
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch (e) {
+        throw new Error(`Server returned HTML or invalid JSON: ${text.substring(0, 50)}...`);
+      }
+      
+      if (!response.ok) throw new Error(data.error || 'Request failed');
       setMessages(prev => [...prev, { role: 'assistant', content: data.response }]);
     } catch (error: any) {
       setMessages(prev => [...prev, { role: 'assistant', content: `Error: ${error.message}` }]);
