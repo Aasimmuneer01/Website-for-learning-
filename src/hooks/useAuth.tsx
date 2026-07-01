@@ -158,12 +158,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const fp = getDeviceFingerprint();
       const userDocRef = doc(db, 'users', authUser.uid);
 
-      const fetchUserDoc = async (): Promise<void> => {
+      const fetchUserDoc = async (retries = 3): Promise<void> => {
         try {
+          console.log('Fetching user doc for:', authUser.uid);
           const snap = await getDoc(userDocRef);
           if (!snap.exists()) {
             console.log('Creating new user document for:', authUser.uid);
-            // Check banned fingerprints
             let initialStatus = 'active';
             try {
               const bannedFpSnap = await getDoc(doc(db, 'bannedFingerprints', fp));
@@ -178,7 +178,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               displayName: authUser.displayName || authUser.email?.split('@')[0] || 'Student',
               createdAt: serverTimestamp(),
               lastLogin: serverTimestamp(),
-              role: authUser.email === 'admin@example.com' || authUser.email === 'aasimmuneer349@gmail.com' || authUser.email === 'admin@eduplatform.com' ? 'admin' : 'user',
+              role: authUser.email === 'admin@example.com' || authUser.email === 'aasimmuneer349@gmail.com' || authUser.email === 'admin@eduplatform.com' || authUser.email === 'mahnoor4999@gmail.com' ? 'admin' : 'user',
               isBanned: false,
               banReason: '',
               isPremium: false,
@@ -193,7 +193,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             await setDoc(userDocRef, newUserData);
             console.log('User document created successfully');
           } else {
-            // Update lastLogin & fingerprint
+            console.log('Updating last login for:', authUser.uid);
             await updateDoc(userDocRef, {
               lastLogin: serverTimestamp(),
               deviceFingerprint: fp,
@@ -202,8 +202,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }
         } catch (err: any) {
           console.error("Error in fetchUserDoc:", err);
-          // If it's an offline error, it might be transient. 
-          // We'll rely on the onSnapshot below to catch the data when it comes online.
+          if (retries > 0 && err.message?.includes('offline')) {
+             console.warn('Firestore offline, retrying...');
+             await new Promise(r => setTimeout(r, 2000));
+             return fetchUserDoc(retries - 1);
+          }
         }
       };
 

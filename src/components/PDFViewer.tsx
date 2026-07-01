@@ -33,6 +33,7 @@ export default function PDFViewer() {
   const containerRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<HTMLDivElement>(null);
   const renderTaskRef = useRef<any>(null);
+  const renderGenerationRef = useRef(0);
   const textLayerRenderTaskRef = useRef<any>(null);
 
   // Premium Features States
@@ -396,16 +397,24 @@ export default function PDFViewer() {
     if (!pdfDoc || !canvasRef.current) return;
 
     const renderPage = async () => {
+      const generation = ++renderGenerationRef.current;
+      
       try {
         // Cancel existing render task if any
         if (renderTaskRef.current) {
-          renderTaskRef.current.cancel();
+          try {
+            renderTaskRef.current.cancel();
+          } catch (e) {
+            // Ignore cancellation errors
+          }
         }
 
         const page = await pdfDoc.getPage(currentPage);
+        if (generation !== renderGenerationRef.current) return;
+
         const viewport = page.getViewport({ scale });
         const canvas = canvasRef.current!;
-        const context = canvas.getContext('2d')!;
+        const context = canvas.getContext('2d', { alpha: false })!;
 
         // Adjust for device pixel ratio
         const outputScale = window.devicePixelRatio || 1;
@@ -420,7 +429,7 @@ export default function PDFViewer() {
 
         const renderContext = {
           canvasContext: context,
-          transform: transform,
+          transform: transform || undefined,
           viewport: viewport,
         };
 
@@ -428,9 +437,12 @@ export default function PDFViewer() {
         renderTaskRef.current = renderTask;
         
         await renderTask.promise;
-        renderTaskRef.current = null;
+        
+        if (generation === renderGenerationRef.current) {
+          renderTaskRef.current = null;
+        }
       } catch (err: any) {
-        if (err.name === 'RenderingCancelledException') return;
+        if (err.name === 'RenderingCancelledException' || generation !== renderGenerationRef.current) return;
         console.error("Error rendering PDF page:", err);
       }
     };
@@ -438,6 +450,7 @@ export default function PDFViewer() {
     renderPage();
     
     return () => {
+      renderGenerationRef.current++;
       if (renderTaskRef.current) {
         renderTaskRef.current.cancel();
       }

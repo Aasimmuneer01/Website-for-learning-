@@ -21,7 +21,7 @@ export const auth = getAuth(app);
 export const db = initializeFirestore(app, {
   experimentalForceLongPolling: true,
   experimentalAutoDetectLongPolling: false, 
-});
+}, rawConfig.firestoreDatabaseId || '(default)');
 
 export const storage = getStorage(app);
 
