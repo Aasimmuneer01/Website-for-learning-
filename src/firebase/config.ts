@@ -20,7 +20,7 @@ export const auth = getAuth(app);
 // Use initializeFirestore to force long polling for stability in AI Studio and certain proxy environments
 export const db = initializeFirestore(app, {
   experimentalForceLongPolling: true,
-  experimentalAutoDetectLongPolling: false, // Disable auto-detect to ensure long polling is used
+  experimentalAutoDetectLongPolling: false, 
 });
 
 export const storage = getStorage(app);

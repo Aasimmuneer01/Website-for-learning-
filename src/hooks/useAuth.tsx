@@ -158,43 +158,56 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const fp = getDeviceFingerprint();
       const userDocRef = doc(db, 'users', authUser.uid);
 
-      try {
-        const snap = await getDoc(userDocRef);
-        if (!snap.exists()) {
-          // Check banned fingerprints
-          const bannedFpSnap = await getDoc(doc(db, 'bannedFingerprints', fp));
-          const initialStatus = bannedFpSnap.exists() ? 'suspicious' : 'active';
+      const fetchUserDoc = async (): Promise<void> => {
+        try {
+          const snap = await getDoc(userDocRef);
+          if (!snap.exists()) {
+            console.log('Creating new user document for:', authUser.uid);
+            // Check banned fingerprints
+            let initialStatus = 'active';
+            try {
+              const bannedFpSnap = await getDoc(doc(db, 'bannedFingerprints', fp));
+              if (bannedFpSnap.exists()) initialStatus = 'suspicious';
+            } catch (err) {
+              console.warn('Could not check banned fingerprints:', err);
+            }
 
-          const newUserData: UserType = {
-            uid: authUser.uid,
-            email: authUser.email || '',
-            displayName: authUser.displayName || authUser.email?.split('@')[0] || 'Student',
-            createdAt: serverTimestamp(),
-            lastLogin: serverTimestamp(),
-            role: authUser.email === 'admin@example.com' || authUser.email === 'aasimmuneer349@gmail.com' || authUser.email === 'admin@eduplatform.com' ? 'admin' : 'user',
-            isBanned: false,
-            banReason: '',
-            isPremium: false,
-            emailVerified: authUser.emailVerified,
-            verificationRequired: false,
-            deviceFingerprint: fp,
-            accountStatus: initialStatus,
-            warningCount: 0,
-            warnings: [],
-          };
+            const newUserData: UserType = {
+              uid: authUser.uid,
+              email: authUser.email || '',
+              displayName: authUser.displayName || authUser.email?.split('@')[0] || 'Student',
+              createdAt: serverTimestamp(),
+              lastLogin: serverTimestamp(),
+              role: authUser.email === 'admin@example.com' || authUser.email === 'aasimmuneer349@gmail.com' || authUser.email === 'admin@eduplatform.com' ? 'admin' : 'user',
+              isBanned: false,
+              banReason: '',
+              isPremium: false,
+              emailVerified: authUser.emailVerified,
+              verificationRequired: false,
+              deviceFingerprint: fp,
+              accountStatus: initialStatus,
+              warningCount: 0,
+              warnings: [],
+            };
 
-          await setDoc(userDocRef, newUserData);
-        } else {
-          // Update lastLogin & fingerprint
-          await updateDoc(userDocRef, {
-            lastLogin: serverTimestamp(),
-            deviceFingerprint: fp,
-            emailVerified: authUser.emailVerified,
-          });
+            await setDoc(userDocRef, newUserData);
+            console.log('User document created successfully');
+          } else {
+            // Update lastLogin & fingerprint
+            await updateDoc(userDocRef, {
+              lastLogin: serverTimestamp(),
+              deviceFingerprint: fp,
+              emailVerified: authUser.emailVerified,
+            });
+          }
+        } catch (err: any) {
+          console.error("Error in fetchUserDoc:", err);
+          // If it's an offline error, it might be transient. 
+          // We'll rely on the onSnapshot below to catch the data when it comes online.
         }
-      } catch (err) {
-        console.error("Error setting up user doc:", err);
-      }
+      };
+
+      await fetchUserDoc();
 
       // Realtime snapshot listener on user doc
       unsubscribeDoc = onSnapshot(userDocRef, async (docSnap) => {

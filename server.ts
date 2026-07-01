@@ -1,13 +1,13 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 import express from 'express';
 import path from 'path';
 import { createServer as createViteServer } from 'vite';
 import { GoogleGenAI } from '@google/genai';
-import dotenv from 'dotenv';
 import { chat as groqChat } from './src/ai/groq';
 import { adminDb as db, adminAuth as auth } from './src/lib/firebase-admin';
 import { Timestamp } from 'firebase-admin/firestore';
-
-dotenv.config();
 
 const app = express();
 const PORT = 3000;
@@ -49,8 +49,8 @@ async function startServer() {
       const generateEmailWithRetry = async (prompt: string, retries = 3): Promise<any> => {
         try {
           return await ai.models.generateContent({
-            model: 'gemini-3.5-flash',
-            contents: prompt
+            model: 'gemini-1.5-flash',
+            contents: [{ role: 'user', parts: [{ text: prompt }] }]
           });
         } catch (error: any) {
           if (retries > 0 && error.status === 503) {
@@ -139,6 +139,13 @@ async function startServer() {
       console.error('AI chat error:', error);
       res.status(500).json({ error: 'Failed to get AI response: ' + (error as Error).message });
     }
+  });
+
+  // API routes defined above
+  
+  // JSON 404 for unmatched API routes
+  app.all('/api/*', (req, res) => {
+    res.status(404).json({ error: `API route ${req.method} ${req.url} not found` });
   });
 
   // Vite middleware for development
