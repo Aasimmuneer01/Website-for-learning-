@@ -95,8 +95,16 @@ async function startServer() {
        console.log('Token verified for User ID:', userId);
        
        // Check premium status
+       console.log('Fetching user doc from Firestore database:', (db as any)._databaseId?.database || '(default)');
        const userDoc = await db.collection('users').doc(userId).get();
-       if (!userDoc.exists || !userDoc.data()?.isPremium) {
+       
+       if (!userDoc.exists) {
+         console.warn('User document does not exist in Firestore for ID:', userId);
+         // For now, let's allow non-existent docs to be treated as non-premium instead of crashing
+         return res.status(403).json({ error: 'User record not found' });
+       }
+
+       if (!userDoc.data()?.isPremium) {
          console.warn('Access denied: User is not premium');
          return res.status(403).json({ error: 'Premium required' });
        }
