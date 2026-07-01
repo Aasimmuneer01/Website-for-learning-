@@ -2,16 +2,17 @@ import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { initializeFirestore, getFirestore, enableIndexedDbPersistence } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
-import rawConfig from '../../firebase-applet-config.json';
 
 const firebaseConfig = {
-  apiKey: rawConfig.apiKey,
-  authDomain: rawConfig.authDomain,
-  projectId: rawConfig.projectId,
-  storageBucket: rawConfig.storageBucket,
-  messagingSenderId: rawConfig.messagingSenderId,
-  appId: rawConfig.appId,
+  apiKey: "AIzaSyAjpGS1Oj6yhHv3wv4F2tET69N_Qe9DMh0",
+  authDomain: "resourceswebsite-4871a.firebaseapp.com",
+  projectId: "resourceswebsite-4871a",
+  storageBucket: "resourceswebsite-4871a.firebasestorage.app",
+  messagingSenderId: "499105267177",
+  appId: "1:499105267177:web:d88137205e617e294c1f78"
 };
+
+console.log('Firebase Config Initialized:', firebaseConfig);
 
 const app = initializeApp(firebaseConfig);
 
@@ -21,7 +22,7 @@ export const auth = getAuth(app);
 export const db = initializeFirestore(app, {
   experimentalForceLongPolling: true,
   experimentalAutoDetectLongPolling: false, 
-}, rawConfig.firestoreDatabaseId || '(default)');
+}, '(default)');
 
 export const storage = getStorage(app);
 

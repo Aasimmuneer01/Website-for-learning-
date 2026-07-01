@@ -1,38 +1,18 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, X, LogOut, Sun, Moon, Shield, User } from 'lucide-react';
+import { Menu, X, LogOut, Shield, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useAuth } from '../hooks/useAuth';
 import ProfileModal from './ProfileModal';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
-  const [isDark, setIsDark] = useState(true);
   const [showProfile, setShowProfile] = useState(false);
   const { logout, userData, user, isPremium } = useAuth();
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'light') {
-      setIsDark(false);
-      document.documentElement.classList.remove('dark');
-    } else {
-      setIsDark(true);
-      document.documentElement.classList.add('dark');
-    }
+    document.documentElement.classList.add('dark');
   }, []);
-
-  const toggleTheme = () => {
-    const newTheme = !isDark;
-    setIsDark(newTheme);
-    if (newTheme) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    }
-  };
 
   const [remainingTime, setRemainingTime] = useState<string>('');
 
@@ -151,14 +131,6 @@ export default function Navbar() {
             </div>
           )}
 
-          <button 
-            onClick={toggleTheme}
-            className="p-2 text-text-main hover:bg-surface rounded-lg transition-colors"
-            title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
-          >
-            {isDark ? <Sun size={20} /> : <Moon size={20} className="text-primary" />}
-          </button>
-          
           <button
             onClick={() => setShowProfile(true)}
             className="p-2 text-text-main hover:bg-surface rounded-lg transition-colors"

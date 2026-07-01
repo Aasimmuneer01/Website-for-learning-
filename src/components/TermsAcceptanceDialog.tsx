@@ -12,8 +12,8 @@ export default function TermsAcceptanceDialog({ onAccept, onDecline }: TermsAcce
   return (
     <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
       <div className="bg-background-main border border-secondary p-8 rounded-2xl w-full max-w-lg shadow-2xl">
-        <h2 className="text-2xl font-bold mb-4 text-black">Terms of Use Update</h2>
-        <p className="mb-6 text-black">
+        <h2 className="text-2xl font-bold mb-4 text-text-main">Terms of Use Update</h2>
+        <p className="mb-6 text-text-main">
           Please review and <button onClick={() => setShowTerms(true)} className="text-primary underline font-bold">accept our updated Terms of Use</button> to continue using EduPlatform.
         </p>
         <div className="flex gap-4">
@@ -25,7 +25,7 @@ export default function TermsAcceptanceDialog({ onAccept, onDecline }: TermsAcce
           </button>
           <button 
             onClick={onDecline}
-            className="flex-1 bg-surface text-black py-3 rounded-xl font-bold hover:bg-surface/80"
+            className="flex-1 bg-surface text-text-main py-3 rounded-xl font-bold hover:bg-surface/80"
           >
             Decline
           </button>
@@ -33,12 +33,12 @@ export default function TermsAcceptanceDialog({ onAccept, onDecline }: TermsAcce
       </div>
       {showTerms && (
         <div className="fixed inset-0 z-[1001] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-          <div className="bg-white border border-secondary p-8 rounded-2xl w-full max-w-4xl shadow-2xl max-h-[80vh] overflow-y-auto">
-            <h2 className="text-2xl font-bold mb-4 text-black">Terms of Use</h2>
+          <div className="bg-background-main border border-secondary p-8 rounded-2xl w-full max-w-4xl shadow-2xl max-h-[80vh] overflow-y-auto">
+            <h2 className="text-2xl font-bold mb-4 text-text-main">Terms of Use</h2>
             <TermsContent />
             <button 
               onClick={() => setShowTerms(false)}
-              className="mt-6 w-full bg-gray-200 text-black py-3 rounded-xl font-bold hover:bg-gray-300"
+              className="mt-6 w-full bg-surface text-text-main py-3 rounded-xl font-bold hover:bg-surface/80"
             >
               Close
             </button>

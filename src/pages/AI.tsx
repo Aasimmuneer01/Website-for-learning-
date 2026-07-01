@@ -1,14 +1,11 @@
-import { useAuth } from '../hooks/useAuth';
-import ChatInterface from '../components/Chat/ChatInterface';
+import React from 'react';
+import { Chat } from '../components/ai/Chat';
 
-export default function AI() {
-  const { userData } = useAuth();
-  const isPremium = !!userData?.isPremium;
-
+export default function AIPage() {
   return (
-    <div className="max-w-4xl mx-auto p-4 md:p-8">
-      <h1 className="text-3xl font-bold mb-6">AI Assistant</h1>
-      <ChatInterface isPremium={isPremium} />
+    <div className="p-6 h-[calc(100vh-64px)]">
+      <h1 className="text-2xl font-bold mb-6 text-text-main">AI Assistant</h1>
+      <Chat />
     </div>
   );
 }

@@ -3,10 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
+import AI from './pages/AI';
 import Resources from './pages/Resources';
 import PDFViewer from './components/PDFViewer';
 import Bookmarks from './pages/Bookmarks';
@@ -26,16 +28,21 @@ import PremiumAgreement from './pages/legal/PremiumAgreement';
 import Footer from './components/Footer';
 import TermsAcceptanceDialog from './components/TermsAcceptanceDialog';
 import WarningModal from './components/WarningModal';
-import AI from './pages/AI';
-import FeatureUpdateModal from './components/FeatureUpdateModal';
+import { NewFeaturePopup } from './components/common/NewFeaturePopup';
 
 function MainLayout() {
-  const { user, loading, verificationBlocked, userData, acceptTerms, acknowledgeWarning, acknowledgeAiUpdate, logout } = useAuth();
+  const { user, loading, verificationBlocked, userData, acceptTerms, acknowledgeWarning, logout } = useAuth();
   const location = useLocation();
+  const [showPopup, setShowPopup] = useState(false);
   
   // Terms check
   const termsAccepted = !!userData?.termsAccepted;
-  const aiSeen = !!userData?.aiFeatureSeen;
+
+  useEffect(() => {
+    if (user && userData && userData.lastPopupVersion !== '1.0') {
+      setShowPopup(true);
+    }
+  }, [user, userData]);
 
   if (loading) {
     return (
@@ -63,7 +70,7 @@ function MainLayout() {
 
   return (
     <div className="min-h-screen bg-background-main text-text-main flex flex-col">
-      {user && !aiSeen && <FeatureUpdateModal onClose={acknowledgeAiUpdate} />}
+      {showPopup && <NewFeaturePopup version="1.0" onClose={() => setShowPopup(false)} />}
       <Navbar />
       <main className="flex-1 overflow-auto">
         <Routes>

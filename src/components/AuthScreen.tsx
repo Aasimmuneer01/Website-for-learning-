@@ -82,20 +82,20 @@ export default function AuthScreen() {
           <h1 className="text-2xl font-bold font-sans tracking-tight text-text-main">
             {mode === 'login' ? 'Sign In to EduPlatform' : mode === 'signup' ? 'Create Your Account' : 'Reset Password'}
           </h1>
-          <p className="text-gray-400 text-sm">
+          <p className="text-slate-600 text-sm">
             {mode === 'login' ? 'Enter your email and password to access study notes.' : mode === 'signup' ? 'Join thousands of students learning smarter.' : 'Enter your email to receive a reset link.'}
           </p>
         </div>
 
         {error && (
-          <div className="p-4 bg-red-500/10 border border-red-500/30 text-red-400 rounded-xl text-sm flex items-start gap-3">
+          <div className="p-4 bg-red-500/10 border border-red-500/30 text-red-700 rounded-xl text-sm flex items-start gap-3">
             <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
             <span>{error}</span>
           </div>
         )}
 
         {successMsg && (
-          <div className="p-4 bg-green-500/10 border border-green-500/30 text-green-400 rounded-xl text-sm flex items-start gap-3">
+          <div className="p-4 bg-green-500/10 border border-green-500/30 text-green-700 rounded-xl text-sm flex items-start gap-3">
             <CheckCircle className="w-5 h-5 shrink-0 mt-0.5" />
             <span>{successMsg}</span>
           </div>
@@ -104,7 +104,7 @@ export default function AuthScreen() {
         <form onSubmit={handleSubmit} className="space-y-4">
           {mode === 'signup' && (
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider block">Full Name</label>
+              <label className="text-xs font-semibold text-slate-600 uppercase tracking-wider block">Full Name</label>
               <div className="relative">
                 <User className="w-5 h-5 absolute left-3.5 top-3 text-gray-500" />
                 <input 
@@ -113,14 +113,14 @@ export default function AuthScreen() {
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
                   placeholder="Student Name"
-                  className="w-full bg-background-main border border-secondary rounded-xl pl-11 pr-4 py-2.5 text-text-main placeholder-gray-600 focus:outline-none focus:border-primary text-sm transition-colors"
+                  className="w-full bg-background-main border border-secondary rounded-xl pl-11 pr-4 py-2.5 text-text-main placeholder-gray-500 focus:outline-none focus:border-primary text-sm transition-colors"
                 />
               </div>
             </div>
           )}
 
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider block">Email Address</label>
+            <label className="text-xs font-semibold text-slate-600 uppercase tracking-wider block">Email Address</label>
             <div className="relative">
               <Mail className="w-5 h-5 absolute left-3.5 top-3 text-gray-500" />
               <input 
@@ -129,7 +129,7 @@ export default function AuthScreen() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="student@example.com"
-                className="w-full bg-background-main border border-secondary rounded-xl pl-11 pr-4 py-2.5 text-text-main placeholder-gray-600 focus:outline-none focus:border-primary text-sm transition-colors"
+                className="w-full bg-background-main border border-secondary rounded-xl pl-11 pr-4 py-2.5 text-text-main placeholder-gray-500 focus:outline-none focus:border-primary text-sm transition-colors"
               />
             </div>
           </div>
@@ -137,7 +137,7 @@ export default function AuthScreen() {
           {mode !== 'forgot' && (
             <div className="space-y-1.5">
               <div className="flex justify-between items-center">
-                <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider block">Password</label>
+                <label className="text-xs font-semibold text-slate-600 uppercase tracking-wider block">Password</label>
                 {mode === 'login' && (
                   <button 
                     type="button" 
@@ -156,7 +156,7 @@ export default function AuthScreen() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full bg-background-main border border-secondary rounded-xl pl-11 pr-4 py-2.5 text-text-main placeholder-gray-600 focus:outline-none focus:border-primary text-sm transition-colors"
+                  className="w-full bg-background-main border border-secondary rounded-xl pl-11 pr-4 py-2.5 text-text-main placeholder-gray-500 focus:outline-none focus:border-primary text-sm transition-colors"
                 />
               </div>
             </div>
@@ -172,7 +172,7 @@ export default function AuthScreen() {
           </button>
         </form>
 
-        <div className="border-t border-secondary pt-4 text-center text-sm text-gray-400">
+        <div className="border-t border-secondary pt-4 text-center text-sm text-slate-600">
           {mode === 'login' ? (
             <p>
               Don't have an account?{' '}
