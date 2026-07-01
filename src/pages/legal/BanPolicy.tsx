@@ -29,7 +29,6 @@ export default function BanPolicy() {
         <li>Using browser exploits</li>
         <li>Excessive API abuse</li>
         <li>Reverse engineering</li>
-        <li>AI abuse</li>
         <li>Any activity that harms the platform</li>
       </ul>
     </LegalLayout>

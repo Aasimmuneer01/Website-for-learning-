@@ -7,13 +7,14 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import Navbar from './components/Navbar';
+import BottomNav from './components/BottomNav';
 import Home from './pages/Home';
-import AI from './pages/AI';
 import Resources from './pages/Resources';
 import PDFViewer from './components/PDFViewer';
 import Bookmarks from './pages/Bookmarks';
 import Folders from './pages/Folders';
 import OfflineLibrary from './pages/OfflineLibrary';
+import Profile from './pages/Profile';
 import { AuthProvider, useAuth } from './hooks/useAuth';
 import AuthScreen from './components/AuthScreen';
 import VerificationScreen from './components/VerificationScreen';
@@ -75,11 +76,11 @@ function MainLayout() {
       <main className="flex-1 overflow-auto">
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/ai" element={<AI />} />
           <Route path="/resources" element={<Resources />} />
           <Route path="/bookmarks" element={<Bookmarks />} />
           <Route path="/folders" element={<Folders />} />
           <Route path="/offline" element={<OfflineLibrary />} />
+          <Route path="/profile" element={<Profile />} />
           <Route path="/viewer/:resourceId" element={<PDFViewer />} />
           <Route path="/terms" element={<TermsOfUse />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
@@ -91,6 +92,7 @@ function MainLayout() {
           <Route path="/premium-agreement" element={<PremiumAgreement />} />
         </Routes>
       </main>
+      <BottomNav />
       <Footer />
     </div>
   );

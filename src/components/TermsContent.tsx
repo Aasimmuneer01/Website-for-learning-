@@ -1,7 +1,7 @@
 export default function TermsContent() {
   return (
-    <div className="prose max-w-none text-black">
-      <h1 className="text-3xl font-bold">TERMS OF USE</h1>
+    <div className="prose max-w-none text-white">
+      <h1 className="text-3xl font-bold text-white">TERMS OF USE</h1>
       <p>Last Updated: June 2026</p>
       <p>Welcome to our learning platform. By accessing or using this website, you agree to follow these Terms of Use. If you do not agree, please do not use this website.</p>
       <hr />
@@ -24,7 +24,6 @@ export default function TermsContent() {
       <ul>
         <li>PDF Downloads</li>
         <li>Premium Notes</li>
-        <li>AI Study Assistant</li>
         <li>Exclusive Resources</li>
         <li>Future Premium Features</li>
       </ul>
@@ -58,18 +57,7 @@ export default function TermsContent() {
       <p>Premium downloads are for personal educational use only.</p>
       <p>Downloaded files may not be redistributed.</p>
       <hr />
-      <h2>7. AI Features</h2>
-      <p>AI tools provided on this website are intended to assist learning.</p>
-      <p>Users must not use AI features to:</p>
-      <ul>
-        <li>Generate illegal content.</li>
-        <li>Harass others.</li>
-        <li>Spam.</li>
-        <li>Attempt to exploit the platform.</li>
-      </ul>
-      <p>Misuse may result in restricted AI access or account suspension.</p>
-      <hr />
-      <h2>8. Prohibited Activities</h2>
+      <h2>7. Prohibited Activities</h2>
       <p>The following actions are prohibited:</p>
       <ul>
         <li>Sharing premium resources.</li>
@@ -107,7 +95,6 @@ export default function TermsContent() {
         <li>Copyright infringement.</li>
         <li>Fraudulent activity.</li>
         <li>Attempting to bypass security.</li>
-        <li>Abuse of AI features.</li>
         <li>Multiple warnings.</li>
         <li>Any activity considered harmful to the platform.</li>
       </ul>

@@ -74,13 +74,9 @@ service cloud.firestore {
 
     match /resources/{resource} {
       allow read: if true;
-      allow update: if isAdmin() || (
-        request.auth != null && 
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewCount', 'downloadCount'])
-      ) || (
-        // Allow even guests to update view counts if they only touch those fields
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewCount', 'downloadCount'])
-      );
+      allow update: if isAdmin() || 
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewCount']) ||
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['downloadCount']);
       allow create, delete: if isAdmin();
     }
 

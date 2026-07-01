@@ -5,7 +5,6 @@ import express from 'express';
 import path from 'path';
 import { createServer as createViteServer } from 'vite';
 import { adminDb as db, adminAuth as auth } from './src/lib/firebase-admin';
-import aiRouter from './src/lib/server/aiRouter';
 
 const app = express();
 const PORT = 3000;
@@ -18,7 +17,6 @@ app.use((req, res, next) => {
 });
 
 async function startServer() {
-  app.use('/api/ai', aiRouter);
   app.get('/api/test', (req, res) => {
     res.json({ status: 'ok', message: 'Routing is working' });
   });

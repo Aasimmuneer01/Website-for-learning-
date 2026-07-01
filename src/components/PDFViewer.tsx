@@ -781,6 +781,12 @@ export default function PDFViewer() {
               </button>
             </>
           )}
+          
+          <div className="flex items-center bg-surface rounded-lg border border-surface-border ml-2">
+            <button onClick={() => setScale(prev => Math.max(0.5, prev - 0.2))} className="h-10 w-10 flex items-center justify-center text-text-main hover:bg-surface-light rounded-l-lg">-</button>
+            <span className="text-text-main text-xs font-bold w-12 text-center">{(scale * 100).toFixed(0)}%</span>
+            <button onClick={() => setScale(prev => Math.min(3, prev + 0.2))} className="h-10 w-10 flex items-center justify-center text-text-main hover:bg-surface-light rounded-r-lg">+</button>
+          </div>
         </div>
 
         <div className="flex items-center gap-4">
@@ -811,11 +817,6 @@ export default function PDFViewer() {
           >
             <Maximize2 size={24} />
           </button>
-          <div className="flex items-center gap-2">
-            <button onClick={() => setScale(prev => Math.max(0.5, prev - 0.2))} className="px-2 text-text-main hover:bg-surface rounded">-</button>
-            <span className="text-text-main text-sm">{(scale * 100).toFixed(0)}%</span>
-            <button onClick={() => setScale(prev => Math.min(3, prev + 0.2))} className="px-2 text-text-main hover:bg-surface rounded">+</button>
-          </div>
         </div>
       </div>
     </div>

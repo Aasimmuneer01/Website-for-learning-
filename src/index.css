@@ -11,9 +11,9 @@
 
 @layer base {
   :root {
-    --bg-main: #ffffff;
-    --bg-surface: #f8fafc;
-    --text-main: #0f172a;
+    --bg-main: #020617;
+    --bg-surface: #0f172a;
+    --text-main: #f8fafc;
   }
 
   .dark {
