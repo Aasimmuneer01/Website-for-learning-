@@ -93,6 +93,30 @@ async function startServer() {
     }
   });
   
+  app.get('/api/admin/ai/config', async (req, res) => {
+    try {
+      const configDoc = await db.collection('ai_settings').doc('global').get();
+      if (!configDoc.exists) {
+        return res.json({ enabled: true, maintenanceMode: false, providers: {} });
+      }
+      res.json(configDoc.data());
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Failed to fetch config' });
+    }
+  });
+
+  app.post('/api/admin/ai/config', async (req, res) => {
+    try {
+      const config = req.body;
+      await db.collection('ai_settings').doc('global').set(config, { merge: true });
+      res.json({ success: true });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Failed to update config' });
+    }
+  });
+
   // JSON 404 for unmatched API routes
   app.all('/api/*', (req, res) => {
     res.status(404).json({ error: `API route ${req.method} ${req.url} not found` });

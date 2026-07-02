@@ -455,11 +455,11 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div class="p-4 bg-black rounded-xl border border-white/5 flex items-center justify-between">
                                     <span>Global AI Enabled</span>
-                                    <button class="px-4 py-2 bg-primary text-secondary rounded-lg font-bold">Toggle</button>
+                                    <button id="toggle-ai-enabled" class="px-4 py-2 bg-primary text-secondary rounded-lg font-bold">Toggle</button>
                                 </div>
                                 <div class="p-4 bg-black rounded-xl border border-white/5 flex items-center justify-between">
                                     <span>Maintenance Mode</span>
-                                    <button class="px-4 py-2 bg-yellow-500/20 text-yellow-500 rounded-lg font-bold">Toggle</button>
+                                    <button id="toggle-maintenance" class="px-4 py-2 bg-yellow-500/20 text-yellow-500 rounded-lg font-bold">Toggle</button>
                                 </div>
                             </div>
                         </div>
@@ -468,19 +468,56 @@
                         <div class="mb-10">
                             <h4 class="text-lg font-bold mb-4">AI Providers</h4>
                             <div class="space-y-4">
-                                <!-- Example Provider -->
                                 <div class="p-4 bg-black rounded-xl border border-white/5 flex items-center justify-between">
                                     <span>Groq</span>
                                     <div class="flex items-center gap-4">
-                                        <input type="password" placeholder="API Key" class="bg-surface border border-white/5 rounded-lg p-2 text-sm">
-                                        <button class="px-4 py-2 bg-green-500/20 text-green-500 rounded-lg font-bold text-sm">Test</button>
-                                        <button class="px-4 py-2 bg-primary text-secondary rounded-lg font-bold text-sm">Enable</button>
+                                        <input id="groq-api-key" type="password" placeholder="API Key" class="bg-surface border border-white/5 rounded-lg p-2 text-sm">
+                                        <button id="test-groq" class="px-4 py-2 bg-green-500/20 text-green-500 rounded-lg font-bold text-sm">Test</button>
+                                        <button id="save-groq" class="px-4 py-2 bg-primary text-secondary rounded-lg font-bold text-sm">Save</button>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </section>
+                
+                <script>
+                    async function loadAiConfig() {
+                        const res = await fetch('/api/admin/ai/config');
+                        const config = await res.json();
+                        if (config.enabled !== undefined) {
+                            // Update UI based on config
+                            document.getElementById('toggle-ai-enabled').innerText = config.enabled ? 'Enabled' : 'Disabled';
+                            document.getElementById('toggle-maintenance').innerText = config.maintenanceMode ? 'Enabled' : 'Disabled';
+                            if (config.providers && config.providers.groq) {
+                                document.getElementById('groq-api-key').value = config.providers.groq.apiKey || '';
+                            }
+                        }
+                    }
+
+                    document.getElementById('toggle-ai-enabled').addEventListener('click', async () => {
+                        const currentText = document.getElementById('toggle-ai-enabled').innerText;
+                        const newState = currentText !== 'Enabled';
+                        await fetch('/api/admin/ai/config', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ enabled: newState })
+                        });
+                        loadAiConfig();
+                    });
+
+                    document.getElementById('save-groq').addEventListener('click', async () => {
+                        const apiKey = document.getElementById('groq-api-key').value;
+                        await fetch('/api/admin/ai/config', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ providers: { groq: { apiKey } } })
+                        });
+                        alert('Groq API key saved!');
+                    });
+
+                    loadAiConfig();
+                </script>
                 
                 <!-- Analytics Content -->
                 <section id="analytics" class="tab-content space-y-10">

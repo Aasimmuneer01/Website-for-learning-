@@ -94,7 +94,7 @@ function MainLayout() {
           <Route path="/premium-agreement" element={<PremiumAgreement />} />
         </Routes>
       </main>
-      <BottomNav />
+      {!location.pathname.startsWith('/viewer/') && <BottomNav />}
       <Footer />
     </div>
   );
