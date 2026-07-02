@@ -447,19 +447,37 @@
                 <!-- AI Management Content -->
                 <section id="ai" class="tab-content space-y-8">
                     <div class="bg-surface p-10 rounded-[2.5rem] border border-white/5 shadow-2xl">
-                        <h3 class="text-2xl font-black uppercase tracking-tight mb-8">AI Management</h3>
-                        <p class="text-gray-500 mb-8">Configure AI providers and monitor usage.</p>
-                        <div class="grid grid-cols-2 gap-6">
-                           <div class="bg-black p-6 rounded-2xl border border-white/5">
-                               <h4 class="font-bold mb-2">Provider</h4>
-                               <select class="w-full bg-surface p-3 rounded-xl border border-white/5">
-                                   <option value="groq">Groq</option>
-                               </select>
-                           </div>
-                           <div class="bg-black p-6 rounded-2xl border border-white/5">
-                               <h4 class="font-bold mb-2">Status</h4>
-                               <button class="bg-primary text-secondary px-6 py-3 rounded-xl font-bold">Enabled</button>
-                           </div>
+                        <h3 class="text-2xl font-black uppercase tracking-tight mb-8">AI Control Center</h3>
+                        
+                        <!-- AI System -->
+                        <div class="mb-10">
+                            <h4 class="text-lg font-bold mb-4">AI System</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="p-4 bg-black rounded-xl border border-white/5 flex items-center justify-between">
+                                    <span>Global AI Enabled</span>
+                                    <button class="px-4 py-2 bg-primary text-secondary rounded-lg font-bold">Toggle</button>
+                                </div>
+                                <div class="p-4 bg-black rounded-xl border border-white/5 flex items-center justify-between">
+                                    <span>Maintenance Mode</span>
+                                    <button class="px-4 py-2 bg-yellow-500/20 text-yellow-500 rounded-lg font-bold">Toggle</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- AI Providers -->
+                        <div class="mb-10">
+                            <h4 class="text-lg font-bold mb-4">AI Providers</h4>
+                            <div class="space-y-4">
+                                <!-- Example Provider -->
+                                <div class="p-4 bg-black rounded-xl border border-white/5 flex items-center justify-between">
+                                    <span>Groq</span>
+                                    <div class="flex items-center gap-4">
+                                        <input type="password" placeholder="API Key" class="bg-surface border border-white/5 rounded-lg p-2 text-sm">
+                                        <button class="px-4 py-2 bg-green-500/20 text-green-500 rounded-lg font-bold text-sm">Test</button>
+                                        <button class="px-4 py-2 bg-primary text-secondary rounded-lg font-bold text-sm">Enable</button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </section>
