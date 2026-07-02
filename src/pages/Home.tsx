@@ -117,7 +117,7 @@ export default function Home() {
           <Zap className="mb-4 text-primary" />
           <h3 className="text-xl font-bold mb-2 text-text-main">AI Assistant</h3>
           <p className="text-sm text-gray-400 mb-4">Ask questions, solve homework and learn faster.</p>
-          <button className="w-full py-3 bg-secondary text-text-main rounded-xl font-bold cursor-not-allowed opacity-70">Coming Soon</button>
+          <Link to="/ai-assistant" className="block text-center w-full py-3 bg-primary text-white rounded-xl font-bold hover:bg-opacity-90 transition-all">Start Chatting</Link>
         </div>
       </section>
 

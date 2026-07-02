@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, X, LogOut, Shield, User } from 'lucide-react';
+import { Menu, X, LogOut, Shield, User, Bot } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useAuth } from '../hooks/useAuth';
 import ProfileModal from './ProfileModal';
@@ -58,6 +58,7 @@ export default function Navbar() {
         <div className="hidden md:flex items-center gap-4">
           <Link to="/" className="px-4 py-2 bg-surface text-text-main rounded-lg font-bold shadow-[0_3px_0_0_rgba(0,0,0,0.1)] dark:shadow-[0_3px_0_0_#000] hover:shadow-none hover:translate-y-[3px] transition-all">Home</Link>
           <Link to="/resources" className="px-4 py-2 bg-primary text-slate-950 rounded-lg font-bold shadow-[0_3px_0_0_#0ea5e9] hover:shadow-none hover:translate-y-[3px] transition-all">Resources</Link>
+          <Link to="/ai-assistant" className="px-4 py-2 bg-surface text-text-main rounded-lg font-bold hover:translate-y-[-2px] transition-all flex items-center gap-2"><Bot size={18}/> AI Assistant</Link>
           {isPremium && (
             <>
               <Link to="/bookmarks" className="px-4 py-2 bg-surface text-text-main rounded-lg font-bold hover:translate-y-[-2px] transition-all flex items-center gap-2">Bookmarks</Link>
@@ -165,6 +166,7 @@ export default function Navbar() {
             <div className="flex flex-col gap-2 p-4">
               <Link to="/" onClick={() => setIsOpen(false)} className="text-center p-3 text-text-main border-2 border-surface rounded-lg font-bold">Home</Link>
               <Link to="/resources" onClick={() => setIsOpen(false)} className="text-center p-3 text-text-main border-2 border-surface rounded-lg font-bold">Resources</Link>
+              <Link to="/ai-assistant" onClick={() => setIsOpen(false)} className="text-center p-3 text-text-main border-2 border-surface rounded-lg font-bold flex items-center justify-center gap-2"><Bot size={18}/> AI Assistant</Link>
               <button onClick={() => { setIsOpen(false); setShowProfile(true); }} className="text-center p-3 text-text-main border-2 border-surface rounded-lg font-bold">Profile</button>
               {isPremium && (
                 <>

@@ -14,6 +14,7 @@ import PDFViewer from './components/PDFViewer';
 import Bookmarks from './pages/Bookmarks';
 import Folders from './pages/Folders';
 import OfflineLibrary from './pages/OfflineLibrary';
+import AIAssistant from './pages/AIAssistant';
 import Profile from './pages/Profile';
 import { AuthProvider, useAuth } from './hooks/useAuth';
 import AuthScreen from './components/AuthScreen';
@@ -80,6 +81,7 @@ function MainLayout() {
           <Route path="/bookmarks" element={<Bookmarks />} />
           <Route path="/folders" element={<Folders />} />
           <Route path="/offline" element={<OfflineLibrary />} />
+          <Route path="/ai-assistant" element={<AIAssistant />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/viewer/:resourceId" element={<PDFViewer />} />
           <Route path="/terms" element={<TermsOfUse />} />

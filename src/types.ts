@@ -114,3 +114,30 @@ export interface Resource {
   viewCount: number;
   downloadCount: number;
 }
+
+export interface Message {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  createdAt: any;
+  provider: string;
+}
+
+export interface Chat {
+  id: string;
+  title: string;
+  subject: string;
+  createdAt: any;
+  updatedAt: any;
+  messages: Message[];
+}
+
+export interface AIProvider {
+  name: string;
+  isActive: boolean;
+}
+
+export interface AIUsage {
+  count: number;
+  lastUpdated: any;
+}
